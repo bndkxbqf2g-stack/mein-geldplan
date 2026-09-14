@@ -55,8 +55,15 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <div><label>Nettoauszahlung (€)</label><input id="bNetto" type="number" step=".01" value="2664.98"></div>
 <div><label>Fixkosten inkl. 60 € Urlaubssparen</label><input id="bFix" type="number" step=".01" value="2156"></div>
 <div><label>Zusätzliches Urlaubssparen (€)</label><input id="bExtraSave" type="number" step=".01" value="0"></div>
-<div><label>Tage bis zum nächsten Lohn</label><input id="bDays" type="number" step="1" value="29"></div>
+<div><label>Tage bis zum nächsten Lohn</label><input id="bDays" type="number" step="1" value="29" readonly></div>
 <div><label>Ziel-Wochensatz (€)</label><input id="bTarget" type="number" step=".01" value="120"></div>
+</div>
+<div class="row"><span>Letzter Lohn</span><span class="v" id="lastPayOut">–</span></div>
+<div class="row"><span>Nächster Lohn</span><span class="v" id="nextPayOut">–</span></div>
+<div class="row"><span>Automatische Budgettage</span><span class="v" id="autoDays">–</span></div>
+<div class="note">Der nächste Lohntag wird automatisch als letzter Kalendertag des Monats um 20:30 Uhr angenommen. Der Budgetzeitraum zählt bis zum Abend des nächsten Lohneingangs.</div> 
+<div class="grid">
+
 </div>
 </section>
 
@@ -213,4 +220,105 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 
 
-<script src="app.js?v=5"></script></body></html>
+<script src="app.js?v=6"></script>
+
+<script>
+(function(){
+"use strict";
+
+/* Germany-wide public holidays. Regional holidays are not included because the user's
+   stated rule is simply: weekdays, no public holiday, no weekend. */
+function easterSunday(y){
+  var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25);
+  var g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4;
+  var l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+  var month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
+  return new Date(y,month-1,day);
+}
+function dateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function holidays(y){
+  var e=easterSunday(y), arr=[];
+  function fixed(m,day){arr.push(dateKey(new Date(y,m-1,day)));}
+  fixed(1,1); fixed(5,1); fixed(10,3); fixed(12,25); fixed(12,26);
+  [-2,1,39,50,60].forEach(function(n){arr.push(dateKey(addDays(e,n)));});
+  return arr;
+}
+function isBankDay(d){
+  var dow=d.getDay();
+  if(dow===0 || dow===6) return false;
+  return holidays(d.getFullYear()).indexOf(dateKey(d))===-1;
+}
+function nthLastBankDay(y,m,n){
+  var d=new Date(y,m+1,0);
+  var found=0;
+  while(d.getMonth()===m){
+    if(isBankDay(d)){found++; if(found===n)return d;}
+    d.setDate(d.getDate()-1);
+  }
+  return d;
+}
+function nextPay(){
+  var now=new Date();
+  var y=now.getFullYear(),m=now.getMonth();
+  var d=nthLastBankDay(y,m,2);
+  d.setHours(20,30,0,0);
+  if(now>d){
+    m++;
+    if(m>11){m=0;y++;}
+    d=nthLastBankDay(y,m,2); d.setHours(20,30,0,0);
+  }
+  return d;
+}
+function fmt(d){return new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);}
+function q(id){return document.getElementById(id);}
+function money(v){return new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Number.isFinite(v)?v:0);}
+
+function updateCycle(){
+  var now=new Date(), next=nextPay();
+  var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var nextDay=new Date(next.getFullYear(),next.getMonth(),next.getDate());
+  var days=Math.max(1,Math.round((nextDay-today)/86400000)+1);
+  var prev=new Date(next.getFullYear(),next.getMonth()-1,1);
+  prev=nthLastBankDay(prev.getFullYear(),prev.getMonth(),2);
+  if(q("lastPayOut"))q("lastPayOut").textContent=fmt(prev)+" 20:30";
+  if(q("nextPayOut"))q("nextPayOut").textContent=fmt(next)+" 20:30";
+  if(q("daysOut"))q("daysOut").textContent=days;
+  if(q("autoDays"))q("autoDays").textContent=days;
+  if(q("bDays"))q("bDays").value=days;
+  return days;
+}
+function calcAutoBudget(){
+  var days=updateCycle();
+  var netto=parseFloat((q("bNetto")||{}).value)||0;
+  var fix=parseFloat((q("bFix")||{}).value)||0;
+  var extra=parseFloat((q("bExtraSave")||{}).value)||0;
+  var special=0;
+  try{
+    special=JSON.parse(localStorage.getItem("meinGeldplanSonderausgaben")||"[]")
+      .reduce(function(s,e){return s+(Number(e.amount)||0);},0);
+  }catch(e){}
+  var after=netto-fix-extra-special,day=after/days,week=day*7;
+  if(q("bRest"))q("bRest").textContent=money(netto-fix);
+  if(q("bRestSave"))q("bRestSave").textContent=money(after);
+  if(q("bDay"))q("bDay").textContent=money(day);
+  if(q("bWeek"))q("bWeek").textContent=money(week);
+  if(q("bDiff")){
+    var diff=week-(parseFloat((q("bTarget")||{}).value)||0);
+    q("bDiff").textContent=(diff>=0?"+":"")+money(diff);
+  }
+}
+function bootCycle(){
+  calcAutoBudget();
+  document.querySelectorAll("input,select").forEach(function(el){
+    el.addEventListener("input",calcAutoBudget);
+    el.addEventListener("change",calcAutoBudget);
+  });
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)calcAutoBudget();});
+  setInterval(calcAutoBudget,60000);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bootCycle);
+else bootCycle();
+})();
+</script>
+</body></html>

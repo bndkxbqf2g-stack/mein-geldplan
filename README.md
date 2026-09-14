@@ -1,13 +1,13 @@
-# Mein Geldplan v5
+# Mein Geldplan v7
+
 Persönlicher iPhone-Lohn-, Budget-, Pfändungs- und Sparrechner.
 
-Neu:
-- Girokonto wird intern aus Startstand + Buchungen fortgeführt.
-- Zahlungseingänge (z. B. neuer Lohn) und Ausgaben können gebucht werden.
-- Sonderausgaben bleiben separat gespeichert.
-- Sonntag-Abhebung greift auf den aktuellen Girostand zu.
-- Sicherheitsbudget bis zum nächsten Lohn.
-- Alles lokal im Browser; kein direkter Bankzugriff.
+Neu in v7:
+- Der nächste Lohntag wird automatisch als vorletzter Bank-/Buchungstag des Monats berechnet.
+- Samstag/Sonntag zählen nicht.
+- Deutschlandweite gesetzliche Feiertage werden nicht als Bank-/Buchungstage gezählt.
+- Die Tage bis zum nächsten Lohneingang werden automatisch aktualisiert.
+- Tages- und Wochenbudget passen sich dadurch automatisch an.
+- Sonderausgaben, Girokonto, Sparen und Lohnmodule bleiben erhalten.
 
-GitHub Pages:
-Alle Dateien ins Repository-Hauptverzeichnis hochladen. `index.html` ist die Startseite.
+Hinweis: Die App hat keinen direkten Bankzugriff.
