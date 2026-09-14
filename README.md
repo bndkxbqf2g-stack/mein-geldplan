@@ -1,10 +1,12 @@
-# Mein Geldplan v11
+# Mein Geldplan v12
 
-- Girokonto ist die zentrale Budgetbasis.
-- Optionales Rest-Bargeld aus der laufenden Woche wird nur zum aktuell verfügbaren Gesamtbetrag addiert.
-- Tages- und Wochenbudget werden automatisch aus Gesamt verfügbar / verbleibenden Tagen bis zum nächsten Lohn berechnet.
-- Kein festes 120-€-Ziel in der Berechnung.
-- Sonntags kann ein frei gewählter Betrag abgehoben und als Giro-Ausgabe gebucht werden.
-- Alle sonstigen Ausgaben und Zahlungseingänge werden über das Girokonto gebucht.
-- Lohntag: vorletzter Bank-/Buchungstag des Monats, 20:30 Uhr.
-- Kein direkter Bankzugriff.
+Budget-App für den täglichen Alltag.
+
+Neue Hauptlogik:
+- Der Girokontostand ist die zentrale Budgetbasis.
+- Beim Buchen eines neuen Netto-Lohns werden die monatlichen Fixkosten (Standard 2.156 €) einmal automatisch als Ausgabe abgezogen.
+- Das danach verfügbare Geld bestimmt automatisch Tages- und Wochenbudget bis zum nächsten vorletzten Bank-/Buchungstag des Monats.
+- Bargeld kann optional als Restbetrag der laufenden Woche eingegeben werden und wird zusätzlich zum Girokonto gerechnet.
+- Sonntags kann ein frei gewählter Abhebebetrag gebucht werden.
+- Alle Ausgaben laufen über das Girokonto.
+- Lohn- und Spar-Reiter sind entfernt.

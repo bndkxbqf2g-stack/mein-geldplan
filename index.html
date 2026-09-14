@@ -60,6 +60,16 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 </section>
 
 <section>
+<h2>Monatsabrechnung</h2>
+<div class="grid">
+<div><label>Monatliche Fixkosten (€)</label><input id="monthlyFix" type="number" step=".01" value="2156.00"></div>
+<div><label>Fixkosten diesen Monat bereits abgezogen?</label><select id="fixAlready"><option value="no" selected>Nein</option><option value="yes">Ja</option></select></div>
+</div>
+<div class="row"><span><b>Für Budget verfügbar nach Fixkosten</b></span><span class="v big good" id="afterFixAvailable">–</span></div>
+<div class="note">Beim Buchen eines neuen Lohneingangs werden die Fixkosten für den aktuellen Lohnzyklus automatisch einmal abgezogen. Wenn du sie bereits außerhalb der App abgerechnet hast, stelle „Ja“ ein.</div>
+</section>
+
+<section>
 <h2>Girokonto</h2>
 <div class="grid">
 <div><label>Start-/aktueller Kontostand (€)</label><input id="giroStand" type="number" step=".01" value="233.30"></div>
