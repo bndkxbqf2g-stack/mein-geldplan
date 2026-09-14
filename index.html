@@ -92,9 +92,32 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 </section>
 
 <section>
+<h2>Girokonto automatisch führen</h2>
+<div class="grid">
+<div><label>Aktueller Girokontostand (€)</label><input id="giroStand" type="number" step=".01" value="233.30"></div>
+<div><label>Neuer Zahlungseingang (€)</label><input id="giroIncome" type="number" step=".01" value=""></div>
+<div><label>Ausgabe / Abbuchung (€)</label><input id="giroExpense" type="number" step=".01" value=""></div>
+<div><label>Beschreibung</label><input id="giroText" type="text" placeholder="z. B. Tanken"></div>
+</div>
+<button class="primary" style="margin-top:12px" onclick="addGiroIncome()">Zahlungseingang buchen</button>
+<button class="primary" style="margin-top:8px;background:#f1f1f3;color:#111" onclick="addGiroExpense()">Ausgabe buchen</button>
+<div class="row"><span><b>Aktueller berechneter Kontostand</b></span><span class="v big good" id="giroCurrent">–</span></div>
+<div id="giroTxList" style="margin-top:10px"></div>
+<div class="note">Die App führt den Kontostand anhand deiner eingebuchten Einnahmen und Ausgaben fort. Sie greift nicht direkt auf dein Bankkonto zu.</div>
+</section>
+
+<section>
+<h2>Sicher bis zum nächsten Lohn</h2>
+<div class="row"><span>Tage bis zum Lohn</span><span class="v" id="safeDays">–</span></div>
+<div class="row"><span>Aktueller Kontostand</span><span class="v" id="safeKonto">–</span></div>
+<div class="row"><span>Bereits vorhandenes Bargeld</span><span class="v" id="safeBar">–</span></div>
+<div class="row"><span>Sonderausgaben im Zeitraum</span><span class="v" id="safeSpecial">–</span></div>
+<div class="row"><span><b>Verfügbar pro Tag</b></span><span class="v big good" id="safeDay">–</span></div>
+<div class="note">Orientierung: Kontostand + Bargeld minus Sonderausgaben, verteilt auf die verbleibenden Tage bis zum nächsten Lohn. Fixkosten werden nicht erneut abgezogen, weil sie bereits aus deinem Netto-/Fixkostenmodell stammen.</div>
+</section><section>
 <h2>Sonntag: Was abheben?</h2>
 <div class="grid">
-<div><label>Girokonto (€)</label><input id="sKonto" type="number" step=".01" value="271"></div>
+<div><label>Girokonto (€)</label><input id="sKonto" type="number" step=".01" value="233.30"></div>
 <div><label>Bargeld (€)</label><input id="sBar" type="number" step=".01" value="80"></div>
 <div><label>Ziel für die kommende Woche (€)</label><input id="sTarget" type="number" step=".01" value="120"></div>
 </div>
@@ -190,4 +213,4 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 
 
-<script src="app.js?v=4"></script></body></html>
+<script src="app.js?v=5"></script></body></html>

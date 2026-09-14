@@ -1,8 +1,13 @@
-# Mein Geldplan v4
-
+# Mein Geldplan v5
 Persönlicher iPhone-Lohn-, Budget-, Pfändungs- und Sparrechner.
 
-## GitHub Pages
-Alle Dateien ins Repository-Hauptverzeichnis hochladen und `index.html` als Startseite verwenden.
+Neu:
+- Girokonto wird intern aus Startstand + Buchungen fortgeführt.
+- Zahlungseingänge (z. B. neuer Lohn) und Ausgaben können gebucht werden.
+- Sonderausgaben bleiben separat gespeichert.
+- Sonntag-Abhebung greift auf den aktuellen Girostand zu.
+- Sicherheitsbudget bis zum nächsten Lohn.
+- Alles lokal im Browser; kein direkter Bankzugriff.
 
-Diese Version verwendet eine separate `app.js` und absichtlich keinen Service Worker, um veraltete Cache-Versionen auf iPhone/Safari zu vermeiden.
+GitHub Pages:
+Alle Dateien ins Repository-Hauptverzeichnis hochladen. `index.html` ist die Startseite.
