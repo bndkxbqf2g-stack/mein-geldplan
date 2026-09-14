@@ -1,13 +1,10 @@
-# Mein Geldplan v8
+# Mein Geldplan v11
 
-Persönlicher iPhone-Lohn-, Budget-, Pfändungs- und Sparrechner.
-
-Budgetlogik:
-- Der aktuelle Girokontostand ist die wichtigste Zahl.
-- Tages- und Wochenbudget werden automatisch aus Girostand und den verbleibenden Tagen bis zum nächsten Lohn berechnet.
-- Der nächste Lohntag ist der vorletzte Bank-/Buchungstag des Monats um 20:30 Uhr.
-- Zahlungseingänge und Ausgaben werden manuell gebucht; dadurch läuft der Girostand automatisch weiter.
-- Sonderausgaben werden gleichzeitig als Giro-Ausgabe gebucht.
-- Es gibt kein festes 120-€-Ziel im Rechner; 120 € kann weiterhin als persönliche Orientierung außerhalb der Berechnung verwendet werden.
-
-Hinweis: Kein direkter Bankzugriff.
+- Girokonto ist die zentrale Budgetbasis.
+- Optionales Rest-Bargeld aus der laufenden Woche wird nur zum aktuell verfügbaren Gesamtbetrag addiert.
+- Tages- und Wochenbudget werden automatisch aus Gesamt verfügbar / verbleibenden Tagen bis zum nächsten Lohn berechnet.
+- Kein festes 120-€-Ziel in der Berechnung.
+- Sonntags kann ein frei gewählter Betrag abgehoben und als Giro-Ausgabe gebucht werden.
+- Alle sonstigen Ausgaben und Zahlungseingänge werden über das Girokonto gebucht.
+- Lohntag: vorletzter Bank-/Buchungstag des Monats, 20:30 Uhr.
+- Kein direkter Bankzugriff.
