@@ -63,10 +63,32 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <section>
 <h2>Dein Ergebnis</h2>
 <div class="row"><span>Nach Fixkosten</span><span class="v" id="bRest">–</span></div>
-<div class="row"><span>Nach zusätzlichem Sparen</span><span class="v" id="bRestSave">–</span></div>
+<div class="row"><span>Nach zusätzlichem Sparen & Sonderausgaben</span><span class="v" id="bRestSave">–</span></div>
 <div class="row"><span>Tagessatz</span><span class="v" id="bDay">–</span></div>
 <div class="row"><span>Wochensatz</span><span class="v big good" id="bWeek">–</span></div>
 <div class="row"><span>Über/unter Ziel</span><span class="v" id="bDiff">–</span></div>
+</section>
+
+<section>
+<h2>Sonderausgaben</h2>
+<div class="grid">
+<div><label>Betrag (€)</label><input id="seBetrag" type="number" step=".01" value=""></div>
+<div><label>Datum</label><input id="seDatum" type="date"></div>
+<div><label>Kategorie</label>
+<select id="seKat">
+<option>Tochter</option>
+<option>Kinder</option>
+<option>Auto</option>
+<option>Haushalt</option>
+<option>Freizeit</option>
+<option>Sonstiges</option>
+</select></div>
+<div><label>Beschreibung</label><input id="seText" type="text" placeholder="z. B. Prepaidkarte, Tanken"></div>
+</div>
+<button class="primary" style="margin-top:12px" onclick="addSpecial()">Sonderausgabe hinzufügen</button>
+<div id="specialList" style="margin-top:12px"></div>
+<div class="row"><span><b>Sonderausgaben gesamt</b></span><span class="v" id="seTotal">0,00 €</span></div>
+<div class="note">Sonderausgaben werden zusätzlich zu den Fixkosten vom verfügbaren Geld abgezogen. Die Einträge bleiben beim Neuladen dieser Seite auf demselben Gerät erhalten.</div>
 </section>
 
 <section>
@@ -169,9 +191,49 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 const ids=[...document.querySelectorAll('input')];
 const n=id=>Number(document.getElementById(id).value)||0;
 const eur=x=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(x);
+
+function getSpecials(){
+  try { return JSON.parse(localStorage.getItem('specialExpenses') || '[]'); }
+  catch(e){ return []; }
+}
+function saveSpecials(arr){ localStorage.setItem('specialExpenses', JSON.stringify(arr)); }
+function addSpecial(){
+  const amount = n('seBetrag');
+  if(amount <= 0){ alert('Bitte einen gültigen Betrag eingeben.'); return; }
+  const item = {
+    id: Date.now(),
+    amount,
+    date: document.getElementById('seDatum').value || new Date().toISOString().slice(0,10),
+    category: document.getElementById('seKat').value,
+    text: document.getElementById('seText').value.trim()
+  };
+  const arr = getSpecials(); arr.push(item); saveSpecials(arr);
+  document.getElementById('seBetrag').value='';
+  document.getElementById('seText').value='';
+  renderSpecials(); calc();
+}
+function removeSpecial(id){
+  saveSpecials(getSpecials().filter(e=>e.id!==id));
+  renderSpecials(); calc();
+}
+function renderSpecials(){
+  const arr = getSpecials().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const wrap = document.getElementById('specialList');
+  if(!arr.length){ wrap.innerHTML='<div class="note">Noch keine Sonderausgaben eingetragen.</div>'; }
+  else {
+    wrap.innerHTML = arr.map(e => `
+      <div class="row">
+        <span><b>${euro(e.amount)}</b><br><span class="note">${e.date} · ${e.category}${e.text ? ' · '+e.text : ''}</span></span>
+        <button onclick="removeSpecial(${e.id})" style="width:auto;padding:8px 11px;background:#f1f1f3;color:#111;font-size:13px">Löschen</button>
+      </div>`).join('');
+  }
+  document.getElementById('seTotal').textContent = euro(arr.reduce((s,e)=>s+e.amount,0));
+}
+
 function calcBudget(){
   const netto=n('bNetto'),fix=n('bFix'),extra=n('bExtraSave'),days=Math.max(1,n('bDays'));
-  const rest=netto-fix, restSave=rest-extra, day=restSave/days, week=day*7;
+  const specialTotal = getSpecials().reduce((s,e)=>s+e.amount,0);
+  const rest=netto-fix, restSave=rest-extra-specialTotal, day=restSave/days, week=day*7;
   document.getElementById('bRest').textContent=eur(rest);
   document.getElementById('bRestSave').textContent=eur(restSave);
   document.getElementById('bDay').textContent=eur(day);
@@ -211,6 +273,7 @@ document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
  document.getElementById(b.dataset.tab).classList.remove('hidden');
 }));
+renderSpecials();
 calc();
 </script>
 
