@@ -50,89 +50,53 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <!-- BUDGET -->
 <div id="budget" class="view">
 <section>
-<h2>Aktueller Monatsplan</h2>
-<div class="grid">
-<div><label>Nettoauszahlung (€)</label><input id="bNetto" type="number" step=".01" value="2664.98"></div>
-<div><label>Fixkosten inkl. 60 € Urlaubssparen</label><input id="bFix" type="number" step=".01" value="2156"></div>
-<div><label>Zusätzliches Urlaubssparen (€)</label><input id="bExtraSave" type="number" step=".01" value="0"></div>
-<div><label>Tage bis zum nächsten Lohn</label><input id="bDays" type="number" step="1" value="29" readonly></div>
-<div><label>Ziel-Wochensatz (€)</label><input id="bTarget" type="number" step=".01" value="120"></div>
-</div>
-<div class="row"><span>Letzter Lohn</span><span class="v" id="lastPayOut">–</span></div>
-<div class="row"><span>Nächster Lohn</span><span class="v" id="nextPayOut">–</span></div>
-<div class="row"><span>Automatische Budgettage</span><span class="v" id="autoDays">–</span></div>
-<div class="note">Der nächste Lohntag wird automatisch als letzter Kalendertag des Monats um 20:30 Uhr angenommen. Der Budgetzeitraum zählt bis zum Abend des nächsten Lohneingangs.</div> 
-<div class="grid">
-
-</div>
+<h2>Mein aktuelles Budget</h2>
+<div class="row"><span>Girokonto</span><span class="v big good" id="mainGiro">–</span></div>
+<div class="row"><span>Bargeld</span><span class="v" id="mainBar">–</span></div>
+<div class="row"><span>Zusammen verfügbar</span><span class="v" id="mainTotal">–</span></div>
+<div class="row"><span>Nächster Lohn</span><span class="v" id="mainNextPay">–</span></div>
+<div class="row"><span>Verbleibende Budgettage</span><span class="v" id="mainDays">–</span></div>
+<div class="row"><span><b>Tagessatz</b></span><span class="v big good" id="mainDay">–</span></div>
+<div class="row"><span><b>Wochensatz</b></span><span class="v big good" id="mainWeek">–</span></div>
+<div class="row"><span>Offene Sonderausgaben</span><span class="v" id="mainSpecial">–</span></div>
+<div class="note">Der Girokontostand ist die Grundlage. Am Zahltag buchst du den neuen Lohn als Zahlungseingang. Ausgaben und Sonderausgaben werden danach automatisch berücksichtigt.</div>
 </section>
 
 <section>
-<h2>Dein Ergebnis</h2>
-<div class="row"><span>Nach Fixkosten</span><span class="v" id="bRest">–</span></div>
-<div class="row"><span>Nach zusätzlichem Sparen & Sonderausgaben</span><span class="v" id="bRestSave">–</span></div>
-<div class="row"><span>Tagessatz</span><span class="v" id="bDay">–</span></div>
-<div class="row"><span>Wochensatz</span><span class="v big good" id="bWeek">–</span></div>
-<div class="row"><span>Über/unter Ziel</span><span class="v" id="bDiff">–</span></div>
+<h2>Girokonto</h2>
+<div class="grid">
+<div><label>Start-/aktueller Kontostand (€)</label><input id="giroStand" type="number" step=".01" value="233.30"></div>
+<div><label>Zahlungseingang (€)</label><input id="giroIncome" type="number" step=".01" placeholder="z. B. neuer Lohn"></div>
+<div><label>Ausgabe (€)</label><input id="giroExpense" type="number" step=".01" placeholder="z. B. Tanken"></div>
+<div><label>Beschreibung</label><input id="giroText" type="text" placeholder="z. B. Lohn, Tanken, Prepaidkarte"></div>
+</div>
+<button class="primary" style="margin-top:12px" id="incomeBtn">Zahlungseingang buchen</button>
+<button class="primary" style="margin-top:8px;background:#f1f1f3;color:#111" id="expenseBtn">Ausgabe buchen</button>
+<div class="row"><span><b>Aktueller Kontostand</b></span><span class="v big good" id="giroCurrent">–</span></div>
+<div class="note">Der gespeicherte Kontostand verändert sich nur durch Buchungen. So kannst du am Zahltag einfach dein neues Netto eintragen.</div>
+</section>
+
+<section>
+<h2>Sonntag: Was abheben?</h2>
+<div class="row"><span>Bargeld aktuell</span><span class="v" id="sBarOut">–</span></div>
+<div class="row"><span>Für eine volle Woche fehlen</span><span class="v" id="sNeed">–</span></div>
+<div class="row"><span><b>Abheben</b></span><span class="v big good" id="sWithdraw">–</span></div>
+<div class="row"><span>Girokonto danach</span><span class="v" id="sAfter">–</span></div>
+<div class="note">Die App füllt sonntags nur auf den automatisch ermittelten aktuellen Wochenbetrag auf. Es gibt kein festes 120-€-Ziel mehr.</div>
 </section>
 
 <section>
 <h2>Sonderausgaben</h2>
 <div class="grid">
-<div><label>Betrag (€)</label><input id="seBetrag" type="number" step=".01" value=""></div>
+<div><label>Betrag (€)</label><input id="seBetrag" type="number" step=".01" placeholder="z. B. 25"></div>
 <div><label>Datum</label><input id="seDatum" type="date"></div>
-<div><label>Kategorie</label>
-<select id="seKat">
-<option>Tochter</option>
-<option>Kinder</option>
-<option>Auto</option>
-<option>Haushalt</option>
-<option>Freizeit</option>
-<option>Sonstiges</option>
-</select></div>
-<div><label>Beschreibung</label><input id="seText" type="text" placeholder="z. B. Prepaidkarte, Tanken"></div>
+<div><label>Kategorie</label><select id="seKat"><option>Tochter</option><option>Kinder</option><option>Auto</option><option>Haushalt</option><option>Freizeit</option><option>Sonstiges</option></select></div>
+<div><label>Beschreibung</label><input id="seText" type="text" placeholder="z. B. Prepaidkarte"></div>
 </div>
-<button class="primary" style="margin-top:12px" onclick="addSpecial()">Sonderausgabe hinzufügen</button>
+<button class="primary" style="margin-top:12px" id="specialBtn">Sonderausgabe buchen</button>
 <div id="specialList" style="margin-top:12px"></div>
 <div class="row"><span><b>Sonderausgaben gesamt</b></span><span class="v" id="seTotal">0,00 €</span></div>
-<div class="note">Sonderausgaben werden zusätzlich zu den Fixkosten vom verfügbaren Geld abgezogen. Die Einträge bleiben beim Neuladen dieser Seite auf demselben Gerät erhalten.</div>
-</section>
-
-<section>
-<h2>Girokonto automatisch führen</h2>
-<div class="grid">
-<div><label>Aktueller Girokontostand (€)</label><input id="giroStand" type="number" step=".01" value="233.30"></div>
-<div><label>Neuer Zahlungseingang (€)</label><input id="giroIncome" type="number" step=".01" value=""></div>
-<div><label>Ausgabe / Abbuchung (€)</label><input id="giroExpense" type="number" step=".01" value=""></div>
-<div><label>Beschreibung</label><input id="giroText" type="text" placeholder="z. B. Tanken"></div>
-</div>
-<button class="primary" style="margin-top:12px" onclick="addGiroIncome()">Zahlungseingang buchen</button>
-<button class="primary" style="margin-top:8px;background:#f1f1f3;color:#111" onclick="addGiroExpense()">Ausgabe buchen</button>
-<div class="row"><span><b>Aktueller berechneter Kontostand</b></span><span class="v big good" id="giroCurrent">–</span></div>
-<div id="giroTxList" style="margin-top:10px"></div>
-<div class="note">Die App führt den Kontostand anhand deiner eingebuchten Einnahmen und Ausgaben fort. Sie greift nicht direkt auf dein Bankkonto zu.</div>
-</section>
-
-<section>
-<h2>Sicher bis zum nächsten Lohn</h2>
-<div class="row"><span>Tage bis zum Lohn</span><span class="v" id="safeDays">–</span></div>
-<div class="row"><span>Aktueller Kontostand</span><span class="v" id="safeKonto">–</span></div>
-<div class="row"><span>Bereits vorhandenes Bargeld</span><span class="v" id="safeBar">–</span></div>
-<div class="row"><span>Sonderausgaben im Zeitraum</span><span class="v" id="safeSpecial">–</span></div>
-<div class="row"><span><b>Verfügbar pro Tag</b></span><span class="v big good" id="safeDay">–</span></div>
-<div class="note">Orientierung: Kontostand + Bargeld minus Sonderausgaben, verteilt auf die verbleibenden Tage bis zum nächsten Lohn. Fixkosten werden nicht erneut abgezogen, weil sie bereits aus deinem Netto-/Fixkostenmodell stammen.</div>
-</section><section>
-<h2>Sonntag: Was abheben?</h2>
-<div class="grid">
-<div><label>Girokonto (€)</label><input id="sKonto" type="number" step=".01" value="233.30"></div>
-<div><label>Bargeld (€)</label><input id="sBar" type="number" step=".01" value="80"></div>
-<div><label>Ziel für die kommende Woche (€)</label><input id="sTarget" type="number" step=".01" value="120"></div>
-</div>
-<div class="row"><span>Aktuelles Bargeld</span><span class="v" id="sBarOut">–</span></div>
-<div class="row"><span>Bis zum Wochenziel fehlen</span><span class="v" id="sNeed">–</span></div>
-<div class="row"><span><b>Am Sonntag abheben</b></span><span class="v big good" id="sWithdraw">–</span></div>
-<div class="row"><span>Girokonto danach</span><span class="v" id="sAfter">–</span></div>
-<div class="note">Die App füllt dein Bargeld sonntags nur bis zum gewünschten Wochenbetrag auf. Überschüssiges Geld bleibt auf dem Konto.</div>
+<div class="note">Eine Sonderausgabe wird zugleich als Giro-Ausgabe verbucht, damit dein Kontostand und dein Budget sofort stimmen.</div>
 </section>
 </div>
 
