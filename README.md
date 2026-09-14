@@ -11,3 +11,6 @@ Persönlicher iPhone-Lohn-, Budget-, Pfändungs- und Sparrechner.
 5. Safari → Teilen → Zu Home-Bildschirm hinzufügen → Als Web-App öffnen.
 
 Hinweis: GitHub Pages ist öffentlich. Keine echten Konto-/Bankzugangsdaten oder sensiblen persönlichen Informationen in die Repository-Dateien schreiben.
+
+
+Version 3: robuster Safari/iPhone-JavaScript-Start und Sonderausgaben.

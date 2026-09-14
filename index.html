@@ -187,104 +187,127 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <p class="note">Alle Berechnungen laufen lokal im Browser. Die App speichert keine Kontodaten online.</p>
 </main>
 
-<script>
-const ids=[...document.querySelectorAll('input')];
-const n=id=>Number(document.getElementById(id).value)||0;
-const eur=x=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(x);
 
-function getSpecials(){
-  try { return JSON.parse(localStorage.getItem('specialExpenses') || '[]'); }
-  catch(e){ return []; }
-}
-function saveSpecials(arr){ localStorage.setItem('specialExpenses', JSON.stringify(arr)); }
-function addSpecial(){
-  const amount = n('seBetrag');
-  if(amount <= 0){ alert('Bitte einen gültigen Betrag eingeben.'); return; }
-  const item = {
-    id: Date.now(),
-    amount,
-    date: document.getElementById('seDatum').value || new Date().toISOString().slice(0,10),
-    category: document.getElementById('seKat').value,
-    text: document.getElementById('seText').value.trim()
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const n = id => {
+    const el=$(id);
+    if(!el) return 0;
+    const v=parseFloat(String(el.value).replace(",","."));
+    return Number.isFinite(v)?v:0;
   };
-  const arr = getSpecials(); arr.push(item); saveSpecials(arr);
-  document.getElementById('seBetrag').value='';
-  document.getElementById('seText').value='';
-  renderSpecials(); calc();
-}
-function removeSpecial(id){
-  saveSpecials(getSpecials().filter(e=>e.id!==id));
-  renderSpecials(); calc();
-}
-function renderSpecials(){
-  const arr = getSpecials().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  const wrap = document.getElementById('specialList');
-  if(!arr.length){ wrap.innerHTML='<div class="note">Noch keine Sonderausgaben eingetragen.</div>'; }
-  else {
-    wrap.innerHTML = arr.map(e => `
-      <div class="row">
-        <span><b>${euro(e.amount)}</b><br><span class="note">${e.date} · ${e.category}${e.text ? ' · '+e.text : ''}</span></span>
-        <button onclick="removeSpecial(${e.id})" style="width:auto;padding:8px 11px;background:#f1f1f3;color:#111;font-size:13px">Löschen</button>
-      </div>`).join('');
+  const eur = x => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(Number.isFinite(x)?x:0);
+
+  function calcBudget(){
+    const netto=n('bNetto'), fix=n('bFix'), extra=n('bExtraSave');
+    const days=Math.max(1,n('bDays'));
+    const specialTotal=getSpecials().reduce((s,e)=>s+e.amount,0);
+    const rest=netto-fix;
+    const restSave=rest-extra-specialTotal;
+    const day=restSave/days, week=day*7;
+    $('bRest').textContent=eur(rest);
+    $('bRestSave').textContent=eur(restSave);
+    $('bDay').textContent=eur(day);
+    $('bWeek').textContent=eur(week);
+    const diff=week-n('bTarget');
+    $('bDiff').textContent=(diff>=0?'+':'')+eur(diff);
   }
-  document.getElementById('seTotal').textContent = euro(arr.reduce((s,e)=>s+e.amount,0));
-}
 
-function calcBudget(){
-  const netto=n('bNetto'),fix=n('bFix'),extra=n('bExtraSave'),days=Math.max(1,n('bDays'));
-  const specialTotal = getSpecials().reduce((s,e)=>s+e.amount,0);
-  const rest=netto-fix, restSave=rest-extra-specialTotal, day=restSave/days, week=day*7;
-  document.getElementById('bRest').textContent=eur(rest);
-  document.getElementById('bRestSave').textContent=eur(restSave);
-  document.getElementById('bDay').textContent=eur(day);
-  document.getElementById('bWeek').textContent=eur(week);
-  const diff=week-n('bTarget'); document.getElementById('bDiff').textContent=(diff>=0?'+':'')+eur(diff);
+  function getSpecials(){
+    try{
+      const raw=localStorage.getItem('meinGeldplanSonderausgaben');
+      if(raw) return JSON.parse(raw).filter(x=>x && Number.isFinite(Number(x.amount)));
+    }catch(e){}
+    return [];
+  }
+  function saveSpecials(arr){ localStorage.setItem('meinGeldplanSonderausgaben',JSON.stringify(arr)); }
 
-  const konto=n('sKonto'),bar=n('sBar'),target=n('sTarget');
-  const need=Math.max(0,target-bar),wd=Math.min(konto,need);
-  document.getElementById('sBarOut').textContent=eur(bar);
-  document.getElementById('sNeed').textContent=eur(need);
-  document.getElementById('sWithdraw').textContent=eur(wd);
-  document.getElementById('sAfter').textContent=eur(konto-wd);
-}
-function calcLohn(){
-  const grund=n('lGrund'),pflege=n('lPflege'),uni=n('lUni'),wechsel=n('lWechsel'),taxz=n('lTaxZ');
-  const brutto=grund+pflege+uni+wechsel+taxz;
-  const netto=n('lNetto'),unpf=n('lUntaxZ'),pf=n('lPf');
-  document.getElementById('lBrutto').textContent=eur(brutto);
-  document.getElementById('lNettoOut').textContent=eur(netto);
-  document.getElementById('lUnpfOut').textContent=eur(unpf);
-  document.getElementById('lBeforePf').textContent=eur(netto+unpf);
-  document.getElementById('lPfOut').textContent=eur(pf);
-  document.getElementById('lAuszahlung').textContent=eur(netto+unpf-pf);
-}
-function calcSparen(){
-  const us=n('uStand'),rate=n('uOwn')+n('uSteffi')+n('uExtra'),m=n('uMonths'),goal=n('uGoal');
-  const forecast=us+rate*m;
-  document.getElementById('uMonth').textContent=eur(rate);
-  document.getElementById('uForecast').textContent=eur(forecast);
-  document.getElementById('uMissing').textContent=eur(Math.max(0,goal-forecast));
-  document.getElementById('aForecast').textContent=eur(n('aStand')+n('aRate')*n('aMonths'));
-}
-function calc(){calcBudget();calcLohn();calcSparen();}
-ids.forEach(x=>x.addEventListener('input',calc));
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
- document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
- document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
- document.getElementById(b.dataset.tab).classList.remove('hidden');
-}));
-renderSpecials();
-calc();
+  function addSpecial(){
+    const amount=n('seBetrag');
+    if(amount<=0){ alert('Bitte einen gültigen Betrag eingeben.'); return; }
+    const item={
+      id:Date.now(),
+      amount:amount,
+      date:$('seDatum').value || new Date().toISOString().slice(0,10),
+      category:$('seKat').value,
+      text:$('seText').value.trim()
+    };
+    const arr=getSpecials(); arr.push(item); saveSpecials(arr);
+    $('seBetrag').value=''; $('seText').value='';
+    renderSpecials(); calcAll();
+  }
+
+  function removeSpecial(id){
+    saveSpecials(getSpecials().filter(e=>e.id!==id));
+    renderSpecials(); calcAll();
+  }
+
+  function renderSpecials(){
+    const arr=getSpecials().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const wrap=$('specialList');
+    if(!wrap) return;
+    if(!arr.length){
+      wrap.innerHTML='<div class="note">Noch keine Sonderausgaben eingetragen.</div>';
+    }else{
+      wrap.innerHTML=arr.map(e=>{
+        const safeText=String(e.text||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const safeCat=String(e.category||'Sonstiges').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        return `<div class="row">
+          <span><b>${eur(Number(e.amount))}</b><br><span class="note">${e.date} · ${safeCat}${safeText?' · '+safeText:''}</span></span>
+          <button onclick="removeSpecial(${Number(e.id)})" style="width:auto;padding:8px 11px;background:#f1f1f3;color:#111;font-size:13px">Löschen</button>
+        </div>`;
+      }).join('');
+    }
+    const total=arr.reduce((s,e)=>s+Number(e.amount),0);
+    if($('seTotal')) $('seTotal').textContent=eur(total);
+  }
+
+  function calcSunday(){
+    const konto=n('sKonto'), bar=n('sBar'), target=n('sTarget');
+    const need=Math.max(0,target-bar), wd=Math.min(konto,need);
+    $('sBarOut').textContent=eur(bar);
+    $('sNeed').textContent=eur(need);
+    $('sWithdraw').textContent=eur(wd);
+    $('sAfter').textContent=eur(konto-wd);
+  }
+
+  function calcLohn(){
+    const brutto=n('lGrund')+n('lPflege')+n('lUni')+n('lWechsel')+n('lTaxZ');
+    const netto=n('lNetto'), unpf=n('lUntaxZ'), pf=n('lPf');
+    $('lBrutto').textContent=eur(brutto);
+    $('lNettoOut').textContent=eur(netto);
+    $('lUnpfOut').textContent=eur(unpf);
+    $('lBeforePf').textContent=eur(netto+unpf);
+    $('lPfOut').textContent=eur(pf);
+    $('lAuszahlung').textContent=eur(netto+unpf-pf);
+  }
+
+  function calcSparen(){
+    const us=n('uStand'), rate=n('uOwn')+n('uSteffi')+n('uExtra'), m=n('uMonths'), goal=n('uGoal');
+    $('uMonth').textContent=eur(rate);
+    $('uForecast').textContent=eur(us+rate*m);
+    $('uMissing').textContent=eur(Math.max(0,goal-(us+rate*m)));
+    $('aForecast').textContent=eur(n('aStand')+n('aRate')*n('aMonths'));
+  }
+
+  function calcAll(){ calcBudget(); calcSunday(); calcLohn(); calcSparen(); }
+
+  window.addSpecial=addSpecial;
+  window.removeSpecial=removeSpecial;
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',calcAll));
+    document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+      const target=$(btn.dataset.tab); if(target) target.classList.remove('hidden');
+    }));
+    renderSpecials();
+    calcAll();
+  });
+})();
 </script>
 
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Mein Geldplan">
-<link rel="apple-touch-icon" href="icon.svg">
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
-}
-</script>
 </body></html>
