@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5f5f7">
+<title>Mein Geldplan</title>
+<style>
+:root{
+  --bg:#f5f5f7;--card:#fff;--text:#171717;--muted:#747474;--line:#e6e6e8;
+  --accent:#111;--green:#15803d;--orange:#b45309;--red:#b91c1c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+header{position:sticky;top:0;background:rgba(245,245,247,.94);backdrop-filter:blur(18px);z-index:5;padding:18px 16px 12px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:29px;letter-spacing:-.5px}.sub{margin-top:3px;color:var(--muted);font-size:14px}
+nav{display:flex;gap:8px;overflow:auto;padding:10px 16px;background:var(--bg);position:sticky;top:84px;z-index:4}
+nav button{white-space:nowrap;border:1px solid var(--line);background:white;border-radius:999px;padding:9px 14px;font-weight:600}
+nav button.active{background:#111;color:#fff}
+main{max-width:760px;margin:auto;padding:10px 14px 40px}
+section{background:var(--card);border:1px solid var(--line);border-radius:20px;margin:12px 0;padding:16px}
+h2{font-size:19px;margin:0 0 14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px;font-size:17px;background:#fff}
+.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:11px 0}
+.row:last-child{border-bottom:0}.v{font-weight:700;text-align:right}
+.big{font-size:29px}.good{color:var(--green)}.warn{color:var(--orange)}.red{color:var(--red)}
+.badge{display:inline-block;padding:6px 9px;background:#f0f0f2;border-radius:999px;font-size:12px;margin:2px 4px 2px 0}
+.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
+.primary{width:100%;border:0;background:#111;color:#fff;padding:14px;border-radius:13px;font-size:16px;font-weight:700}
+.hidden{display:none}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Mein Geldplan</h1>
+  <div class="sub">Lohn · Pfändung · Wochensatz · Sparen</div>
+</header>
+
+<nav>
+  <button class="tab active" data-tab="budget">Budget</button>
+  <button class="tab" data-tab="lohn">Lohn</button>
+  <button class="tab" data-tab="sparen">Sparen</button>
+</nav>
+
+<main>
+<!-- BUDGET -->
+<div id="budget" class="view">
+<section>
+<h2>Aktueller Monatsplan</h2>
+<div class="grid">
+<div><label>Nettoauszahlung (€)</label><input id="bNetto" type="number" step=".01" value="2664.98"></div>
+<div><label>Fixkosten inkl. 60 € Urlaubssparen</label><input id="bFix" type="number" step=".01" value="2156"></div>
+<div><label>Zusätzliches Urlaubssparen (€)</label><input id="bExtraSave" type="number" step=".01" value="0"></div>
+<div><label>Tage bis zum nächsten Lohn</label><input id="bDays" type="number" step="1" value="29"></div>
+<div><label>Ziel-Wochensatz (€)</label><input id="bTarget" type="number" step=".01" value="120"></div>
+</div>
+</section>
+
+<section>
+<h2>Dein Ergebnis</h2>
+<div class="row"><span>Nach Fixkosten</span><span class="v" id="bRest">–</span></div>
+<div class="row"><span>Nach zusätzlichem Sparen</span><span class="v" id="bRestSave">–</span></div>
+<div class="row"><span>Tagessatz</span><span class="v" id="bDay">–</span></div>
+<div class="row"><span>Wochensatz</span><span class="v big good" id="bWeek">–</span></div>
+<div class="row"><span>Über/unter Ziel</span><span class="v" id="bDiff">–</span></div>
+</section>
+
+<section>
+<h2>Sonntag: Was abheben?</h2>
+<div class="grid">
+<div><label>Girokonto (€)</label><input id="sKonto" type="number" step=".01" value="271"></div>
+<div><label>Bargeld (€)</label><input id="sBar" type="number" step=".01" value="80"></div>
+<div><label>Ziel für die kommende Woche (€)</label><input id="sTarget" type="number" step=".01" value="120"></div>
+</div>
+<div class="row"><span>Aktuelles Bargeld</span><span class="v" id="sBarOut">–</span></div>
+<div class="row"><span>Bis zum Wochenziel fehlen</span><span class="v" id="sNeed">–</span></div>
+<div class="row"><span><b>Am Sonntag abheben</b></span><span class="v big good" id="sWithdraw">–</span></div>
+<div class="row"><span>Girokonto danach</span><span class="v" id="sAfter">–</span></div>
+<div class="note">Die App füllt dein Bargeld sonntags nur bis zum gewünschten Wochenbetrag auf. Überschüssiges Geld bleibt auf dem Konto.</div>
+</section>
+</div>
+
+<!-- LOHN -->
+<div id="lohn" class="view hidden">
+<section>
+<h2>Lohnrechner</h2>
+<div class="grid">
+<div><label>Tabellenentgelt KR 8 / Stufe 5</label><input id="lGrund" type="number" step=".01" value="4226.92"></div>
+<div><label>Pflegezulage</label><input id="lPflege" type="number" step=".01" value="90"></div>
+<div><label>Universitätszulage</label><input id="lUni" type="number" step=".01" value="163.51"></div>
+<div><label>Wechselschichtzulage</label><input id="lWechsel" type="number" step=".01" value="250"></div>
+<div><label>Sonstige steuerpflichtige Zuschläge</label><input id="lTaxZ" type="number" step=".01" value="0"></div>
+<div><label>Unpfändbare Zuschläge</label><input id="lUntaxZ" type="number" step=".01" value="0"></div>
+<div><label>Netto aus steuerpflichtigem Brutto (manuell)</label><input id="lNetto" type="number" step=".01" value="2991.52"></div>
+<div><label>Pfändung laut Tabelle (€)</label><input id="lPf" type="number" step=".01" value="188.94"></div>
+</div>
+</section>
+
+<section>
+<h2>Dienste / Zuschläge</h2>
+<div class="grid">
+<div><label>Spätdienste werktags</label><input id="wSD" type="number" step="1" value="0"></div>
+<div><label>Nachtdienste werktags</label><input id="wND" type="number" step="1" value="0"></div>
+<div><label>Spätdienste Samstag</label><input id="wSDSa" type="number" step="1" value="0"></div>
+<div><label>Spätdienste Sonntag</label><input id="wSDSo" type="number" step="1" value="0"></div>
+<div><label>Nachtdienste Samstag</label><input id="wNDSa" type="number" step="1" value="0"></div>
+<div><label>Nachtdienste Sonntag</label><input id="wNDSo" type="number" step="1" value="0"></div>
+<div><label>Frühdienst Sonntag</label><input id="wFDSo" type="number" step="1" value="0"></div>
+</div>
+<div class="note">Annahme wie bisher: Spätdienst 13:30–21:42; Nachtdienst 21:15–06:30. Zuschläge werden stundenweise ohne Doppelzählung von Sonntag + Nacht berechnet.</div>
+</section>
+
+<section>
+<h2>Ergebnis Lohn</h2>
+<div class="row"><span>Steuerpflichtiges Brutto</span><span class="v" id="lBrutto">–</span></div>
+<div class="row"><span>Netto aus Brutto</span><span class="v" id="lNettoOut">–</span></div>
+<div class="row"><span>Unpfändbare Zuschläge</span><span class="v" id="lUnpfOut">–</span></div>
+<div class="row"><span>Netto vor Pfändung</span><span class="v" id="lBeforePf">–</span></div>
+<div class="row"><span>Pfändung</span><span class="v red" id="lPfOut">–</span></div>
+<div class="row"><span><b>Auszahlung</b></span><span class="v big good" id="lAuszahlung">–</span></div>
+</section>
+</div>
+
+<!-- SPAREN -->
+<div id="sparen" class="view hidden">
+<section>
+<h2>Urlaubskonto</h2>
+<div class="grid">
+<div><label>Aktueller Stand (€)</label><input id="uStand" type="number" step=".01" value="345"></div>
+<div><label>Deine Monatsrate (€)</label><input id="uOwn" type="number" step=".01" value="60"></div>
+<div><label>Steffis Monatsrate (€)</label><input id="uSteffi" type="number" step=".01" value="60"></div>
+<div><label>Zusätzliche Monatsrate (€)</label><input id="uExtra" type="number" step=".01" value="0"></div>
+<div><label>Monate</label><input id="uMonths" type="number" step="1" value="12"></div>
+<div><label>Ziel (€)</label><input id="uGoal" type="number" step=".01" value="4000"></div>
+</div>
+<div class="row"><span>Gemeinsam pro Monat</span><span class="v" id="uMonth">–</span></div>
+<div class="row"><span>Prognose ohne Entnahmen</span><span class="v big good" id="uForecast">–</span></div>
+<div class="row"><span>Bis zum Ziel fehlen</span><span class="v" id="uMissing">–</span></div>
+</section>
+
+<section>
+<h2>Autokonto</h2>
+<div class="grid">
+<div><label>Aktueller Stand (€)</label><input id="aStand" type="number" step=".01" value="615.34"></div>
+<div><label>Monatliche Einzahlung (€)</label><input id="aRate" type="number" step=".01" value="0"></div>
+<div><label>Monate</label><input id="aMonths" type="number" step="1" value="12"></div>
+</div>
+<div class="row"><span>Prognose</span><span class="v big" id="aForecast">–</span></div>
+</section>
+
+<section>
+<h2>Persönlicher Überblick</h2>
+<div class="row"><span>Fixkosten</span><span class="v">2.156,00 €</span></div>
+<div class="row"><span>Ziel-Wochensatz</span><span class="v">120,00 €</span></div>
+<div class="row"><span>Urlaubskonto aktuell</span><span class="v">345,00 €</span></div>
+<div class="row"><span>Autokonto aktuell</span><span class="v">615,34 €</span></div>
+</section>
+</div>
+
+<button class="primary" onclick="location.reload()">Ausgangswerte laden</button>
+<p class="note">Alle Berechnungen laufen lokal im Browser. Die App speichert keine Kontodaten online.</p>
+</main>
+
+<script>
+const ids=[...document.querySelectorAll('input')];
+const n=id=>Number(document.getElementById(id).value)||0;
+const eur=x=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(x);
+function calcBudget(){
+  const netto=n('bNetto'),fix=n('bFix'),extra=n('bExtraSave'),days=Math.max(1,n('bDays'));
+  const rest=netto-fix, restSave=rest-extra, day=restSave/days, week=day*7;
+  document.getElementById('bRest').textContent=eur(rest);
+  document.getElementById('bRestSave').textContent=eur(restSave);
+  document.getElementById('bDay').textContent=eur(day);
+  document.getElementById('bWeek').textContent=eur(week);
+  const diff=week-n('bTarget'); document.getElementById('bDiff').textContent=(diff>=0?'+':'')+eur(diff);
+
+  const konto=n('sKonto'),bar=n('sBar'),target=n('sTarget');
+  const need=Math.max(0,target-bar),wd=Math.min(konto,need);
+  document.getElementById('sBarOut').textContent=eur(bar);
+  document.getElementById('sNeed').textContent=eur(need);
+  document.getElementById('sWithdraw').textContent=eur(wd);
+  document.getElementById('sAfter').textContent=eur(konto-wd);
+}
+function calcLohn(){
+  const grund=n('lGrund'),pflege=n('lPflege'),uni=n('lUni'),wechsel=n('lWechsel'),taxz=n('lTaxZ');
+  const brutto=grund+pflege+uni+wechsel+taxz;
+  const netto=n('lNetto'),unpf=n('lUntaxZ'),pf=n('lPf');
+  document.getElementById('lBrutto').textContent=eur(brutto);
+  document.getElementById('lNettoOut').textContent=eur(netto);
+  document.getElementById('lUnpfOut').textContent=eur(unpf);
+  document.getElementById('lBeforePf').textContent=eur(netto+unpf);
+  document.getElementById('lPfOut').textContent=eur(pf);
+  document.getElementById('lAuszahlung').textContent=eur(netto+unpf-pf);
+}
+function calcSparen(){
+  const us=n('uStand'),rate=n('uOwn')+n('uSteffi')+n('uExtra'),m=n('uMonths'),goal=n('uGoal');
+  const forecast=us+rate*m;
+  document.getElementById('uMonth').textContent=eur(rate);
+  document.getElementById('uForecast').textContent=eur(forecast);
+  document.getElementById('uMissing').textContent=eur(Math.max(0,goal-forecast));
+  document.getElementById('aForecast').textContent=eur(n('aStand')+n('aRate')*n('aMonths'));
+}
+function calc(){calcBudget();calcLohn();calcSparen();}
+ids.forEach(x=>x.addEventListener('input',calc));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+ document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+ document.getElementById(b.dataset.tab).classList.remove('hidden');
+}));
+calc();
+</script>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mein Geldplan">
+<link rel="apple-touch-icon" href="icon.svg">
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+}
+</script>
+</body></html>
