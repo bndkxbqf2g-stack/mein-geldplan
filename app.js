@@ -15,11 +15,12 @@ function nextPayDate(){var now=new Date(),y=now.getFullYear(),m=now.getMonth(),d
 function cycleDays(){var now=new Date(),n=nextPayDate(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()),nd=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.max(1,Math.round((nd-today)/86400000)+1);}
 function txs(){try{var a=JSON.parse(localStorage.getItem("meinGeldplanGiroTx")||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
 function saveTx(a){try{localStorage.setItem("meinGeldplanGiroTx",JSON.stringify(a));}catch(e){}}
-function ensureBase(){var a=txs();if(!a.some(function(t){return t.type==="base";})){a.unshift({id:"base",type:"base",amount:233.30,date:dateKey(new Date()),text:"Startkontostand"});saveTx(a);}}
-function base(){var t=txs().find(function(x){return x.type==="base";});return t?Number(t.amount)||0:233.30;}
+function ensureBase(){var a=txs();if(!a.some(function(t){return t.type==="base";})){a.unshift({id:"base",type:"base",amount:153.30,date:dateKey(new Date()),text:"Startkontostand"});saveTx(a);}}
+function base(){var t=txs().find(function(x){return x.type==="base";});return t?Number(t.amount)||0:153.30;}
 function currentGiro(){return base()+txs().filter(function(t){return t.type!=="base";}).reduce(function(s,t){return s+(Number(t.amount)||0);},0);}
-function cashBalance(){try{var v=parseFloat(localStorage.getItem("meinGeldplanCash")||"0");return Number.isFinite(v)?Math.max(0,v):0;}catch(e){return 0;}}
+function cashBalance(){try{var v=parseFloat(localStorage.getItem("meinGeldplanCash")||"100");return Number.isFinite(v)?Math.max(0,v):0;}catch(e){return 0;}}
 function saveCash(v){try{localStorage.setItem("meinGeldplanCash",String(Math.max(0,Number(v)||0)));}catch(e){}}
+function ensureCash(){try{if(localStorage.getItem("meinGeldplanCash")===null)localStorage.setItem("meinGeldplanCash","100");}catch(e){}}
 function lastWithdrawalDate(){var a=txs().filter(function(t){return t.type==="withdrawal";});if(!a.length)return null;var x=a[a.length-1];return x.date||null;}
 function weeklyInfo(){var a=txs().filter(function(t){return t.type==="withdrawal";});if(!a.length)return null;var x=a[a.length-1],start=new Date((x.date||dateKey(new Date()))+"T00:00:00"),today=new Date(dateKey(new Date())+"T00:00:00"),elapsed=Math.floor((today-start)/86400000);if(elapsed<0||elapsed>=7)return null;return {start:start,days:7-elapsed};}
 function daysUntilNextPayOrSeven(){var w=weeklyInfo();return w?w.days:cycleDays();}
@@ -112,7 +113,7 @@ function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchun
 function refresh(){renderTx();updateBudget();sunday();if($("giroCurrent"))$("giroCurrent").textContent=eur(currentGiro());calcForecast();calcSparen();}
 function setDefaultMonth(){if($("pMonth")&&!$("pMonth").value){var d=new Date();$("pMonth").value=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}}
 function init(){
- ensureBase();setDefaultMonth();if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);
+ ensureBase();ensureCash();setDefaultMonth();if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);
  if($("incomeBtn"))$("incomeBtn").onclick=addIncome;
  if($("expenseBtn"))$("expenseBtn").onclick=addExpense;
  if($("withdrawBtn"))$("withdrawBtn").onclick=withdraw;
