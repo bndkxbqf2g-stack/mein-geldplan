@@ -18,9 +18,8 @@ function saveTx(a){try{localStorage.setItem("meinGeldplanGiroTx",JSON.stringify(
 function ensureBase(){var a=txs();if(!a.some(function(t){return t.type==="base";})){a.unshift({id:"base",type:"base",amount:153.30,date:dateKey(new Date()),text:"Startkontostand"});saveTx(a);}}
 function base(){var t=txs().find(function(x){return x.type==="base";});return t?Number(t.amount)||0:153.30;}
 function currentGiro(){return base()+txs().filter(function(t){return t.type!=="base";}).reduce(function(s,t){return s+(Number(t.amount)||0);},0);}
-function cashBalance(){try{var v=parseFloat(localStorage.getItem("meinGeldplanCash")||"100");return Number.isFinite(v)?Math.max(0,v):0;}catch(e){return 0;}}
+function cashBalance(){try{var v=parseFloat(localStorage.getItem("meinGeldplanCash")||"0");return Number.isFinite(v)?Math.max(0,v):0;}catch(e){return 0;}}
 function saveCash(v){try{localStorage.setItem("meinGeldplanCash",String(Math.max(0,Number(v)||0)));}catch(e){}}
-function ensureCash(){try{if(localStorage.getItem("meinGeldplanCash")===null)localStorage.setItem("meinGeldplanCash","100");}catch(e){}}
 function lastWithdrawalDate(){var a=txs().filter(function(t){return t.type==="withdrawal";});if(!a.length)return null;var x=a[a.length-1];return x.date||null;}
 function weeklyInfo(){var a=txs().filter(function(t){return t.type==="withdrawal";});if(!a.length)return null;var x=a[a.length-1],start=new Date((x.date||dateKey(new Date()))+"T00:00:00"),today=new Date(dateKey(new Date())+"T00:00:00"),elapsed=Math.floor((today-start)/86400000);if(elapsed<0||elapsed>=7)return null;return {start:start,days:7-elapsed};}
 function daysUntilNextPayOrSeven(){var w=weeklyInfo();return w?w.days:cycleDays();}
@@ -30,21 +29,22 @@ function updateBudget(){
   var storedCash=cashBalance();
   var inputCash=$("bCarryCash")?num("bCarryCash"):storedCash;
   if($("bCarryCash") && document.activeElement!==$("bCarryCash") && Math.abs(inputCash-storedCash)>0.009) { $("bCarryCash").value=storedCash.toFixed(2); inputCash=storedCash; }
-  var giro=currentGiro(),cash=inputCash,available=giro+cash,weekly=weeklyInfo(),days=weekly?weekly.days:cycleDays();
-  // Nach einer Abhebung muss das vorhandene Bargeld für die laufende 7-Tage-Woche reichen.
-  // Ohne laufende Abhebungswoche wird das gesamte verfügbare Geld bis zum nächsten Lohn verteilt.
-  var basis=weekly?cash:available;
+  var giro=currentGiro(),cash=inputCash,available=giro+cash,weekly=weeklyInfo();
+  // Nach einer Abhebung sind die 7 Tage Bargeld bereits reserviert. Das verbleibende Girokonto
+  // wird deshalb auf die restlichen Tage bis zum nächsten Lohn verteilt.
+  var days=weekly?Math.max(1, cycleDays()-7):cycleDays();
+  var basis=giro;
   if($("mainGiro"))$("mainGiro").textContent=eur(giro);
   if($("mainCash"))$("mainCash").textContent=eur(cash);
   if($("mainAvailable"))$("mainAvailable").textContent=eur(available);
-  if($("mainBudgetBasis"))$("mainBudgetBasis").textContent=eur(basis)+(weekly?" (Bargeld / Woche)":" (gesamt)");
+  if($("mainBudgetBasis"))$("mainBudgetBasis").textContent=eur(basis)+(weekly?" (Girokonto / restliche Tage)":" (Girokonto)");
   if($("mainNextPay"))$("mainNextPay").textContent=fmt(nextPayDate())+" 20:30";
   if($("mainDays"))$("mainDays").textContent=days;
   var day=basis/days,week=day*7;
   if($("mainDay"))$("mainDay").textContent=eur(day);
   if($("mainWeek"))$("mainWeek").textContent=eur(week);
   if($("afterFixAvailable"))$("afterFixAvailable").textContent=eur(available);
-  if($("budgetNote")){if(weekly){var wd=lastWithdrawalDate();$("budgetNote").textContent="Neue Wochenperiode seit "+wd.split("-").reverse().join(".")+". Noch "+days+" Tage. Das Bargeld ist die Budgetbasis für diese Woche.";}else{$("budgetNote").textContent="Ohne laufende Abhebungswoche rechnet die App mit dem gesamten verfügbaren Geld bis zum nächsten Lohn.";}}
+  if($("budgetNote")){if(weekly){var wd=lastWithdrawalDate();$("budgetNote").textContent="Neue Wochenperiode seit "+wd.split("-").reverse().join(".")+". Die ersten 7 Tage sind durch das Bargeld abgedeckt. Für die verbleibenden "+days+" Tage wird nur das Girokonto verteilt.";}else{$("budgetNote").textContent="Ohne laufende Abhebungswoche rechnet die App bis zum nächsten Lohn mit dem Girokonto.";}}
 }
 function renderTx(){
   var list=$("giroTxList");if(!list)return;list.innerHTML="";
@@ -113,7 +113,7 @@ function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchun
 function refresh(){renderTx();updateBudget();sunday();if($("giroCurrent"))$("giroCurrent").textContent=eur(currentGiro());calcForecast();calcSparen();}
 function setDefaultMonth(){if($("pMonth")&&!$("pMonth").value){var d=new Date();$("pMonth").value=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}}
 function init(){
- ensureBase();ensureCash();setDefaultMonth();if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);
+ ensureBase();setDefaultMonth();if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);
  if($("incomeBtn"))$("incomeBtn").onclick=addIncome;
  if($("expenseBtn"))$("expenseBtn").onclick=addExpense;
  if($("withdrawBtn"))$("withdrawBtn").onclick=withdraw;

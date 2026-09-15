@@ -60,7 +60,7 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 </div>
 <div class="row"><span>Bargeld</span><span class="v" id="mainCash">–</span></div>
 <div class="row"><span><b>Insgesamt verfügbar</b></span><span class="v big good" id="mainAvailable">–</span></div>
-<div class="row"><span>Budgetbasis aktuell</span><span class="v" id="mainBudgetBasis">–</span></div>
+<div class="row"><span>Budgetbasis aktuell (Girokonto)</span><span class="v" id="mainBudgetBasis">–</span></div>
 <div class="row"><span>Nächster Lohn</span><span class="v" id="mainNextPay">–</span></div>
 <div class="row"><span>Verbleibende Budgettage</span><span class="v" id="mainDays">–</span></div>
 <div class="row"><span><b>Tagessatz</b></span><span class="v big good" id="mainDay">–</span></div>
@@ -80,6 +80,7 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <section>
 <h2>Girokonto</h2>
 <div class="grid">
+<div><label>Start-/aktueller Kontostand (€)</label><input id="giroStand" type="number" step=".01" value="153.30"></div>
 <div><label>Zahlungseingang (€)</label><input id="giroIncome" type="number" step=".01" placeholder="z. B. neuer Lohn"></div>
 <div><label>Ausgabe (€)</label><input id="giroExpense" type="number" step=".01" placeholder="z. B. Tanken"></div>
 <div><label>Beschreibung</label><input id="giroText" type="text" placeholder="z. B. Lohn, Tanken, Prepaidkarte"></div>
