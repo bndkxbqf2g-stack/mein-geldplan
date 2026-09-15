@@ -35,7 +35,7 @@ function updateBudget(){
   // Das Budget für Tagessatz und Wochensatz basiert ausschließlich auf dem aktuellen Girokonto-Guthaben.
   // Nach einer Abhebung beginnt ein neuer 7-Tage-Zeitraum; innerhalb dieses
   // Zeitraums werden die verbleibenden Tage bis zum Ende der Woche angezeigt.
-  var days=weekly?weekly.days:cycleDays();
+  var days=Math.max(1, cycleDays()-(weekly?weekly.days:7));
   // Tagessatz/Wochensatz basieren ausschließlich auf dem aktuell verfügbaren Girokonto-Guthaben.
   var basis=giro;
   if($("mainGiro"))$("mainGiro").textContent=eur(giro);
@@ -47,7 +47,7 @@ function updateBudget(){
   if($("mainDay"))$("mainDay").textContent=eur(day);
   if($("mainWeek"))$("mainWeek").textContent=eur(week);
   if($("afterFixAvailable"))$("afterFixAvailable").textContent=eur(available);
-  if($("budgetNote")){if(weekly){var wd=lastWithdrawalDate();$("budgetNote").textContent="Neue Wochenperiode seit "+wd.split("-").reverse().join(".")+". Die ersten 7 Tage sind durch das Bargeld abgedeckt. Für die verbleibenden "+days+" Tage wird nur das Girokonto verteilt.";}else{$("budgetNote").textContent="Ohne laufende Abhebungswoche rechnet die App bis zum nächsten Lohn mit dem Girokonto.";}}
+  if($("budgetNote")){if(weekly){var wd=lastWithdrawalDate();$("budgetNote").textContent="Bargeld deckt die verbleibenden "+weekly.days+" Tage des 7-Tage-Abhebungszeitraums ab. Das Girokonto wird für die danach verbleibenden "+days+" Tage bis zum Lohn verteilt.";}else{$("budgetNote").textContent="Das Bargeld ist für 7 Tage reserviert. Das Girokonto wird für die danach verbleibenden "+days+" Tage bis zum Lohn verteilt.";}}
 }
 function renderTx(){
   var list=$("giroTxList");if(!list)return;list.innerHTML="";
