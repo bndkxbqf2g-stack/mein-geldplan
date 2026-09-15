@@ -1,9 +1,8 @@
-# Mein Geldplan v15
+# Mein Geldplan v19
 
-Neue Funktionen:
-- Girokonto und Bargeld werden getrennt angezeigt.
-- Nach einer Bargeldabhebung startet eine neue 7-Tage-Woche.
-- Während dieser 7 Tage ist das vorhandene Bargeld die Budgetbasis und muss für die verbleibenden Tage reichen.
-- Nach Ablauf der 7 Tage wechselt die Berechnung automatisch wieder auf das gesamte verfügbare Geld bis zum nächsten Lohn.
-- Neuer Reiter „Testen / Zurücksetzen“ zum vollständigen Löschen der gespeicherten App-Daten.
-- Lohnbuchung und normale Zahlungseingänge bleiben getrennt.
+Budgetlogik:
+- Girokonto und Bargeld getrennt anzeigen
+- Insgesamt verfügbar = Giro + Bargeld
+- Tagessatz/Wochensatz berechnen sich ausschließlich aus dem Girokonto
+- Nach einer Abhebung startet ein neuer 7-Tage-Zeitraum; die verbleibenden Tage werden heruntergezählt
+- Start-/aktueller Kontostand wird nicht mehr als Eingabefeld angezeigt

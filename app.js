@@ -32,12 +32,14 @@ function updateBudget(){
   var giro=currentGiro(),cash=inputCash,available=giro+cash,weekly=weeklyInfo();
   // Nach einer Abhebung sind die 7 Tage Bargeld bereits reserviert. Das verbleibende Girokonto
   // wird deshalb auf die restlichen Tage bis zum nächsten Lohn verteilt.
-  var days=weekly?Math.max(1, cycleDays()-7):cycleDays();
+  // Das Budget basiert ausschließlich auf dem Girokonto.
+  // Nach einer Abhebung beginnt ein neuer 7-Tage-Zeitraum; innerhalb dieses
+  // Zeitraums werden die verbleibenden Tage bis zum Ende der Woche angezeigt.
+  var days=weekly?weekly.days:cycleDays();
   var basis=giro;
   if($("mainGiro"))$("mainGiro").textContent=eur(giro);
   if($("mainCash"))$("mainCash").textContent=eur(cash);
   if($("mainAvailable"))$("mainAvailable").textContent=eur(available);
-  if($("mainBudgetBasis"))$("mainBudgetBasis").textContent=eur(basis)+(weekly?" (Girokonto / restliche Tage)":" (Girokonto)");
   if($("mainNextPay"))$("mainNextPay").textContent=fmt(nextPayDate())+" 20:30";
   if($("mainDays"))$("mainDays").textContent=days;
   var day=basis/days,week=day*7;
@@ -68,7 +70,7 @@ function addSalary(){
 }
 function addExpense(){var v=num("giroExpense");if(v<=0){alert("Bitte einen positiven Ausgabebetrag eingeben.");return;}bookTransaction(-v,$("giroText").value.trim()||"Ausgabe","expense");$("giroExpense").value="";$("giroText").value="";refresh();}
 function withdraw(){var v=num("sWithdrawAmount"),g=currentGiro();if(v<=0){alert("Bitte einen Abhebebetrag eingeben.");return;}if(v>g){alert("Der Abhebebetrag ist höher als dein Girokontostand.");return;}bookTransaction(-v,"Bargeldabhebung","withdrawal");saveCash(cashBalance()+v);if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);$("sWithdrawAmount").value="";refresh();}
-function sunday(){var konto=currentGiro(),cash=cashBalance();if($("bCarryCash")){if(document.activeElement!==$("bCarryCash"))$("bCarryCash").value=cash.toFixed(2);else{var typed=num("bCarryCash");if(Math.abs(typed-cash)>0.009){saveCash(typed);cash=Math.max(0,typed);}}}if($("sTotal"))$("sTotal").textContent=eur(konto+cash);if($("sGiro"))$("sGiro").textContent=eur(konto);if($("sCash"))$("sCash").textContent=eur(cash);var weekly=weeklyInfo(),day=(weekly?cash:konto+cash)/(weekly?weekly.days:daysUntilNextPayOrSeven());var suggested=Math.max(0,day*7-Math.max(0,cash));if($("sSuggested"))$("sSuggested").textContent=eur(suggested);if($("sAfter"))$("sAfter").textContent=eur(konto-num("sWithdrawAmount"));}
+function sunday(){var konto=currentGiro(),cash=cashBalance();if($("bCarryCash")){if(document.activeElement!==$("bCarryCash"))$("bCarryCash").value=cash.toFixed(2);else{var typed=num("bCarryCash");if(Math.abs(typed-cash)>0.009){saveCash(typed);cash=Math.max(0,typed);}}}if($("sTotal"))$("sTotal").textContent=eur(konto+cash);if($("sGiro"))$("sGiro").textContent=eur(konto);if($("sCash"))$("sCash").textContent=eur(cash);var weekly=weeklyInfo(),days=weekly?weekly.days:cycleDays(),day=konto/days;var suggested=Math.max(0,day*7);if($("sSuggested"))$("sSuggested").textContent=eur(suggested);if($("sAfter"))$("sAfter").textContent=eur(konto-num("sWithdrawAmount"));}
 
 /* Gehaltsprognose */
 function tariffHour(){return 24.21;}
