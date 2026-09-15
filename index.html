@@ -37,10 +37,16 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <body>
 <header>
   <h1>Mein Geldplan</h1>
-  <div class="sub">Girokonto · Tagesbudget · Wochenbudget</div>
+  <div class="sub">Girokonto · Budget · Gehaltsprognose · Urlaub</div>
 </header>
 
 
+
+<nav>
+  <button class="tab active" data-tab="budget">Budget</button>
+  <button class="tab" data-tab="prognose">Gehaltsprognose</button>
+  <button class="tab" data-tab="sparen">Sparen</button>
+</nav>
 
 <main>
 <!-- BUDGET -->
@@ -60,13 +66,12 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 </section>
 
 <section>
-<h2>Monatsabrechnung</h2>
+<h2>Fixkosten</h2>
 <div class="grid">
 <div><label>Monatliche Fixkosten (€)</label><input id="monthlyFix" type="number" step=".01" value="2156.00"></div>
-<div><label>Fixkosten diesen Monat bereits abgezogen?</label><select id="fixAlready"><option value="no" selected>Nein</option><option value="yes">Ja</option></select></div>
 </div>
-<div class="row"><span><b>Für Budget verfügbar nach Fixkosten</b></span><span class="v big good" id="afterFixAvailable">–</span></div>
-<div class="note">Beim Buchen eines neuen Lohneingangs werden die Fixkosten für den aktuellen Lohnzyklus automatisch einmal abgezogen. Wenn du sie bereits außerhalb der App abgerechnet hast, stelle „Ja“ ein.</div>
+<div class="row"><span><b>Verfügbar im aktuellen Budget</b></span><span class="v big good" id="afterFixAvailable">–</span></div>
+<div class="note">Die 2.156 € werden automatisch nur beim Button „Lohn buchen“ einmal pro Lohnmonat abgezogen. Normale Zahlungseingänge lösen keinen Fixkostenabzug aus.</div>
 </section>
 
 <section>
@@ -80,7 +85,7 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <button class="primary" style="margin-top:12px" id="incomeBtn">Zahlungseingang buchen</button>
 <button class="primary" style="margin-top:8px;background:#f1f1f3;color:#111" id="expenseBtn">Ausgabe buchen</button>
 <div class="row"><span><b>Aktueller Kontostand</b></span><span class="v big good" id="giroCurrent">–</span></div>
-<div class="note">Alle Ausgaben, auch Sonderausgaben wie Tanken oder Ausgaben für die Kinder, werden hier gebucht. Am Zahltag trägst du deinen neuen Lohn als Zahlungseingang ein.</div>
+<div class="note">Alle Ausgaben, auch Sonderausgaben wie Tanken oder Ausgaben für die Kinder, werden hier gebucht. Den Lohn buchst du ausschließlich über „Lohn buchen“.</div>
 </section>
 
 <section>
@@ -97,44 +102,56 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 </div>
 
-<!-- LOHN -->
-<div id="lohn" class="view hidden">
+<!-- PROGNOSE -->
+<div id="prognose" class="view hidden">
 <section>
-<h2>Lohnrechner</h2>
+<h2>Voraussichtliches Gehalt</h2>
 <div class="grid">
-<div><label>Tabellenentgelt KR 8 / Stufe 5</label><input id="lGrund" type="number" step=".01" value="4226.92"></div>
-<div><label>Pflegezulage</label><input id="lPflege" type="number" step=".01" value="90"></div>
-<div><label>Universitätszulage</label><input id="lUni" type="number" step=".01" value="163.51"></div>
-<div><label>Wechselschichtzulage</label><input id="lWechsel" type="number" step=".01" value="250"></div>
-<div><label>Sonstige steuerpflichtige Zuschläge</label><input id="lTaxZ" type="number" step=".01" value="0"></div>
-<div><label>Unpfändbare Zuschläge</label><input id="lUntaxZ" type="number" step=".01" value="0"></div>
-<div><label>Netto aus steuerpflichtigem Brutto (manuell)</label><input id="lNetto" type="number" step=".01" value="2991.52"></div>
-<div><label>Pfändung laut Tabelle (€)</label><input id="lPf" type="number" step=".01" value="188.94"></div>
+<div><label>Monat</label><input id="pMonth" type="month"></div>
+<div><label>Tabellenentgelt KR 8 / Stufe 5 (€)</label><input id="pGrund" type="number" step=".01" value="4226.92"></div>
+<div><label>Pflegezulage (€)</label><input id="pPflege" type="number" step=".01" value="90"></div>
+<div><label>Universitätszulage (€)</label><input id="pUni" type="number" step=".01" value="163.51"></div>
+<div><label>Wechselschichtzulage (€)</label><input id="pWechsel" type="number" step=".01" value="250"></div>
+<div><label>Wechselschichtzulage berücksichtigen</label><select id="pWechselOn"><option value="on" selected>Ja</option><option value="off">Nein</option></select></div>
+<div><label>Netto-Basis bei 4.730,43 € Brutto (€)</label><input id="pBasisNetto" type="number" step=".01" value="2991.52"></div>
 </div>
+<div class="note">Die Prognose nutzt deine hinterlegten TV-L-Werte und deine üblichen Dienstzeiten. Die Auszahlung ist eine Näherung und ersetzt keine echte Abrechnung.</div>
 </section>
 
 <section>
-<h2>Dienste / Zuschläge</h2>
+<h2>Dienste des Monats</h2>
 <div class="grid">
-<div><label>Spätdienste werktags</label><input id="wSD" type="number" step="1" value="0"></div>
-<div><label>Nachtdienste werktags</label><input id="wND" type="number" step="1" value="0"></div>
-<div><label>Spätdienste Samstag</label><input id="wSDSa" type="number" step="1" value="0"></div>
-<div><label>Spätdienste Sonntag</label><input id="wSDSo" type="number" step="1" value="0"></div>
-<div><label>Nachtdienste Samstag</label><input id="wNDSa" type="number" step="1" value="0"></div>
-<div><label>Nachtdienste Sonntag</label><input id="wNDSo" type="number" step="1" value="0"></div>
-<div><label>Frühdienst Sonntag</label><input id="wFDSo" type="number" step="1" value="0"></div>
+<div><label>Frühdienst werktags</label><input id="pFD" type="number" step="1" min="0" value="0"></div>
+<div><label>Frühdienst Sonntag</label><input id="pFDSo" type="number" step="1" min="0" value="0"></div>
+<div><label>Spätdienst werktags</label><input id="pSD" type="number" step="1" min="0" value="0"></div>
+<div><label>Spätdienst Samstag</label><input id="pSDSa" type="number" step="1" min="0" value="0"></div>
+<div><label>Spätdienst Sonntag</label><input id="pSDSo" type="number" step="1" min="0" value="0"></div>
+<div><label>Nachtdienst werktags</label><input id="pND" type="number" step="1" min="0" value="0"></div>
+<div><label>Nachtdienst Samstag</label><input id="pNDSa" type="number" step="1" min="0" value="0"></div>
+<div><label>Nachtdienst Sonntag</label><input id="pNDSo" type="number" step="1" min="0" value="0"></div>
 </div>
-<div class="note">Annahme wie bisher: Spätdienst 13:30–21:42; Nachtdienst 21:15–06:30. Zuschläge werden stundenweise ohne Doppelzählung von Sonntag + Nacht berechnet.</div>
+<div class="note">Zeiten: Frühdienst 06:00–14:12, Spätdienst 13:30–21:42, Nachtdienst 21:15–06:30. Nachtzuschlag 20 %, Sonntagszuschlag 25 %, Samstag 13:00–21:00 mit 0,64 €/h. Sonntag + Nacht wird nicht doppelt gezählt.</div>
 </section>
 
 <section>
-<h2>Ergebnis Lohn</h2>
-<div class="row"><span>Steuerpflichtiges Brutto</span><span class="v" id="lBrutto">–</span></div>
-<div class="row"><span>Netto aus Brutto</span><span class="v" id="lNettoOut">–</span></div>
-<div class="row"><span>Unpfändbare Zuschläge</span><span class="v" id="lUnpfOut">–</span></div>
-<div class="row"><span>Netto vor Pfändung</span><span class="v" id="lBeforePf">–</span></div>
-<div class="row"><span>Pfändung</span><span class="v red" id="lPfOut">–</span></div>
-<div class="row"><span><b>Auszahlung</b></span><span class="v big good" id="lAuszahlung">–</span></div>
+<h2>Prognose</h2>
+<div class="row"><span>Steuerpflichtiges Brutto</span><span class="v" id="pBrutto">–</span></div>
+<div class="row"><span>Geschätzte steuerpflichtige Netto-Grundzahlung</span><span class="v" id="pNettoBasis">–</span></div>
+<div class="row"><span>Unpfändbare Zuschläge</span><span class="v" id="pProtected">–</span></div>
+<div class="row"><span>Geschätzte Pfändung</span><span class="v red" id="pGarnish">–</span></div>
+<div class="row"><span><b>Voraussichtliche Auszahlung</b></span><span class="v big good" id="pPayout">–</span></div>
+<div class="row"><span>Gesamt Zuschläge</span><span class="v" id="pSurcharges">–</span></div>
+<div class="note" id="pShiftSummary">–</div>
+</section>
+
+<section>
+<h2>Gehalt buchen</h2>
+<div class="grid">
+<div><label>Nettolohn (€)</label><input id="salaryAmount" type="number" step=".01" placeholder="z. B. 2.900"></div>
+<div><label>Beschreibung</label><input id="salaryText" type="text" placeholder="z. B. Lohn September"></div>
+</div>
+<button class="primary" style="margin-top:12px" id="salaryBtn">Lohn buchen & Fixkosten abziehen</button>
+<div class="note">Nur dieser Button löst den automatischen Abzug der monatlichen Fixkosten aus. Ein normaler Zahlungseingang tut das nicht.</div>
 </section>
 </div>
 
@@ -180,105 +197,6 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 
 
-<script src="app.js?v=6"></script>
+<script src="app.js?v=13"></script>
 
-<script>
-(function(){
-"use strict";
-
-/* Germany-wide public holidays. Regional holidays are not included because the user's
-   stated rule is simply: weekdays, no public holiday, no weekend. */
-function easterSunday(y){
-  var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25);
-  var g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4;
-  var l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
-  var month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
-  return new Date(y,month-1,day);
-}
-function dateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
-function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
-function holidays(y){
-  var e=easterSunday(y), arr=[];
-  function fixed(m,day){arr.push(dateKey(new Date(y,m-1,day)));}
-  fixed(1,1); fixed(5,1); fixed(10,3); fixed(12,25); fixed(12,26);
-  [-2,1,39,50,60].forEach(function(n){arr.push(dateKey(addDays(e,n)));});
-  return arr;
-}
-function isBankDay(d){
-  var dow=d.getDay();
-  if(dow===0 || dow===6) return false;
-  return holidays(d.getFullYear()).indexOf(dateKey(d))===-1;
-}
-function nthLastBankDay(y,m,n){
-  var d=new Date(y,m+1,0);
-  var found=0;
-  while(d.getMonth()===m){
-    if(isBankDay(d)){found++; if(found===n)return d;}
-    d.setDate(d.getDate()-1);
-  }
-  return d;
-}
-function nextPay(){
-  var now=new Date();
-  var y=now.getFullYear(),m=now.getMonth();
-  var d=nthLastBankDay(y,m,2);
-  d.setHours(20,30,0,0);
-  if(now>d){
-    m++;
-    if(m>11){m=0;y++;}
-    d=nthLastBankDay(y,m,2); d.setHours(20,30,0,0);
-  }
-  return d;
-}
-function fmt(d){return new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);}
-function q(id){return document.getElementById(id);}
-function money(v){return new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Number.isFinite(v)?v:0);}
-
-function updateCycle(){
-  var now=new Date(), next=nextPay();
-  var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  var nextDay=new Date(next.getFullYear(),next.getMonth(),next.getDate());
-  var days=Math.max(1,Math.round((nextDay-today)/86400000)+1);
-  var prev=new Date(next.getFullYear(),next.getMonth()-1,1);
-  prev=nthLastBankDay(prev.getFullYear(),prev.getMonth(),2);
-  if(q("lastPayOut"))q("lastPayOut").textContent=fmt(prev)+" 20:30";
-  if(q("nextPayOut"))q("nextPayOut").textContent=fmt(next)+" 20:30";
-  if(q("daysOut"))q("daysOut").textContent=days;
-  if(q("autoDays"))q("autoDays").textContent=days;
-  if(q("bDays"))q("bDays").value=days;
-  return days;
-}
-function calcAutoBudget(){
-  var days=updateCycle();
-  var netto=parseFloat((q("bNetto")||{}).value)||0;
-  var fix=parseFloat((q("bFix")||{}).value)||0;
-  var extra=parseFloat((q("bExtraSave")||{}).value)||0;
-  var special=0;
-  try{
-    special=JSON.parse(localStorage.getItem("meinGeldplanSonderausgaben")||"[]")
-      .reduce(function(s,e){return s+(Number(e.amount)||0);},0);
-  }catch(e){}
-  var after=netto-fix-extra-special,day=after/days,week=day*7;
-  if(q("bRest"))q("bRest").textContent=money(netto-fix);
-  if(q("bRestSave"))q("bRestSave").textContent=money(after);
-  if(q("bDay"))q("bDay").textContent=money(day);
-  if(q("bWeek"))q("bWeek").textContent=money(week);
-  if(q("bDiff")){
-    var diff=week-(parseFloat((q("bTarget")||{}).value)||0);
-    q("bDiff").textContent=(diff>=0?"+":"")+money(diff);
-  }
-}
-function bootCycle(){
-  calcAutoBudget();
-  document.querySelectorAll("input,select").forEach(function(el){
-    el.addEventListener("input",calcAutoBudget);
-    el.addEventListener("change",calcAutoBudget);
-  });
-  document.addEventListener("visibilitychange",function(){if(!document.hidden)calcAutoBudget();});
-  setInterval(calcAutoBudget,60000);
-}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bootCycle);
-else bootCycle();
-})();
-</script>
 </body></html>
