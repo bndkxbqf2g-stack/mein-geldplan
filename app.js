@@ -32,17 +32,18 @@ function updateBudget(){
   var giro=currentGiro(),cash=inputCash,available=giro+cash,weekly=weeklyInfo();
   // Nach einer Abhebung sind die 7 Tage Bargeld bereits reserviert. Das verbleibende Girokonto
   // wird deshalb auf die restlichen Tage bis zum nächsten Lohn verteilt.
-  // Das Budget basiert ausschließlich auf dem Girokonto.
+  // Das Budget für Tagessatz und Wochensatz basiert ausschließlich auf dem aktuellen Girokonto-Guthaben.
   // Nach einer Abhebung beginnt ein neuer 7-Tage-Zeitraum; innerhalb dieses
   // Zeitraums werden die verbleibenden Tage bis zum Ende der Woche angezeigt.
   var days=weekly?weekly.days:cycleDays();
+  // Tagessatz/Wochensatz basieren ausschließlich auf dem aktuell verfügbaren Girokonto-Guthaben.
   var basis=giro;
   if($("mainGiro"))$("mainGiro").textContent=eur(giro);
   if($("mainCash"))$("mainCash").textContent=eur(cash);
   if($("mainAvailable"))$("mainAvailable").textContent=eur(available);
   if($("mainNextPay"))$("mainNextPay").textContent=fmt(nextPayDate())+" 20:30";
   if($("mainDays"))$("mainDays").textContent=days;
-  var day=basis/days,week=day*7;
+  var day=(days>0?basis/days:0),week=day*7;
   if($("mainDay"))$("mainDay").textContent=eur(day);
   if($("mainWeek"))$("mainWeek").textContent=eur(week);
   if($("afterFixAvailable"))$("afterFixAvailable").textContent=eur(available);
