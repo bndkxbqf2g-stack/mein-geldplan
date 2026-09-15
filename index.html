@@ -46,6 +46,7 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
   <button class="tab active" data-tab="budget">Budget</button>
   <button class="tab" data-tab="prognose">Gehaltsprognose</button>
   <button class="tab" data-tab="sparen">Sparen</button>
+  <button class="tab" data-tab="einstellungen">Testen / Zurücksetzen</button>
 </nav>
 
 <main>
@@ -55,14 +56,16 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <h2>Mein aktuelles Budget</h2>
 <div class="row"><span>Girokonto</span><span class="v" id="mainGiro">–</span></div>
 <div class="grid" style="margin-top:8px">
-<div><label>Übriges Bargeld aus der laufenden Woche (€)</label><input id="bCarryCash" type="number" step=".01" placeholder="z. B. 20"></div>
+<div><label>Vorhandenes Bargeld (€)</label><input id="bCarryCash" type="number" step=".01" min="0" placeholder="z. B. 20"></div>
 </div>
+<div class="row"><span>Bargeld</span><span class="v" id="mainCash">–</span></div>
 <div class="row"><span><b>Insgesamt verfügbar</b></span><span class="v big good" id="mainAvailable">–</span></div>
+<div class="row"><span>Budgetbasis aktuell</span><span class="v" id="mainBudgetBasis">–</span></div>
 <div class="row"><span>Nächster Lohn</span><span class="v" id="mainNextPay">–</span></div>
 <div class="row"><span>Verbleibende Budgettage</span><span class="v" id="mainDays">–</span></div>
 <div class="row"><span><b>Tagessatz</b></span><span class="v big good" id="mainDay">–</span></div>
 <div class="row"><span><b>Wochensatz</b></span><span class="v big good" id="mainWeek">–</span></div>
-<div class="note">Das eingetragene Bargeld ist nur ein Rest aus der laufenden Woche und wird zum Girokonto addiert. Es ist kein eigener Spar- oder Budgettopf.</div>
+<div class="note" id="budgetNote">Ohne neue Abhebung rechnet die App bis zum nächsten Lohn. Nach einer Abhebung läuft ein neues 7-Tage-Wochenbudget. Das vorhandene Bargeld ist die Budgetbasis und muss für diese 7 Tage reichen.</div>
 </section>
 
 <section>
@@ -90,14 +93,15 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 <section>
 <h2>Sonntag: Was abheben?</h2>
-<div class="row"><span>Aktuell insgesamt verfügbar</span><span class="v" id="sTotal">–</span></div>
 <div class="row"><span>Girokonto</span><span class="v" id="sGiro">–</span></div>
+<div class="row"><span>Bargeld</span><span class="v" id="sCash">–</span></div>
+<div class="row"><span>Aktuell insgesamt verfügbar</span><span class="v" id="sTotal">–</span></div>
 <div style="margin-top:12px"><label>Tatsächlich abheben (€)</label>
 <input id="sWithdrawAmount" type="number" step="1" inputmode="decimal" placeholder="z. B. 110">
 </div>
 <button class="primary" style="margin-top:12px" id="withdrawBtn">Abheben & buchen</button>
 <div class="row"><span>Girokonto nach Abhebung</span><span class="v" id="sAfter">–</span></div>
-<div class="note">Du entscheidest selbst, wie viel du sonntags abhebst. Die eingegebene Summe wird als Giro-Ausgabe gebucht. Bereits vorhandenes Bargeld wird nicht nochmals als Abhebung behandelt.</div>
+<div class="note">Du entscheidest selbst, wie viel du sonntags abhebst. Die Summe wird vom Giro abgezogen und zum Bargeldbestand addiert. Nach einer Abhebung startet eine neue 7-Tage-Woche. Das vorhandene Bargeld ist die Budgetbasis und muss für die verbleibenden Tage dieser Woche reichen.</div>
 </section>
 
 </div>
@@ -191,12 +195,22 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 </section>
 </div>
 
+<!-- EINSTELLUNGEN / RESET -->
+<div id="einstellungen" class="view hidden">
+<section>
+<h2>Testmodus</h2>
+<p class="note">Damit deine Freundin die App mit eigenen Werten testen kann, können alle gespeicherten Eingaben und Buchungen hier zurückgesetzt werden.</p>
+<button class="primary" id="resetBtn" style="margin-top:12px;background:#b91c1c">Alle Eingaben & Buchungen löschen</button>
+<div class="note">Dabei werden Giro-Buchungen, Bargeldbestand und die gespeicherten Testdaten dieser App auf die Ausgangswerte zurückgesetzt.</div>
+</section>
+</div>
+
 <p class="note">Alle Berechnungen laufen lokal im Browser. Die App speichert keine Kontodaten online.</p>
 </main>
 
 
 
 
-<script src="app.js?v=13"></script>
+<script src="app.js?v=15"></script>
 
 </body></html>

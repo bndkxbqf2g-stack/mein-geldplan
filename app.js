@@ -18,18 +18,32 @@ function saveTx(a){try{localStorage.setItem("meinGeldplanGiroTx",JSON.stringify(
 function ensureBase(){var a=txs();if(!a.some(function(t){return t.type==="base";})){a.unshift({id:"base",type:"base",amount:233.30,date:dateKey(new Date()),text:"Startkontostand"});saveTx(a);}}
 function base(){var t=txs().find(function(x){return x.type==="base";});return t?Number(t.amount)||0:233.30;}
 function currentGiro(){return base()+txs().filter(function(t){return t.type!=="base";}).reduce(function(s,t){return s+(Number(t.amount)||0);},0);}
+function cashBalance(){try{var v=parseFloat(localStorage.getItem("meinGeldplanCash")||"0");return Number.isFinite(v)?Math.max(0,v):0;}catch(e){return 0;}}
+function saveCash(v){try{localStorage.setItem("meinGeldplanCash",String(Math.max(0,Number(v)||0)));}catch(e){}}
+function lastWithdrawalDate(){var a=txs().filter(function(t){return t.type==="withdrawal";});if(!a.length)return null;var x=a[a.length-1];return x.date||null;}
+function weeklyInfo(){var a=txs().filter(function(t){return t.type==="withdrawal";});if(!a.length)return null;var x=a[a.length-1],start=new Date((x.date||dateKey(new Date()))+"T00:00:00"),today=new Date(dateKey(new Date())+"T00:00:00"),elapsed=Math.floor((today-start)/86400000);if(elapsed<0||elapsed>=7)return null;return {start:start,days:7-elapsed};}
+function daysUntilNextPayOrSeven(){var w=weeklyInfo();return w?w.days:cycleDays();}
 function bookTransaction(amount,text,type,meta){var a=txs();var t={id:Date.now()+Math.random(),type:type,amount:amount,date:dateKey(new Date()),text:text};if(meta)Object.keys(meta).forEach(function(k){t[k]=meta[k];});a.push(t);saveTx(a);}
 
 function updateBudget(){
-  var days=cycleDays(),giro=currentGiro(),cash=num("bCarryCash"),available=giro+cash;
+  var storedCash=cashBalance();
+  var inputCash=$("bCarryCash")?num("bCarryCash"):storedCash;
+  if($("bCarryCash") && document.activeElement!==$("bCarryCash") && Math.abs(inputCash-storedCash)>0.009) { $("bCarryCash").value=storedCash.toFixed(2); inputCash=storedCash; }
+  var giro=currentGiro(),cash=inputCash,available=giro+cash,weekly=weeklyInfo(),days=weekly?weekly.days:cycleDays();
+  // Nach einer Abhebung muss das vorhandene Bargeld für die laufende 7-Tage-Woche reichen.
+  // Ohne laufende Abhebungswoche wird das gesamte verfügbare Geld bis zum nächsten Lohn verteilt.
+  var basis=weekly?cash:available;
   if($("mainGiro"))$("mainGiro").textContent=eur(giro);
+  if($("mainCash"))$("mainCash").textContent=eur(cash);
   if($("mainAvailable"))$("mainAvailable").textContent=eur(available);
+  if($("mainBudgetBasis"))$("mainBudgetBasis").textContent=eur(basis)+(weekly?" (Bargeld / Woche)":" (gesamt)");
   if($("mainNextPay"))$("mainNextPay").textContent=fmt(nextPayDate())+" 20:30";
   if($("mainDays"))$("mainDays").textContent=days;
-  var day=available/days,week=day*7;
+  var day=basis/days,week=day*7;
   if($("mainDay"))$("mainDay").textContent=eur(day);
   if($("mainWeek"))$("mainWeek").textContent=eur(week);
   if($("afterFixAvailable"))$("afterFixAvailable").textContent=eur(available);
+  if($("budgetNote")){if(weekly){var wd=lastWithdrawalDate();$("budgetNote").textContent="Neue Wochenperiode seit "+wd.split("-").reverse().join(".")+". Noch "+days+" Tage. Das Bargeld ist die Budgetbasis für diese Woche.";}else{$("budgetNote").textContent="Ohne laufende Abhebungswoche rechnet die App mit dem gesamten verfügbaren Geld bis zum nächsten Lohn.";}}
 }
 function renderTx(){
   var list=$("giroTxList");if(!list)return;list.innerHTML="";
@@ -52,8 +66,8 @@ function addSalary(){
   $("salaryAmount").value="";$("salaryText").value="";refresh();
 }
 function addExpense(){var v=num("giroExpense");if(v<=0){alert("Bitte einen positiven Ausgabebetrag eingeben.");return;}bookTransaction(-v,$("giroText").value.trim()||"Ausgabe","expense");$("giroExpense").value="";$("giroText").value="";refresh();}
-function withdraw(){var v=num("sWithdrawAmount"),g=currentGiro();if(v<=0){alert("Bitte einen Abhebebetrag eingeben.");return;}if(v>g){alert("Der Abhebebetrag ist höher als dein Girokontostand.");return;}bookTransaction(-v,"Bargeldabhebung","withdrawal");$("sWithdrawAmount").value="";refresh();}
-function sunday(){var konto=currentGiro(),cash=num("bCarryCash");if($("sTotal"))$("sTotal").textContent=eur(konto+cash);if($("sGiro"))$("sGiro").textContent=eur(konto);var day=(konto+cash)/cycleDays(),suggested=Math.max(0,day*7-Math.max(0,cash));if($("sSuggested"))$("sSuggested").textContent=eur(suggested);if($("sAfter"))$("sAfter").textContent=eur(konto-num("sWithdrawAmount"));}
+function withdraw(){var v=num("sWithdrawAmount"),g=currentGiro();if(v<=0){alert("Bitte einen Abhebebetrag eingeben.");return;}if(v>g){alert("Der Abhebebetrag ist höher als dein Girokontostand.");return;}bookTransaction(-v,"Bargeldabhebung","withdrawal");saveCash(cashBalance()+v);if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);$("sWithdrawAmount").value="";refresh();}
+function sunday(){var konto=currentGiro(),cash=cashBalance();if($("bCarryCash")){if(document.activeElement!==$("bCarryCash"))$("bCarryCash").value=cash.toFixed(2);else{var typed=num("bCarryCash");if(Math.abs(typed-cash)>0.009){saveCash(typed);cash=Math.max(0,typed);}}}if($("sTotal"))$("sTotal").textContent=eur(konto+cash);if($("sGiro"))$("sGiro").textContent=eur(konto);if($("sCash"))$("sCash").textContent=eur(cash);var weekly=weeklyInfo(),day=(weekly?cash:konto+cash)/(weekly?weekly.days:daysUntilNextPayOrSeven());var suggested=Math.max(0,day*7-Math.max(0,cash));if($("sSuggested"))$("sSuggested").textContent=eur(suggested);if($("sAfter"))$("sAfter").textContent=eur(konto-num("sWithdrawAmount"));}
 
 /* Gehaltsprognose */
 function tariffHour(){return 24.21;}
@@ -94,14 +108,16 @@ function calcForecast(){
   if($("pSurcharges"))$("pSurcharges").textContent=eur(protectedPay);
   if($("pShiftSummary"))$("pShiftSummary").textContent=nightHours.toFixed(2)+" h Nacht · "+sunHours.toFixed(2)+" h Sonntag · "+eur(saturdayPay)+" Samstag";
 }
+function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchungen löschen?"))return;localStorage.removeItem("meinGeldplanGiroTx");localStorage.removeItem("meinGeldplanCash");location.reload();}
 function refresh(){renderTx();updateBudget();sunday();if($("giroCurrent"))$("giroCurrent").textContent=eur(currentGiro());calcForecast();calcSparen();}
 function setDefaultMonth(){if($("pMonth")&&!$("pMonth").value){var d=new Date();$("pMonth").value=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}}
 function init(){
- ensureBase();setDefaultMonth();
+ ensureBase();setDefaultMonth();if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);
  if($("incomeBtn"))$("incomeBtn").onclick=addIncome;
  if($("expenseBtn"))$("expenseBtn").onclick=addExpense;
  if($("withdrawBtn"))$("withdrawBtn").onclick=withdraw;
  if($("salaryBtn"))$("salaryBtn").onclick=addSalary;
+ if($("resetBtn"))$("resetBtn").onclick=resetApp;
  document.querySelectorAll("input,select").forEach(function(el){el.addEventListener("input",refresh);el.addEventListener("change",refresh);});
  document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});b.classList.add("active");document.querySelectorAll(".view").forEach(function(v){v.classList.add("hidden")});var t=b.dataset.tab;if($(t))$(t).classList.remove("hidden");});});
  refresh();setInterval(refresh,60000);document.addEventListener("visibilitychange",function(){if(!document.hidden)refresh();});
