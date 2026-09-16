@@ -173,7 +173,29 @@ function sunday(){
  if($('withdrawalDays'))$('withdrawalDays').textContent=daysUntilNextWithdrawal();
  if($('withdrawalHint'))$('withdrawalHint').textContent='Der rechnerische 7-Tage-Betrag ist nur eine Orientierung. Du entscheidest selbst, wie viel du abhebst.';
 }
-function tariffHour(){return 24.21;}
+// Historisch aus den hochgeladenen Bezügemitteilungen kalibriert.
+// Wir verwenden das tatsächlich ausgewiesene Regel-Netto als Basis und
+// schätzen nur die variablen Zeitbezüge. Das ist stabiler als ein grober
+// Brutto->Netto-Faktor.
+var PAYROLL_CALIBRATION={
+  // 2026 vor der Entgelt-/Zulagenänderung ab 01.04.2026
+  preApr2026:{gross:4360.85,legalNet:2767.80},
+  // Regelabrechnungen ab 04/2026 zeigen durchgehend diese Basis
+  fromApr2026:{gross:4480.43,legalNet:2827.98},
+  // Aus den Rückrechnungs-Perioden 2026 ergibt sich für steuer-/SV-pflichtige
+  // variable Bezüge ein sehr stabiler Auszahlungsfaktor um 48,2 %.
+  taxableExtraNetRate:0.482,
+  // Durchschnitt-VM §21 wird in den jüngsten Abrechnungen mit 1,44 €/Einheit
+  // ausgewiesen (z. B. 7 × 1,44 € = 10,08 €).
+  average21Rate:1.44,
+  nightSurchargeRate:4.58,
+  sundaySurchargeRate:5.58,
+  saturdayRate:0.64
+};
+function payrollBaseForReport(rep){
+  var y=Number(rep.year)||0,m=Number(rep.month)||0;
+  return (y>2026 || (y===2026&&m>=3))?PAYROLL_CALIBRATION.fromApr2026:PAYROLL_CALIBRATION.preApr2026;
+}
 
 
 var reportStore=[];
@@ -231,9 +253,20 @@ function extractShiftSummary(lines){
  return counts;
 }
 function protectedSurchargeCalc(rows){
- var h=tariffHour(),nightHours=0,sunHours=0,saturdayHours=0,saturdayPay=0;
- rows.forEach(function(r){if(r.code==='5010'||r.code==='5011')nightHours+=r.qty;else if(r.code==='5024')sunHours+=r.qty;else if(r.code==='5014'){saturdayHours+=r.qty;saturdayPay+=r.qty*0.64;}});
- return {nightHours:nightHours,sunHours:sunHours,saturdayHours:saturdayHours,nightPay:nightHours*h*0.20,sundayPay:sunHours*h*0.25,saturdayPay:saturdayPay};
+ var nightHours=0,sunHours=0,saturdayHours=0,saturdayPay=0;
+ rows.forEach(function(r){
+   if(r.code==='5010'||r.code==='5011')nightHours+=Number(r.qty)||0;
+   else if(r.code==='5024')sunHours+=Number(r.qty)||0;
+   else if(r.code==='5014'){var q=Number(r.qty)||0;saturdayHours+=q;saturdayPay+=q*PAYROLL_CALIBRATION.saturdayRate;}
+ });
+ return {
+   nightHours:nightHours,
+   sunHours:sunHours,
+   saturdayHours:saturdayHours,
+   nightPay:nightHours*PAYROLL_CALIBRATION.nightSurchargeRate,
+   sundayPay:sunHours*PAYROLL_CALIBRATION.sundaySurchargeRate,
+   saturdayPay:saturdayPay
+ };
 }
 function allowanceFromRows(rows){var wech=rows.some(function(r){return r.code==='5211'||r.label.toLowerCase().indexOf('wech')>=0;});var schi=rows.some(function(r){return r.code==='5212'||r.label.toLowerCase().indexOf('schiz')>=0;});return {wech:wech,schi:schi};}
 function garnishment2026(net,dependents){
@@ -260,18 +293,35 @@ function estimateNetFromGross(gross){
  if(gross<=0)return 0;
  return gross*(refNet/refGross);
 }
-function calculateReportForecast(rep,dependents){
- var p=protectedSurchargeCalc(rep.rows),a=allowanceFromRows(rep.rows);
- var fixedBase=4226.92+90+163.51;
+function reportVariableExtras(rep,a,p){
  var shiftAllowance=a.wech?250:(a.schi?100:0);
- var taxableGross=fixedBase+shiftAllowance+p.saturdayPay;
- var netBase=estimateNetFromGross(taxableGross);
- var protected= p.nightPay+p.sundayPay; // treated separately for the forecast, as established in the app logic
- var estimatedPfNet=netBase;
+ var avgUnits=rep.rows.filter(function(r){return r.code==='5161';}).reduce(function(s,r){return s+(Number(r.qty)||0);},0);
+ var averagePay=avgUnits*PAYROLL_CALIBRATION.average21Rate;
+ var taxableExtrasGross=shiftAllowance+p.saturdayPay+averagePay;
+ return {shiftAllowance:shiftAllowance,averageUnits:avgUnits,averagePay:averagePay,taxableExtrasGross:taxableExtrasGross};
+}
+function calculateReportForecast(rep,dependents){
+ var p=protectedSurchargeCalc(rep.rows),a=allowanceFromRows(rep.rows),base=payrollBaseForReport(rep),v=reportVariableExtras(rep,a,p);
+ // Die Basis ist das tatsächlich beobachtete Regel-Netto aus den Abrechnungen.
+ // Nur variable, steuer-/SV-pflichtige Bestandteile werden zusätzlich geschätzt.
+ var taxableExtraNet=v.taxableExtrasGross*PAYROLL_CALIBRATION.taxableExtraNetRate;
+ var protected=p.nightPay+p.sundayPay;
+ var estimatedLegalNet=base.legalNet+taxableExtraNet+protected;
+ // Pfändung nur auf den nicht geschützten Teil anwenden.
+ var estimatedPfNet=Math.max(0,base.legalNet+taxableExtraNet);
  var garnish=garnishment2026(estimatedPfNet,dependents);
- var payout=estimatedPfNet-garnish;
+ var payout=estimatedLegalNet-garnish;
  var pm=payoutMonthFor(rep.year,rep.month);
- return {report:rep, payoutYear:pm.year,payoutMonth:pm.month,taxableGross:taxableGross,netBase:netBase,protected:protected,estimatedPfNet:estimatedPfNet,garnish:garnish,payout:payout,shiftAllowance:shiftAllowance,allowanceType:a.wech?'Wechselschichtzulage §43':a.schi?'Schichtzulage §43':'keine aus Zeitlohnarten',p:p};
+ return {
+  report:rep,payoutYear:pm.year,payoutMonth:pm.month,
+  baseGross:base.gross,baseLegalNet:base.legalNet,
+  taxableGross:base.gross+v.taxableExtrasGross,
+  taxableExtrasGross:v.taxableExtrasGross,taxableExtraNet:taxableExtraNet,
+  netBase:estimatedLegalNet,protected:protected,estimatedPfNet:estimatedPfNet,
+  garnish:garnish,payout:payout,shiftAllowance:v.shiftAllowance,
+  averageUnits:v.averageUnits,averagePay:v.averagePay,
+  allowanceType:a.wech?'Wechselschichtzulage §43':a.schi?'Schichtzulage §43':'keine aus Zeitlohnarten',p:p
+ };
 }
 function renderReportDetails(rep,forecast){
  var box=$('reportDetails');if(!box)return;var rows=rep.rows.map(function(r){var q=(Number(r.qty)||0).toFixed(2).replace('.',',');return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(r.description)+'</span></span><span class="v">'+q+' h</span></div>';}).join('');
@@ -281,12 +331,14 @@ function renderReportDetails(rep,forecast){
  if($('pBrutto'))$('pBrutto').textContent=eur(forecast.taxableGross);
  if($('pNettoBasis'))$('pNettoBasis').textContent=eur(forecast.netBase);
  if($('pProtected'))$('pProtected').textContent=eur(forecast.protected);
+ if($('pBaseNet'))$('pBaseNet').textContent=eur(forecast.baseLegalNet);
+ if($('pVariableNet'))$('pVariableNet').textContent=eur(forecast.taxableExtraNet);
  if($('pPfNetto'))$('pPfNetto').textContent=eur(forecast.estimatedPfNet);
  if($('pGarnish'))$('pGarnish').textContent=eur(forecast.garnish);
  if($('pPayout'))$('pPayout').textContent=eur(forecast.payout);
  if($('pShiftAllowance'))$('pShiftAllowance').textContent=forecast.shiftAllowance?eur(forecast.shiftAllowance)+' · '+forecast.allowanceType:forecast.allowanceType;
- if($('pSurcharges'))$('pSurcharges').textContent=eur(forecast.protected+forecast.p.saturdayPay);
- if($('pShiftSummary'))$('pShiftSummary').textContent=forecast.p.nightHours.toFixed(2)+' h Nacht · '+forecast.p.sunHours.toFixed(2)+' h Sonntag · '+forecast.p.saturdayHours.toFixed(2)+' h Samstag · geschützte Zuschläge '+eur(forecast.protected);
+ if($('pSurcharges'))$('pSurcharges').textContent=eur(forecast.protected+forecast.p.saturdayPay+forecast.averagePay);
+ if($('pShiftSummary'))$('pShiftSummary').textContent=forecast.p.nightHours.toFixed(2)+' h Nacht · '+forecast.p.sunHours.toFixed(2)+' h Sonntag · '+forecast.p.saturdayHours.toFixed(2)+' h Samstag · Ø §21 '+forecast.averageUnits.toFixed(2)+' · geschützte Zuschläge '+eur(forecast.protected);
 }
 function renderForecastTable(){
  var box=$('forecastTableWrap');if(!box)return;var arr=reportStore.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);});if(!arr.length){box.innerHTML='<div class="empty">Noch kein Zeitnachweis eingelesen.</div>';return;}
