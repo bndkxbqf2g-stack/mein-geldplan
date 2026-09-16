@@ -66,12 +66,19 @@ function regularWithdrawalSuggested(available){
  return payDays>0?Math.max(0,available/payDays*Math.min(7,payDays)):Math.max(0,available);
 }
 var DEFAULT_FIX=[
- {id:"urlaub",name:"Urlaubssparen",amount:60},
- {id:"apple",name:"Apple Speicher",amount:1},
- {id:"bank",name:"Kontoführung",amount:6},
- {id:"weitere",name:"Weitere Fixkosten",amount:2089}
+ {id:"steffi754",name:"Stefanie Wölling",amount:754},
+ {id:"lk1",name:"Landkreis Main-Spessart",amount:456.50},
+ {id:"lk2",name:"Landkreis Main-Spessart",amount:456.50},
+ {id:"steffi100",name:"Stefanie Wölling",amount:100},
+ {id:"steffi60a",name:"Stefanie Wölling",amount:60},
+ {id:"steffi60b",name:"Stefanie Wölling",amount:60},
+ {id:"lebensmittel",name:"Lebensmittel",amount:200},
+ {id:"d-ticket",name:"D-Ticket",amount:63},
+ {id:"konto",name:"Konto",amount:6},
+ {id:"apple",name:"Apple Speicher",amount:0.99}
 ];
-function fixItems(){try{var a=JSON.parse(localStorage.getItem("meinGeldplanFixItems")||"");if(Array.isArray(a)&&a.length)return a;}catch(e){}return DEFAULT_FIX.map(function(x){return {id:x.id,name:x.name,amount:x.amount};});}
+function sameOldDefault(a){return Array.isArray(a)&&a.length===4&&Number(a[0].amount)===60&&String(a[1].name)==="Apple Speicher"&&Number(a[1].amount)===1&&String(a[2].name)==="Kontoführung"&&Number(a[2].amount)===6&&Number(a[3].amount)===2089;}
+function fixItems(){try{var raw=localStorage.getItem("meinGeldplanFixItems");var a=raw?JSON.parse(raw):null;if(sameOldDefault(a)){var migrated=DEFAULT_FIX.map(function(x){return {id:x.id,name:x.name,amount:x.amount};});saveFixItems(migrated);return migrated;}if(Array.isArray(a)&&a.length)return a;}catch(e){}return DEFAULT_FIX.map(function(x){return {id:x.id,name:x.name,amount:x.amount};});}
 function saveFixItems(a){try{localStorage.setItem("meinGeldplanFixItems",JSON.stringify(a));}catch(e){}}
 function fixTotal(){return fixItems().reduce(function(s,x){return s+(Number(x.amount)||0);},0);}
 function renderFixItems(){var box=$("fixItems");if(!box)return;var a=fixItems();box.innerHTML="";a.forEach(function(item,idx){var wrap=document.createElement("div");wrap.className="fix-item";wrap.innerHTML='<input class="fix-name" data-idx="'+idx+'" type="text" value="'+String(item.name).replace(/&/g,"&amp;").replace(/"/g,"&quot;")+'"><input class="fix-amount" data-idx="'+idx+'" type="number" step=".01" min="0" value="'+(Number(item.amount)||0).toFixed(2)+'"><button type="button" class="removeFix" data-idx="'+idx+'">×</button>';box.appendChild(wrap);});
