@@ -30,14 +30,14 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 .badge{display:inline-block;padding:6px 9px;background:#f0f0f2;border-radius:999px;font-size:12px;margin:2px 4px 2px 0}
 .note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
 .primary{width:100%;border:0;background:#111;color:#fff;padding:14px;border-radius:13px;font-size:16px;font-weight:700}
-.hidden{display:none}
+.fix-item{display:grid;grid-template-columns:1fr 120px 42px;gap:8px;align-items:center;margin:8px 0}.fix-item input{min-width:0}.fix-item button{border:0;background:#f1f1f3;border-radius:12px;font-size:24px;height:48px}.hidden{display:none}
 @media(max-width:560px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
   <h1>Mein Geldplan</h1>
-  <div class="sub">Girokonto · Budget · Gehaltsprognose · Urlaub</div>
+  <div class="sub">Girokonto · Budget · Gehaltsprognose</div>
 </header>
 
 
@@ -68,11 +68,11 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 <section>
 <h2>Fixkosten</h2>
-<div class="grid">
-<div><label>Monatliche Fixkosten (€)</label><input id="monthlyFix" type="number" step=".01" value="2156.00"></div>
-</div>
-<div class="row"><span><b>Verfügbar im aktuellen Budget</b></span><span class="v big good" id="afterFixAvailable">–</span></div>
-<div class="note">Die 2.156 € werden automatisch nur beim Button „Lohn buchen“ einmal pro Lohnmonat abgezogen. Normale Zahlungseingänge lösen keinen Fixkostenabzug aus.</div>
+<div id="fixItems"></div>
+<button class="primary" style="margin-top:10px;background:#f1f1f3;color:#111" id="addFixBtn">+ Fixkosten hinzufügen</button>
+<div class="row" style="margin-top:10px"><span><b>Gesamte monatliche Fixkosten</b></span><span class="v big" id="fixTotal">–</span></div>
+<div class="row"><span>Verfügbar nach Fixkosten</span><span class="v" id="afterFixAvailable">–</span></div>
+<div class="note">Jede Position ist sichtbar und änderbar. Die Summe wird beim „Lohn buchen“ automatisch einmal je Lohnzyklus vom Giro abgezogen.</div>
 </section>
 
 <section>
@@ -89,7 +89,13 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <div><label>Kontostand korrigieren auf (€)</label><input id="giroCorrection" type="number" step=".01" placeholder="z. B. 153,30"></div>
 </div>
 <button class="primary" style="margin-top:8px;background:#f1f1f3;color:#111" id="correctionBtn">Kontostand korrigieren</button>
-<div class="note">Alle Ausgaben, auch Sonderausgaben wie Tanken oder Ausgaben für die Kinder, werden hier gebucht. Den Lohn buchst du ausschließlich über „Lohn buchen“.</div>
+<div class="note">Alle zusätzlichen Ausgaben werden hier gebucht. Der Lohn wird ausschließlich über „Lohn buchen“ gebucht.</div>
+</section>
+
+<section>
+<h2>Zusätzliche Ausgaben – laufender Lohnzyklus</h2>
+<div id="cycleExpenseList"></div>
+<div class="note">Diese Liste zeigt nur zusätzliche Ausgaben des aktuellen Lohnzyklus. Mit dem nächsten Lohn beginnt automatisch eine neue Liste; ältere Buchungen bleiben für den Kontostand erhalten.</div>
 </section>
 
 <section>
@@ -102,6 +108,8 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 </div>
 <button class="primary" style="margin-top:12px" id="withdrawBtn">Abheben & buchen</button>
 <div class="row"><span>Girokonto nach Abhebung</span><span class="v" id="sAfter">–</span></div>
+<div class="row"><span>Nächste Abhebung</span><span class="v" id="nextWithdrawalDate">–</span></div>
+<div class="row"><span>Tage bis nächste Abhebung</span><span class="v" id="withdrawalDays">–</span></div>
 <div class="note">Du entscheidest selbst, wie viel du sonntags abhebst. Die Summe wird vom Giro abgezogen und zum Bargeldbestand addiert. Nach einer Abhebung startet der nächste 7-Tage-Abhebungszeitraum. Die Abhebung am Lohntag wird bis zum folgenden Sonntag anteilig berechnet; danach gilt jeweils eine volle Woche. Das Bargeld bleibt separat.</div>
 </section>
 
@@ -176,6 +184,6 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 
 
-<script src="app.js?v=23"></script>
+<script src="app.js?v=24"></script>
 
 </body></html>
