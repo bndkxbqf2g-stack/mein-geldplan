@@ -22,7 +22,7 @@ function cashBalance(){try{var v=parseFloat(localStorage.getItem("meinGeldplanCa
 function saveCash(v){try{localStorage.setItem("meinGeldplanCash",String(Math.max(0,Number(v)||0)));}catch(e){}}
 function lastWithdrawalDate(){var a=txs().filter(function(t){return t.type==="withdrawal";});if(!a.length)return null;var x=a[a.length-1];return x.date||null;}
 function weeklyInfo(){var a=txs().filter(function(t){return t.type==="withdrawal";});if(!a.length)return null;var x=a[a.length-1],start=new Date((x.date||dateKey(new Date()))+"T00:00:00"),today=new Date(dateKey(new Date())+"T00:00:00"),elapsed=Math.floor((today-start)/86400000);if(elapsed<0||elapsed>=7)return null;return {start:start,days:7-elapsed};}
-function daysUntilNextPayOrSeven(){var w=weeklyInfo();return w?w.days:cycleDays();}
+function daysUntilNextPayOrSeven(){var w=weeklyInfo();return w?w.days:7;}
 function bookTransaction(amount,text,type,meta){var a=txs();var t={id:Date.now()+Math.random(),type:type,amount:amount,date:dateKey(new Date()),text:text};if(meta)Object.keys(meta).forEach(function(k){t[k]=meta[k];});a.push(t);saveTx(a);}
 
 function updateBudget(){
@@ -35,7 +35,7 @@ function updateBudget(){
   // Das Budget für Tagessatz und Wochensatz basiert ausschließlich auf dem aktuellen Girokonto-Guthaben.
   // Nach einer Abhebung beginnt ein neuer 7-Tage-Zeitraum; innerhalb dieses
   // Zeitraums werden die verbleibenden Tage bis zum Ende der Woche angezeigt.
-  var days=Math.max(1, cycleDays()-(weekly?weekly.days:7));
+  var days=weekly?weekly.days:7;
   // Tagessatz/Wochensatz basieren ausschließlich auf dem aktuell verfügbaren Girokonto-Guthaben.
   var basis=giro;
   if($("mainGiro"))$("mainGiro").textContent=eur(giro);
@@ -47,7 +47,7 @@ function updateBudget(){
   if($("mainDay"))$("mainDay").textContent=eur(day);
   if($("mainWeek"))$("mainWeek").textContent=eur(week);
   if($("afterFixAvailable"))$("afterFixAvailable").textContent=eur(available);
-  if($("budgetNote")){if(weekly){var wd=lastWithdrawalDate();$("budgetNote").textContent="Bargeld deckt die verbleibenden "+weekly.days+" Tage des 7-Tage-Abhebungszeitraums ab. Das Girokonto wird für die danach verbleibenden "+days+" Tage bis zum Lohn verteilt.";}else{$("budgetNote").textContent="Das Bargeld ist für 7 Tage reserviert. Das Girokonto wird für die danach verbleibenden "+days+" Tage bis zum Lohn verteilt.";}}
+  if($("budgetNote")){if(weekly){var wd=lastWithdrawalDate();$("budgetNote").textContent="Neue Wochenperiode seit "+wd.split("-").reverse().join(".")+". Die ersten 7 Tage sind durch das Bargeld abgedeckt. Für die verbleibenden "+days+" Tage wird nur das Girokonto verteilt.";}else{$("budgetNote").textContent="Ohne laufende Abhebungswoche rechnet die App bis zum nächsten Lohn mit dem Girokonto.";}}
 }
 function renderTx(){
   var list=$("giroTxList");if(!list)return;list.innerHTML="";
@@ -112,8 +112,9 @@ function calcForecast(){
   if($("pSurcharges"))$("pSurcharges").textContent=eur(protectedPay);
   if($("pShiftSummary"))$("pShiftSummary").textContent=nightHours.toFixed(2)+" h Nacht · "+sunHours.toFixed(2)+" h Sonntag · "+eur(saturdayPay)+" Samstag";
 }
+function correctGiro(){var target=num("giroCorrection");if(target<0){alert("Bitte einen gültigen Kontostand eingeben.");return;}var current=currentGiro(),delta=target-current;if(Math.abs(delta)<0.005){$("giroCorrection").value="";alert("Der Kontostand entspricht bereits dem eingegebenen Wert.");return;}bookTransaction(delta,"Kontostand korrigiert","correction",{target:target});$("giroCorrection").value="";refresh();}
 function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchungen löschen?"))return;localStorage.removeItem("meinGeldplanGiroTx");localStorage.removeItem("meinGeldplanCash");location.reload();}
-function refresh(){renderTx();updateBudget();sunday();if($("giroCurrent"))$("giroCurrent").textContent=eur(currentGiro());calcForecast();calcSparen();}
+function refresh(){renderTx();updateBudget();sunday();if($("giroCurrent"))$("giroCurrent").textContent=eur(currentGiro());calcForecast();}
 function setDefaultMonth(){if($("pMonth")&&!$("pMonth").value){var d=new Date();$("pMonth").value=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}}
 function init(){
  ensureBase();setDefaultMonth();if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);
@@ -122,6 +123,7 @@ function init(){
  if($("withdrawBtn"))$("withdrawBtn").onclick=withdraw;
  if($("salaryBtn"))$("salaryBtn").onclick=addSalary;
  if($("resetBtn"))$("resetBtn").onclick=resetApp;
+ if($("correctionBtn"))$("correctionBtn").onclick=correctGiro;
  document.querySelectorAll("input,select").forEach(function(el){el.addEventListener("input",refresh);el.addEventListener("change",refresh);});
  document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});b.classList.add("active");document.querySelectorAll(".view").forEach(function(v){v.classList.add("hidden")});var t=b.dataset.tab;if($(t))$(t).classList.remove("hidden");});});
  refresh();setInterval(refresh,60000);document.addEventListener("visibilitychange",function(){if(!document.hidden)refresh();});

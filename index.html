@@ -45,7 +45,6 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <nav>
   <button class="tab active" data-tab="budget">Budget</button>
   <button class="tab" data-tab="prognose">Gehaltsprognose</button>
-  <button class="tab" data-tab="sparen">Sparen</button>
   <button class="tab" data-tab="einstellungen">Testen / Zurücksetzen</button>
 </nav>
 
@@ -86,6 +85,10 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <button class="primary" style="margin-top:12px" id="incomeBtn">Zahlungseingang buchen</button>
 <button class="primary" style="margin-top:8px;background:#f1f1f3;color:#111" id="expenseBtn">Ausgabe buchen</button>
 <div class="row"><span><b>Aktueller Kontostand</b></span><span class="v big good" id="giroCurrent">–</span></div>
+<div class="grid" style="margin-top:12px">
+<div><label>Kontostand korrigieren auf (€)</label><input id="giroCorrection" type="number" step=".01" placeholder="z. B. 153,30"></div>
+</div>
+<button class="primary" style="margin-top:8px;background:#f1f1f3;color:#111" id="correctionBtn">Kontostand korrigieren</button>
 <div class="note">Alle Ausgaben, auch Sonderausgaben wie Tanken oder Ausgaben für die Kinder, werden hier gebucht. Den Lohn buchst du ausschließlich über „Lohn buchen“.</div>
 </section>
 
@@ -157,42 +160,6 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 </section>
 </div>
 
-<!-- SPAREN -->
-<div id="sparen" class="view hidden">
-<section>
-<h2>Urlaubskonto</h2>
-<div class="grid">
-<div><label>Aktueller Stand (€)</label><input id="uStand" type="number" step=".01" value="345"></div>
-<div><label>Deine Monatsrate (€)</label><input id="uOwn" type="number" step=".01" value="60"></div>
-<div><label>Steffis Monatsrate (€)</label><input id="uSteffi" type="number" step=".01" value="60"></div>
-<div><label>Zusätzliche Monatsrate (€)</label><input id="uExtra" type="number" step=".01" value="0"></div>
-<div><label>Monate</label><input id="uMonths" type="number" step="1" value="12"></div>
-<div><label>Ziel (€)</label><input id="uGoal" type="number" step=".01" value="4000"></div>
-</div>
-<div class="row"><span>Gemeinsam pro Monat</span><span class="v" id="uMonth">–</span></div>
-<div class="row"><span>Prognose ohne Entnahmen</span><span class="v big good" id="uForecast">–</span></div>
-<div class="row"><span>Bis zum Ziel fehlen</span><span class="v" id="uMissing">–</span></div>
-</section>
-
-<section>
-<h2>Autokonto</h2>
-<div class="grid">
-<div><label>Aktueller Stand (€)</label><input id="aStand" type="number" step=".01" value="615.34"></div>
-<div><label>Monatliche Einzahlung (€)</label><input id="aRate" type="number" step=".01" value="0"></div>
-<div><label>Monate</label><input id="aMonths" type="number" step="1" value="12"></div>
-</div>
-<div class="row"><span>Prognose</span><span class="v big" id="aForecast">–</span></div>
-</section>
-
-<section>
-<h2>Persönlicher Überblick</h2>
-<div class="row"><span>Fixkosten</span><span class="v">2.156,00 €</span></div>
-<div class="row"><span>Ziel-Wochensatz</span><span class="v">120,00 €</span></div>
-<div class="row"><span>Urlaubskonto aktuell</span><span class="v">345,00 €</span></div>
-<div class="row"><span>Autokonto aktuell</span><span class="v">615,34 €</span></div>
-</section>
-</div>
-
 <!-- EINSTELLUNGEN / RESET -->
 <div id="einstellungen" class="view hidden">
 <section>
@@ -209,6 +176,6 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 
 
-<script src="app.js?v=15"></script>
+<script src="app.js?v=16"></script>
 
 </body></html>
