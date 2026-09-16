@@ -1,4 +1,4 @@
-# Mein Geldplan v26
+# Mein Geldplan v27
 
 PWA für Budgetplanung mit getrenntem Giro- und Bargeldbestand, Lohnbuchung, Fixkosten, Lohnzyklus und Gehaltsprognose.
 
@@ -10,3 +10,10 @@ Budgetlogik:
 - Bargeld wird nur erfasst und zum verfügbaren Vermögen addiert.
 - Tatsächliche Abhebung ist frei wählbar; sie wird vom Giro abgezogen und zum Bargeld addiert.
 - Lohn wird am letzten Bank-/Werktag des Monats angesetzt; beim Lohnbuchen werden die gespeicherten Fixkosten einmal je Lohnzyklus abgezogen.
+
+
+Neu in v27:
+- Dienstplan-Screenshot hochladen und per OCR analysieren.
+- Rote Früh-/Spät-/Nachtdienste werden erkannt und vor der Übernahme als Prüfliste angezeigt.
+- Nach Bestätigung werden die erkannten Dienste in die Gehaltsprognose übernommen.
+- Die OCR-Komponente wird beim ersten Aufruf über das Internet geladen.
