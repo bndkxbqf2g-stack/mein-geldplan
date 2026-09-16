@@ -14,6 +14,6 @@ Budgetlogik:
 
 Neu in v27:
 - Dienstplan-Screenshot hochladen und per OCR analysieren.
-- Rote Früh-/Spät-/Nachtdienste werden erkannt und vor der Übernahme als Prüfliste angezeigt.
+- Die OCR sucht gezielt nach „Früh“, „Spät“ und „Nacht“ und ordnet gefundene rote Dienstbegriffe den Kalendertagen zu; vor der Übernahme erscheint eine Prüfliste.
 - Nach Bestätigung werden die erkannten Dienste in die Gehaltsprognose übernommen.
 - Die OCR-Komponente wird beim ersten Aufruf über das Internet geladen.

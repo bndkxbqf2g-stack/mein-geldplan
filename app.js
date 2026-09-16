@@ -130,28 +130,87 @@ function tariffHour(){return 24.21;}
 
 var pendingScan=[];
 function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function scanWordType(txt){var t=String(txt||'').toLowerCase().replace(/[\[\]{}|:;,.!?]/g,'');if(/nachtdien|nachtdi|nachtd|nacht/.test(t))return 'ND';if(/spätdien|spaetdien|spätdi|spaetdi|spatdien|spatdi|spat/.test(t))return 'SD';if(/frühdien|fruehdien|frühdi|fruehdi|frundien|fruhdien|früh/.test(t))return 'FD';return null;}
-function makeRedMask(src){var c=document.createElement('canvas');c.width=src.width;c.height=src.height;var x=c.getContext('2d'),im=x.createImageData(src.width,src.height),ctx=src.getContext('2d'),d=ctx.getImageData(0,0,src.width,src.height).data,o=im.data;for(var i=0;i<d.length;i+=4){var r=d[i],g=d[i+1],b=d[i+2];var red=(r>135&&r>g*1.18&&r>b*1.12);var j=i;o[j]=red?0:255;o[j+1]=red?0:255;o[j+2]=red?0:255;o[j+3]=255;}x.putImageData(im,0,0);return c;}
-function numericDateWords(words,year,month){return words.filter(function(w){var tx=String(w.text||'').trim().replace(/[^0-9]/g,'');var n=Number(tx);var b=w.bbox||{};var h=(b.y1-b.y0);return /^\d{1,2}$/.test(tx)&&n>=1&&n<=31&&b.y0>335&&b.y0<1045&&h<=24;}).map(function(w){var tx=String(w.text||'').trim().replace(/[^0-9]/g,'');return {n:Number(tx),bbox:w.bbox,conf:w.confidence||0};});}
+function scanWordType(txt){
+ var t=String(txt||'').toLowerCase().trim()
+   .replace(/[\[\]{}|:;,.!?]/g,'')
+   .replace(/ä/g,'ä').replace(/ö/g,'ö').replace(/ü/g,'ü');
+ // Deliberately target the short, unambiguous calendar labels.
+ if(/^(nacht|nachtd|nachtdi|nachtdien|nachtdienst)$/.test(t) || /\bnacht\b/.test(t))return 'ND';
+ if(/^(spät|spaet|spätd|spaetd|spätdi|spaetdi|spätad|spatd|spatdi|spätser|spaetser)$/.test(t) || /\bspät\b/.test(t) || /\bspaet\b/.test(t))return 'SD';
+ if(/^(früh|frueh|frühd|fruehd|frühdi|fruehdi)$/.test(t) || /\bfrüh\b/.test(t) || /\bfrueh\b/.test(t))return 'FD';
+ return null;
+}
+function makeRedMask(src){
+ var c=document.createElement('canvas');c.width=src.width;c.height=src.height;
+ var x=c.getContext('2d'),im=x.createImageData(src.width,src.height),ctx=src.getContext('2d'),d=ctx.getImageData(0,0,src.width,src.height).data,o=im.data;
+ for(var i=0;i<d.length;i+=4){
+   var r=d[i],g=d[i+1],b=d[i+2];
+   // Keep white/light text on red event chips, suppress the red background.
+   var red=(r>125&&r>g*1.10&&r>b*1.08);
+   var light=(r>175&&g>175&&b>175);
+   var j=i;
+   if(red){o[j]=0;o[j+1]=0;o[j+2]=0;o[j+3]=255;}
+   else if(light){o[j]=255;o[j+1]=255;o[j+2]=255;o[j+3]=255;}
+   else{o[j]=255;o[j+1]=255;o[j+2]=255;o[j+3]=255;}
+ }
+ x.putImageData(im,0,0);return c;
+}
+function numericDateWords(words,year,month){
+ return words.filter(function(w){
+   var tx=String(w.text||'').trim().replace(/[^0-9]/g,'');var n=Number(tx);var b=w.bbox||{};
+   var h=(b.y1-b.y0);return /^\d{1,2}$/.test(tx)&&n>=1&&n<=31&&b.y0>300&&b.y0<1100&&h<=34;
+ }).map(function(w){var tx=String(w.text||'').trim().replace(/[^0-9]/g,'');return {n:Number(tx),bbox:w.bbox,conf:w.confidence||0};});
+}
 function dateForNumber(n,year,month){var d=new Date(year,month,n);return d.getMonth()===month&&d.getDate()===n?d:null;}
-function nearestDateForService(box,dateWords){var cx=(box.x0+box.x1)/2,cy=(box.y0+box.y1)/2,best=null;dateWords.forEach(function(w){var wx=(w.bbox.x0+w.bbox.x1)/2,wy=(w.bbox.y0+w.bbox.y1)/2;if(wy>cy+8||cy-wy>115)return;if(Math.abs(wx-cx)>100)return;var score=(cy-wy)+Math.abs(wx-cx)*1.6;if(!best||score<best.score)best={w:w,score:score};});return best?best.w:null;}
+function nearestDateForService(box,dateWords){
+ var cx=(box.x0+box.x1)/2,cy=(box.y0+box.y1)/2,best=null;
+ dateWords.forEach(function(w){
+   var wx=(w.bbox.x0+w.bbox.x1)/2,wy=(w.bbox.y0+w.bbox.y1)/2;
+   var dy=Math.abs(cy-wy),dx=Math.abs(cx-wx);
+   if(dy>150||dx>150)return;
+   // Prefer same calendar week row and nearby column; vertical distance is primary.
+   var score=dy*1.0+dx*0.75;
+   if(!best||score<best.score)best={w:w,score:score};
+ });
+ return best?best.w:null;
+}
 async function scanSchedule(){
- var file=$('shiftImage')&&$('shiftImage').files[0],status=$('scanStatus');if(!file){alert('Bitte zuerst einen Screenshot auswählen.');return;}if(!window.Tesseract){alert('OCR-Modul konnte nicht geladen werden. Bitte Internetverbindung prüfen und die Seite neu laden.');return;}
- var mVal=$('scanMonth').value||'2026-10',parts=mVal.split('-'),year=Number(parts[0]),month=Number(parts[1])-1;status.textContent='Screenshot wird analysiert … beim ersten Mal werden die OCR-Daten geladen.';$('scanBtn').disabled=true;
+ var file=$('shiftImage')&&$('shiftImage').files[0],status=$('scanStatus');
+ if(!file){alert('Bitte zuerst einen Screenshot auswählen.');return;}
+ if(!window.Tesseract){alert('OCR-Modul konnte nicht geladen werden. Bitte Internetverbindung prüfen und die Seite neu laden.');return;}
+ var mVal=$('scanMonth').value||'2026-10',parts=mVal.split('-'),year=Number(parts[0]),month=Number(parts[1])-1;
+ status.textContent='Screenshot wird analysiert … gesucht wird gezielt nach „Früh“, „Spät“ und „Nacht“.';$('scanBtn').disabled=true;
  try{
-  var img=await createImageBitmap(file),maxW=1600,scale=Math.min(1,maxW/img.width),canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);var ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  var worker=await Tesseract.createWorker('deu');
-  var orig=await worker.recognize(canvas,{rotateAuto:true});
-  var redCanvas=makeRedMask(canvas);var red=await worker.recognize(redCanvas,{rotateAuto:true});await worker.terminate();
-  var ow=(orig.data.words||[]).filter(function(w){return w.text&&w.bbox;});
-  var rw=(red.data.words||[]).filter(function(w){return w.text&&w.bbox;});
-  var dates=numericDateWords(ow,year,month);
-  // Add date numbers from red OCR only when not already represented nearby.
-  numericDateWords(rw,year,month).forEach(function(w){var exists=dates.some(function(d){return d.n===w.n&&Math.abs(((d.bbox.x0+d.bbox.x1)-(w.bbox.x0+w.bbox.x1))/2)<30&&Math.abs(((d.bbox.y0+d.bbox.y1)-(w.bbox.y0+w.bbox.y1))/2)<35;});if(!exists)dates.push(w);});
-  var candidates=[];
-  rw.forEach(function(w){var typ=scanWordType(w.text);if(!typ)return;var conf=Number(w.confidence)||0;if(conf<12)return;var dw=nearestDateForService(w.bbox,dates);if(!dw)return;var dt=dateForNumber(dw.n,year,month);if(!dt)return;candidates.push({date:dateKey(dt),type:typ,label:String(w.text||''),confidence:Math.round(conf),x:(w.bbox.x0+w.bbox.x1)/2,y:(w.bbox.y0+w.bbox.y1)/2});});
-  var map={};candidates.forEach(function(c){var k=c.date+'|'+c.type;if(!map[k]||c.confidence>map[k].confidence)map[k]=c;});
-  pendingScan=Object.values(map).sort(function(a,b){return a.date.localeCompare(b.date)||a.type.localeCompare(b.type);});renderScanResults();status.textContent=pendingScan.length?'Erkennung abgeschlossen. Prüfe die Liste und übernimm sie erst danach.':'Keine eindeutigen roten Dienst-Einträge erkannt. Bitte Dienste manuell eintragen.';
+   var img=await createImageBitmap(file),maxW=2200,scale=Math.min(1,maxW/img.width),canvas=document.createElement('canvas');
+   canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+   var ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
+   var worker=await Tesseract.createWorker('deu');
+   var orig=await worker.recognize(canvas,{rotateAuto:true});
+   var redCanvas=makeRedMask(canvas);
+   var red=await worker.recognize(redCanvas,{rotateAuto:true});
+   await worker.terminate();
+   var ow=(orig.data.words||[]).filter(function(w){return w.text&&w.bbox;});
+   var rw=(red.data.words||[]).filter(function(w){return w.text&&w.bbox;});
+   var dates=numericDateWords(ow,year,month);
+   numericDateWords(rw,year,month).forEach(function(w){
+     var exists=dates.some(function(d){return d.n===w.n&&Math.abs(((d.bbox.x0+d.bbox.x1)/2)-((w.bbox.x0+w.bbox.x1)/2))<40&&Math.abs(((d.bbox.y0+d.bbox.y1)/2)-((w.bbox.y0+w.bbox.y1)/2))<45;});
+     if(!exists)dates.push(w);
+   });
+   var pool=rw.concat(ow);
+   var candidates=[];
+   pool.forEach(function(w){
+     var typ=scanWordType(w.text);if(!typ)return;
+     var conf=Number(w.confidence)||0;if(conf<8)return;
+     var dw=nearestDateForService(w.bbox,dates);if(!dw)return;
+     var dt=dateForNumber(dw.n,year,month);if(!dt)return;
+     candidates.push({date:dateKey(dt),type:typ,label:String(w.text||''),confidence:Math.round(conf),x:(w.bbox.x0+w.bbox.x1)/2,y:(w.bbox.y0+w.bbox.y1)/2});
+   });
+   var map={};candidates.forEach(function(c){
+     var k=c.date+'|'+c.type;if(!map[k]||c.confidence>map[k].confidence)map[k]=c;
+   });
+   pendingScan=Object.values(map).sort(function(a,b){return a.date.localeCompare(b.date)||a.type.localeCompare(b.type);});
+   renderScanResults();
+   status.textContent=pendingScan.length?('Erkennung abgeschlossen: '+pendingScan.length+' mögliche Dienste. Bitte vor der Übernahme prüfen.'):'Keine eindeutigen Dienstbegriffe erkannt. Bitte die Dienste manuell eintragen.';
  }catch(e){console.error(e);status.textContent='Die automatische Analyse ist fehlgeschlagen. Du kannst die Dienste weiterhin manuell eingeben.';}
  $('scanBtn').disabled=false;
 }
