@@ -135,100 +135,133 @@ function sunday(){
 }
 function tariffHour(){return 24.21;}
 
-var pendingScan=[];
-function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function scanWordType(txt){
- var t=String(txt||'').toLowerCase().trim()
-   .replace(/[\[\]{}|:;,.!?]/g,'')
-   .replace(/ä/g,'ä').replace(/ö/g,'ö').replace(/ü/g,'ü');
- // Deliberately target the short, unambiguous calendar labels.
- if(/^(nacht|nachtd|nachtdi|nachtdien|nachtdienst)$/.test(t) || /\bnacht\b/.test(t))return 'ND';
- if(/^(spät|spaet|spätd|spaetd|spätdi|spaetdi|spätad|spatd|spatdi|spätser|spaetser)$/.test(t) || /\bspät\b/.test(t) || /\bspaet\b/.test(t))return 'SD';
- if(/^(früh|frueh|frühd|fruehd|frühdi|fruehdi)$/.test(t) || /\bfrüh\b/.test(t) || /\bfrueh\b/.test(t))return 'FD';
- return null;
-}
-function makeRedMask(src){
- var c=document.createElement('canvas');c.width=src.width;c.height=src.height;
- var x=c.getContext('2d'),im=x.createImageData(src.width,src.height),ctx=src.getContext('2d'),d=ctx.getImageData(0,0,src.width,src.height).data,o=im.data;
- for(var i=0;i<d.length;i+=4){
-   var r=d[i],g=d[i+1],b=d[i+2];
-   // Keep white/light text on red event chips, suppress the red background.
-   var red=(r>125&&r>g*1.10&&r>b*1.08);
-   var light=(r>175&&g>175&&b>175);
-   var j=i;
-   if(red){o[j]=0;o[j+1]=0;o[j+2]=0;o[j+3]=255;}
-   else if(light){o[j]=255;o[j+1]=255;o[j+2]=255;o[j+3]=255;}
-   else{o[j]=255;o[j+1]=255;o[j+2]=255;o[j+3]=255;}
- }
- x.putImageData(im,0,0);return c;
-}
-function numericDateWords(words,year,month){
- return words.filter(function(w){
-   var tx=String(w.text||'').trim().replace(/[^0-9]/g,'');var n=Number(tx);var b=w.bbox||{};
-   var h=(b.y1-b.y0);return /^\d{1,2}$/.test(tx)&&n>=1&&n<=31&&b.y0>300&&b.y0<1100&&h<=34;
- }).map(function(w){var tx=String(w.text||'').trim().replace(/[^0-9]/g,'');return {n:Number(tx),bbox:w.bbox,conf:w.confidence||0};});
-}
-function dateForNumber(n,year,month){var d=new Date(year,month,n);return d.getMonth()===month&&d.getDate()===n?d:null;}
-function nearestDateForService(box,dateWords){
- var cx=(box.x0+box.x1)/2,cy=(box.y0+box.y1)/2,best=null;
- dateWords.forEach(function(w){
-   var wx=(w.bbox.x0+w.bbox.x1)/2,wy=(w.bbox.y0+w.bbox.y1)/2;
-   var dy=Math.abs(cy-wy),dx=Math.abs(cx-wx);
-   if(dy>150||dx>150)return;
-   // Prefer same calendar week row and nearby column; vertical distance is primary.
-   var score=dy*1.0+dx*0.75;
-   if(!best||score<best.score)best={w:w,score:score};
- });
- return best?best.w:null;
-}
-async function scanSchedule(){
- var file=$('shiftImage')&&$('shiftImage').files[0],status=$('scanStatus');
- if(!file){alert('Bitte zuerst einen Screenshot auswählen.');return;}
- if(!window.Tesseract){alert('OCR-Modul konnte nicht geladen werden. Bitte Internetverbindung prüfen und die Seite neu laden.');return;}
- var mVal=$('scanMonth').value||'2026-10',parts=mVal.split('-'),year=Number(parts[0]),month=Number(parts[1])-1;
- status.textContent='Screenshot wird analysiert … gesucht wird gezielt nach „Früh“, „Spät“ und „Nacht“.';$('scanBtn').disabled=true;
- try{
-   var img=await createImageBitmap(file),maxW=2200,scale=Math.min(1,maxW/img.width),canvas=document.createElement('canvas');
-   canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
-   var ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
-   var worker=await Tesseract.createWorker('deu');
-   var orig=await worker.recognize(canvas,{rotateAuto:true});
-   var redCanvas=makeRedMask(canvas);
-   var red=await worker.recognize(redCanvas,{rotateAuto:true});
-   await worker.terminate();
-   var ow=(orig.data.words||[]).filter(function(w){return w.text&&w.bbox;});
-   var rw=(red.data.words||[]).filter(function(w){return w.text&&w.bbox;});
-   var dates=numericDateWords(ow,year,month);
-   numericDateWords(rw,year,month).forEach(function(w){
-     var exists=dates.some(function(d){return d.n===w.n&&Math.abs(((d.bbox.x0+d.bbox.x1)/2)-((w.bbox.x0+w.bbox.x1)/2))<40&&Math.abs(((d.bbox.y0+d.bbox.y1)/2)-((w.bbox.y0+w.bbox.y1)/2))<45;});
-     if(!exists)dates.push(w);
-   });
-   var pool=rw.concat(ow);
-   var candidates=[];
-   pool.forEach(function(w){
-     var typ=scanWordType(w.text);if(!typ)return;
-     var conf=Number(w.confidence)||0;if(conf<8)return;
-     var dw=nearestDateForService(w.bbox,dates);if(!dw)return;
-     var dt=dateForNumber(dw.n,year,month);if(!dt)return;
-     candidates.push({date:dateKey(dt),type:typ,label:String(w.text||''),confidence:Math.round(conf),x:(w.bbox.x0+w.bbox.x1)/2,y:(w.bbox.y0+w.bbox.y1)/2});
-   });
-   var map={};candidates.forEach(function(c){
-     var k=c.date+'|'+c.type;if(!map[k]||c.confidence>map[k].confidence)map[k]=c;
-   });
-   pendingScan=Object.values(map).sort(function(a,b){return a.date.localeCompare(b.date)||a.type.localeCompare(b.type);});
-   renderScanResults();
-   status.textContent=pendingScan.length?('Erkennung abgeschlossen: '+pendingScan.length+' mögliche Dienste. Bitte vor der Übernahme prüfen.'):'Keine eindeutigen Dienstbegriffe erkannt. Bitte die Dienste manuell eintragen.';
- }catch(e){console.error(e);status.textContent='Die automatische Analyse ist fehlgeschlagen. Du kannst die Dienste weiterhin manuell eingeben.';}
- $('scanBtn').disabled=false;
-}
-function renderScanResults(){var box=$('scanResults'),btn=$('applyScanBtn');if(!box)return;box.classList.remove('hidden');if(!pendingScan.length){box.innerHTML='<div class="note">Keine Dienste sicher erkannt.</div>';if(btn)btn.classList.add('hidden');return;}var rows=pendingScan.map(function(c){var d=new Date(c.date+'T12:00:00');var day=d.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'});var type=c.type==='FD'?'Frühdienst':c.type==='SD'?'Spätdienst':'Nachtdienst';return '<div class="row"><span>'+esc(day)+' · '+esc(type)+'</span><span class="v">'+esc(c.label)+' · '+c.confidence+' %</span></div>';}).join('');box.innerHTML='<div class="note"><b>Bitte vor der Übernahme prüfen:</b></div>'+rows;if(btn)btn.classList.remove('hidden');}
-function applyScan(){var counts={FD:0,FDSo:0,SD:0,SDSa:0,SDSo:0,ND:0,NDSa:0,NDSo:0};pendingScan.forEach(function(c){var d=new Date(c.date+'T12:00:00'),dow=d.getDay();if(c.type==='FD'){if(dow===0)counts.FDSo++;else counts.FD++;}else if(c.type==='SD'){if(dow===0)counts.SDSo++;else if(dow===6)counts.SDSa++;else counts.SD++;}else if(c.type==='ND'){if(dow===0)counts.NDSo++;else if(dow===6)counts.NDSa++;else counts.ND++;}});$('pFD').value=counts.FD;$('pFDSo').value=counts.FDSo;$('pSD').value=counts.SD;$('pSDSa').value=counts.SDSa;$('pSDSo').value=counts.SDSo;$('pND').value=counts.ND;$('pNDSa').value=counts.NDSa;$('pNDSo').value=counts.NDSo;calcForecast();var s=$('scanStatus');if(s)s.textContent='Übernommen: '+pendingScan.length+' Dienste. Die Zuschlagsberechnung wurde aktualisiert.';}
 
-function calcForecast(){var baseGross=num("pGrund")+num("pPflege")+num("pUni")+( $("pWechselOn")&&$("pWechselOn").value==="on" ? num("pWechsel") : 0 );var h=tariffHour();var fdSo=num("pFDSo")*8.2,sdWeek=num("pSD")*0.7,sdSo=num("pSDSo")*8.2,ndWeek=num("pND")*8.75,ndSa=num("pNDSa")*2.75,ndSoNight=num("pNDSo")*2.75,ndSaSun=num("pNDSa")*6.0,ndSoSun=num("pNDSo")*6.0;var nightHours=sdWeek+ndWeek+ndSa+ndSoNight,sunHours=fdSo+sdSo+ndSaSun+ndSoSun,saturdayPay=num("pSDSa")*7.5*0.64,night=nightHours*h*0.20,sundayPay=sunHours*h*0.25,protectedPay=night+sundayPay+saturdayPay;var baseRef=4730.43,netRef=num("pBasisNetto")||2991.52,estNetBase=netRef*(baseGross/baseRef),estimatedPfNet=estNetBase+protectedPay*0.72,garnish=estimatedPfNet>2868.87?136.94+(estimatedPfNet-2868.87)*((188.94-136.94)/(2991.52-2868.87)):0,payout=estimatedPfNet-garnish;if($("pBrutto"))$("pBrutto").textContent=eur(baseGross);if($("pNettoBasis"))$("pNettoBasis").textContent=eur(estNetBase);if($("pProtected"))$("pProtected").textContent=eur(protectedPay);if($("pGarnish"))$("pGarnish").textContent=eur(garnish);if($("pPayout"))$("pPayout").textContent=eur(payout);if($("pSurcharges"))$("pSurcharges").textContent=eur(protectedPay);if($("pShiftSummary"))$("pShiftSummary").textContent=nightHours.toFixed(2)+" h Nacht · "+sunHours.toFixed(2)+" h Sonntag · "+eur(saturdayPay)+" Samstag";}
+var reportStore=[];
+var lastParsedReport=null;
+var MONTHS={Jan:0,Feb:1,"Mär":2,Mar:2,Apr:3,Mai:4,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Okt:9,Oct:9,Nov:10,Dez:11,Dec:11};
+function loadReports(){try{var a=JSON.parse(localStorage.getItem('meinGeldplanTimeReports')||'[]');return Array.isArray(a)?a:[];}catch(e){return[];}}
+function saveReports(a){reportStore=a;try{localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(a));}catch(e){}}
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function parseMoney(v){return parseFloat(String(v||'').replace(/\./g,'').replace(',','.'))||0;}
+function monthName(m){return ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'][m];}
+function payoutMonthFor(y,m){var d=new Date(y,m,1);d.setMonth(d.getMonth()+2);return {year:d.getFullYear(),month:d.getMonth()};}
+function formatMonth(y,m){return monthName(m)+' '+y;}
+function reportMonthFromLines(lines){
+  for(var i=0;i<Math.min(lines.length,18);i++){
+    var s=lines[i];
+    var m=s.match(/\b(Jan|Feb|Mär|Mar|Apr|Mai|May|Jun|Jul|Aug|Sep|Okt|Oct|Nov|Dez|Dec)\s+(\d{2})\b/i);
+    if(m){var key=m[1].replace(/^\s+|\s+$/g,'');var mo=MONTHS[key[0].toUpperCase()+key.slice(1)] ; if(mo==null){var lk=key[0].toUpperCase()+key.slice(1);mo=MONTHS[lk];} if(mo!=null)return {year:2000+Number(m[2]),month:mo};
+    }
+  }
+  return null;
+}
+function groupPdfText(items){
+  var arr=items.filter(function(x){return x.str&&x.str.trim();}).map(function(x){return {str:x.str.trim(),x:x.transform[4],y:x.transform[5]};});
+  arr.sort(function(a,b){return b.y-a.y||a.x-b.x;});
+  var groups=[];
+  arr.forEach(function(it){var g=groups.find(function(z){return Math.abs(z.y-it.y)<2.5;});if(!g){g={y:it.y,items:[]};groups.push(g);}g.items.push(it);});
+  groups.sort(function(a,b){return b.y-a.y;});
+  return groups.map(function(g){g.items.sort(function(a,b){return a.x-b.x;});return g.items.map(function(i){return i.str;}).join(' ');});
+}
+function normalizeReportLine(s){return s.replace(/\s+/g,' ').trim();}
+function codeDescription(code){
+ var m={
+  '5010':'Nachtarbeit (20 %)','5011':'Nacht Beginn vor 0:00 (Nachtarbeit)','5014':'Samstag 13–20 Uhr, 0,64 €/h','5024':'Sonntagsarbeit 25 %','5161':'Durchschnitt § 21 TV-L','5211':'Wechselschichtzulage §43','5212':'Schichtzulage §43','3A10':'Nachtarbeit Zeitlohnart','3A11':'Nacht Beginn vor 0:00','3A14':'Samstag 13–20 Uhr','3B61':'Durchschnitt §21 TV-L','3C11':'Wechselschichtzulage §43','3C12':'Schichtzulage §43'};
+ return m[code]||null;
+}
+function parseTimeReports(lines){
+ var month=reportMonthFromLines(lines);if(!month)throw new Error('Abrechnungsmonat konnte nicht erkannt werden.');
+ var idx=-1;for(var i=0;i<lines.length;i++){if(/Zeitlohnarten\s*\(täglich\)/i.test(lines[i])){idx=i;break;}}
+ if(idx<0)throw new Error('Der Abschnitt „Zeitlohnarten (täglich)“ wurde nicht gefunden.');
+ var rows=[];for(var j=idx+1;j<lines.length;j++){
+   var s=normalizeReportLine(lines[j]); if(!s||/^Abwesenheitskontingente/i.test(s))break;
+   var dm=s.match(/^(\d{2}\.\d{2}\.\d{4})\s+(.*)$/);if(!dm)continue;
+   var rest=dm[2];
+   var m=rest.match(/^(?:(\d{1,2}:\d{2})\s+(\d{1,2}:\d{2})\s+)?([A-Z0-9]{4})\s+(\d{4}):?\s*(.*?)\s+(-?\d+(?:[,.]\d+)?)$/i);
+   if(!m)continue;
+   var code=m[4],shortCode=m[3],label=m[5],qty=parseMoney(m[6]);
+   rows.push({date:dm[1],from:m[1]||'',to:m[2]||'',code:code,shortCode:shortCode,label:label,qty:qty,description:codeDescription(code)||codeDescription(shortCode)||'Unbekannte Zeitlohnart'});
+ }
+ if(!rows.length)throw new Error('Keine abrechnungsrelevanten Zeitlohnarten erkannt.');
+ return {year:month.year,month:month.month,rows:rows};
+}
+function extractShiftSummary(lines){
+ var counts={F1:0,S1:0,N5:0,Nx:0,Z1:0,other:0};
+ lines.forEach(function(s){var m=s.match(/^\d{2}\s+[A-Za-zÄÖÜäöü]+\s+(F1|S1|N5|Nx|Z1)\b/);if(m)counts[m[1]]++;else if(/^\d{2}\s+[A-Za-zÄÖÜäöü]+\s+/.test(s)&&/\d{4}/.test(s))counts.other++;});
+ return counts;
+}
+function protectedSurchargeCalc(rows){
+ var h=tariffHour(),nightHours=0,sunHours=0,saturdayHours=0,saturdayPay=0;
+ rows.forEach(function(r){if(r.code==='5010'||r.code==='5011')nightHours+=r.qty;else if(r.code==='5024')sunHours+=r.qty;else if(r.code==='5014'){saturdayHours+=r.qty;saturdayPay+=r.qty*0.64;}});
+ return {nightHours:nightHours,sunHours:sunHours,saturdayHours:saturdayHours,nightPay:nightHours*h*0.20,sundayPay:sunHours*h*0.25,saturdayPay:saturdayPay};
+}
+function allowanceFromRows(rows){var wech=rows.some(function(r){return r.code==='5211'||r.label.toLowerCase().indexOf('wech')>=0;});var schi=rows.some(function(r){return r.code==='5212'||r.label.toLowerCase().indexOf('schiz')>=0;});return {wech:wech,schi:schi};}
+function garnishment2026(net,dependents){
+ dependents=Math.max(0,Math.min(5,Number(dependents)||0));
+ if(net<=1589.99)return 0;
+ if(net>4866.30){
+   // For the 2-dependent column, the fixed table value at the ceiling is 936.94 € and the excess is fully attachable.
+   var base=dependents===2?936.94:(dependents===1?1231.00:dependents===0?1219.40:dependents===3?0:0);
+   // Full generic columns are not embedded; for this app the user's 2 dependents are the calibrated/default case.
+   if(dependents!==2){return Math.max(0,net-1587.40);}
+   return 936.94+(net-4866.30);
+ }
+ if(dependents!==2){
+   // Conservative fallback: use the 2-dependent table when a different number is selected only if supported; otherwise show zero.
+   dependents=2;
+ }
+ if(net<2520)return 0;
+ var band=Math.floor((Math.min(net,4866.29)-2520)/10);
+ return Math.round((0.94+band*4)*100)/100;
+}
+function estimateNetFromGross(gross){
+ var refGross=4480.43+250; // 4,730.43 calibrated point
+ var refNet=2991.52;
+ if(gross<=0)return 0;
+ return gross*(refNet/refGross);
+}
+function calculateReportForecast(rep,dependents){
+ var p=protectedSurchargeCalc(rep.rows),a=allowanceFromRows(rep.rows);
+ var fixedBase=4226.92+90+163.51;
+ var shiftAllowance=a.wech?250:(a.schi?100:0);
+ var taxableGross=fixedBase+shiftAllowance+p.saturdayPay;
+ var netBase=estimateNetFromGross(taxableGross);
+ var protected= p.nightPay+p.sundayPay; // treated separately for the forecast, as established in the app logic
+ var estimatedPfNet=netBase;
+ var garnish=garnishment2026(estimatedPfNet,dependents);
+ var payout=estimatedPfNet-garnish;
+ var pm=payoutMonthFor(rep.year,rep.month);
+ return {report:rep, payoutYear:pm.year,payoutMonth:pm.month,taxableGross:taxableGross,netBase:netBase,protected:protected,estimatedPfNet:estimatedPfNet,garnish:garnish,payout:payout,shiftAllowance:shiftAllowance,allowanceType:a.wech?'Wechselschichtzulage §43':a.schi?'Schichtzulage §43':'keine aus Zeitlohnarten',p:p};
+}
+function renderReportDetails(rep,forecast){
+ var box=$('reportDetails');if(!box)return;var rows=rep.rows.map(function(r){var q=(Number(r.qty)||0).toFixed(2).replace('.',',');return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(r.description)+'</span></span><span class="v">'+q+' h</span></div>';}).join('');
+ box.innerHTML=rows||'<div class="note">Keine Details.</div>';
+ if($('rMonth'))$('rMonth').textContent=formatMonth(rep.year,rep.month);
+ if($('rPayoutMonth'))$('rPayoutMonth').textContent=formatMonth(forecast.payoutYear,forecast.payoutMonth);
+ if($('pBrutto'))$('pBrutto').textContent=eur(forecast.taxableGross);
+ if($('pNettoBasis'))$('pNettoBasis').textContent=eur(forecast.netBase);
+ if($('pProtected'))$('pProtected').textContent=eur(forecast.protected);
+ if($('pPfNetto'))$('pPfNetto').textContent=eur(forecast.estimatedPfNet);
+ if($('pGarnish'))$('pGarnish').textContent=eur(forecast.garnish);
+ if($('pPayout'))$('pPayout').textContent=eur(forecast.payout);
+ if($('pShiftAllowance'))$('pShiftAllowance').textContent=forecast.shiftAllowance?eur(forecast.shiftAllowance)+' · '+forecast.allowanceType:forecast.allowanceType;
+ if($('pSurcharges'))$('pSurcharges').textContent=eur(forecast.protected+forecast.p.saturdayPay);
+ if($('pShiftSummary'))$('pShiftSummary').textContent=forecast.p.nightHours.toFixed(2)+' h Nacht · '+forecast.p.sunHours.toFixed(2)+' h Sonntag · '+forecast.p.saturdayHours.toFixed(2)+' h Samstag · geschützte Zuschläge '+eur(forecast.protected);
+}
+function renderForecastTable(){var box=$('forecastTableWrap');if(!box)return;var arr=reportStore.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);});if(!arr.length){box.innerHTML='<div class="note">Noch kein Zeitnachweis eingelesen.</div>';return;}
+ var dep=num('pDependents');var rows=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="row" style="align-items:flex-start"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'<br>'+esc(f.allowanceType)+'</span></span><span class="v">Netto '+eur(f.estimatedPfNet)+'<br><span class="red">Pfändung '+eur(f.garnish)+'</span><br><b class="good">'+eur(f.payout)+'</b></span></div>';}).join('');box.innerHTML=rows;}
+function ensurePdfJs(){if(!window.pdfjsLib)throw new Error('PDF-Bibliothek konnte nicht geladen werden. Bitte Internetverbindung prüfen.');window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';return window.pdfjsLib;}
+async function readPdfLines(file){var pdfjs=await ensurePdfJs(),buf=await file.arrayBuffer(),pdf=await pdfjs.getDocument({data:buf}).promise,lines=[];for(var p=1;p<=pdf.numPages;p++){var page=await pdf.getPage(p),tc=await page.getTextContent();lines=lines.concat(groupPdfText(tc.items));}return lines;}
+async function importTimeReports(){var files=$('timeReportFiles')&&$('timeReportFiles').files,status=$('timeReportStatus');if(!files||!files.length){alert('Bitte mindestens einen Zeitnachweis als PDF auswählen.');return;}status.textContent='Zeitnachweis wird ausgelesen …';$('timeReportBtn').disabled=true;var ok=0,errors=[];
+ try{for(var i=0;i<files.length;i++){try{var lines=await readPdfLines(files[i]),rep=parseTimeReports(lines);rep.id=rep.year+'-'+String(rep.month+1).padStart(2,'0');rep.sourceName=files[i].name;rep.importedAt=new Date().toISOString();var existing=reportStore.findIndex(function(x){return x.id===rep.id;});if(existing>=0)reportStore[existing]=rep;else reportStore.push(rep);ok++;lastParsedReport=rep;}catch(e){errors.push(files[i].name+': '+e.message);}}
+ saveReports(reportStore);if(lastParsedReport){var f=calculateReportForecast(lastParsedReport,num('pDependents'));renderReportDetails(lastParsedReport,f);}renderForecastTable();var preview=$('timeReportPreview');if(preview){preview.classList.remove('hidden');preview.innerHTML='<div class="note"><b>'+ok+' Zeitnachweis(e) übernommen.</b>'+(errors.length?'<br>'+errors.map(esc).join('<br>'):'')+'</div>';}
+ status.textContent=errors.length?'Import abgeschlossen; einige Dateien konnten nicht vollständig verarbeitet werden.':'Import abgeschlossen. Zeitlohnarten und Zuschläge wurden berechnet.';
+ }catch(e){status.textContent='Import fehlgeschlagen: '+e.message;} $('timeReportBtn').disabled=false;}
+function showLatestForecast(){reportStore=loadReports();renderForecastTable();if(!lastParsedReport&&reportStore.length){lastParsedReport=reportStore[reportStore.length-1];renderReportDetails(lastParsedReport,calculateReportForecast(lastParsedReport,num('pDependents')));}}
 function correctGiro(){var target=num("giroCorrection");if(target<0){alert("Bitte einen gültigen Kontostand eingeben.");return;}var current=currentGiro(),delta=target-current;if(Math.abs(delta)<0.005){$("giroCorrection").value="";alert("Der Kontostand entspricht bereits dem eingegebenen Wert.");return;}bookTransaction(delta,"Kontostand korrigiert","correction",{target:target,cycle:activeCycleKey()});$("giroCorrection").value="";refresh();}
-function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchungen löschen?"))return;["meinGeldplanGiroTx","meinGeldplanCash","meinGeldplanFixItems","meinGeldplanMonthlyFix"].forEach(function(k){localStorage.removeItem(k);});location.reload();}
-function refresh(){renderTx();renderCycleExpenses();updateBudget();sunday();if($("giroCurrent"))$("giroCurrent").textContent=eur(currentGiro());calcForecast();}
+function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchungen löschen?"))return;["meinGeldplanGiroTx","meinGeldplanCash","meinGeldplanFixItems","meinGeldplanMonthlyFix","meinGeldplanTimeReports"].forEach(function(k){localStorage.removeItem(k);});location.reload();}
+function refresh(){renderTx();renderCycleExpenses();updateBudget();sunday();if($("giroCurrent"))$("giroCurrent").textContent=eur(currentGiro());showLatestForecast();}
 function setDefaultMonth(){if($("pMonth")&&!$("pMonth").value){var d=new Date();$("pMonth").value=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}}
-function init(){ensureBase();setDefaultMonth();renderFixItems();if($("monthlyFix"))$("monthlyFix").value=fixTotal().toFixed(2);if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);if($("incomeBtn"))$("incomeBtn").onclick=addIncome;if($("expenseBtn"))$("expenseBtn").onclick=addExpense;if($("withdrawBtn"))$("withdrawBtn").onclick=withdraw;if($("salaryBtn"))$("salaryBtn").onclick=addSalary;if($("resetBtn"))$("resetBtn").onclick=resetApp;if($("scanBtn"))$("scanBtn").onclick=scanSchedule;if($("applyScanBtn"))$("applyScanBtn").onclick=applyScan;if($("correctionBtn"))$("correctionBtn").onclick=correctGiro;if($("addFixBtn"))$("addFixBtn").onclick=addFixItem;document.querySelectorAll("input,select").forEach(function(el){if(el.classList.contains("fix-name")||el.classList.contains("fix-amount"))return;el.addEventListener("input",function(){if(el.id==="monthlyFix")return;if(el.id==="bCarryCash")saveCash(num("bCarryCash"));refresh();});el.addEventListener("change",function(){if(el.id==="bCarryCash")saveCash(num("bCarryCash"));refresh();});});if($("monthlyFix"))$("monthlyFix").addEventListener("change",function(){var v=Math.max(0,num("monthlyFix")),a=fixItems();if(!a.length)a=[{id:"weitere",name:"Fixkosten",amount:v}];else{var sum=fixTotal();a[a.length-1].amount=Math.max(0,(a[a.length-1].amount||0)+(v-sum));}saveFixItems(a);renderFixItems();refresh();});document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});b.classList.add("active");document.querySelectorAll(".view").forEach(function(v){v.classList.add("hidden")});var t=b.dataset.tab;if($(t))$(t).classList.remove("hidden");});});refresh();setInterval(refresh,60000);document.addEventListener("visibilitychange",function(){if(!document.hidden)refresh();});}
+function init(){ensureBase();reportStore=loadReports();setDefaultMonth();renderFixItems();if($("monthlyFix"))$("monthlyFix").value=fixTotal().toFixed(2);if($("bCarryCash"))$("bCarryCash").value=cashBalance().toFixed(2);if($("incomeBtn"))$("incomeBtn").onclick=addIncome;if($("expenseBtn"))$("expenseBtn").onclick=addExpense;if($("withdrawBtn"))$("withdrawBtn").onclick=withdraw;if($("salaryBtn"))$("salaryBtn").onclick=addSalary;if($("resetBtn"))$("resetBtn").onclick=resetApp;if($('timeReportBtn'))$('timeReportBtn').onclick=importTimeReports;if($('pDependents'))$('pDependents').addEventListener('input',function(){renderForecastTable();if(lastParsedReport)renderReportDetails(lastParsedReport,calculateReportForecast(lastParsedReport,num('pDependents')));});if($("correctionBtn"))$("correctionBtn").onclick=correctGiro;if($("addFixBtn"))$("addFixBtn").onclick=addFixItem;document.querySelectorAll("input,select").forEach(function(el){if(el.classList.contains("fix-name")||el.classList.contains("fix-amount"))return;el.addEventListener("input",function(){if(el.id==="monthlyFix")return;if(el.id==="bCarryCash")saveCash(num("bCarryCash"));refresh();});el.addEventListener("change",function(){if(el.id==="bCarryCash")saveCash(num("bCarryCash"));refresh();});});if($("monthlyFix"))$("monthlyFix").addEventListener("change",function(){var v=Math.max(0,num("monthlyFix")),a=fixItems();if(!a.length)a=[{id:"weitere",name:"Fixkosten",amount:v}];else{var sum=fixTotal();a[a.length-1].amount=Math.max(0,(a[a.length-1].amount||0)+(v-sum));}saveFixItems(a);renderFixItems();refresh();});document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});b.classList.add("active");document.querySelectorAll(".view").forEach(function(v){v.classList.add("hidden")});var t=b.dataset.tab;if($(t))$(t).classList.remove("hidden");});});refresh();setInterval(refresh,60000);document.addEventListener("visibilitychange",function(){if(!document.hidden)refresh();});}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();

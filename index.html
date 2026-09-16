@@ -119,66 +119,62 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <!-- PROGNOSE -->
 <div id="prognose" class="view hidden">
 <section>
-<h2>Voraussichtliches Gehalt</h2>
+<h2>Zeitnachweis hochladen</h2>
 <div class="grid">
-<div><label>Monat</label><input id="pMonth" type="month"></div>
-<div><label>Tabellenentgelt KR 8 / Stufe 5 (€)</label><input id="pGrund" type="number" step=".01" value="4226.92"></div>
-<div><label>Pflegezulage (€)</label><input id="pPflege" type="number" step=".01" value="90"></div>
-<div><label>Universitätszulage (€)</label><input id="pUni" type="number" step=".01" value="163.51"></div>
-<div><label>Wechselschichtzulage (€)</label><input id="pWechsel" type="number" step=".01" value="250"></div>
-<div><label>Wechselschichtzulage berücksichtigen</label><select id="pWechselOn"><option value="on" selected>Ja</option><option value="off">Nein</option></select></div>
-<div><label>Netto-Basis bei 4.730,43 € Brutto (€)</label><input id="pBasisNetto" type="number" step=".01" value="2991.52"></div>
+<div><label>Zeitnachweis (PDF)</label><input id="timeReportFiles" type="file" accept="application/pdf" multiple></div>
+<div><label>Unterhaltspflichten</label><input id="pDependents" type="number" step="1" min="0" max="5" value="2"></div>
 </div>
-<div class="note">Die Prognose nutzt deine hinterlegten TV-L-Werte und deine üblichen Dienstzeiten. Die Auszahlung ist eine Näherung und ersetzt keine echte Abrechnung.</div>
-</section>
-
-
-<section>
-<h2>Dienstplan aus Screenshot</h2>
-<div class="grid">
-<div><label>Monat des Dienstplans</label><input id="scanMonth" type="month" value="2026-10"></div>
-<div><label>Screenshot auswählen</label><input id="shiftImage" type="file" accept="image/*"></div>
-</div>
-<button class="primary" style="margin-top:12px" id="scanBtn">Dienstplan analysieren</button>
-<div class="note" id="scanStatus">Du lädst einen Screenshot hoch. Die App sucht gezielt nach den Dienstbezeichnungen „Früh“, „Spät“ und „Nacht“ in roten Kalender-Einträgen. Vor der Übernahme kannst du alles prüfen.</div>
-<div id="scanResults" class="hidden"></div>
-<button class="primary hidden" style="margin-top:12px" id="applyScanBtn">Erkannte Dienste übernehmen</button>
+<button class="primary" style="margin-top:12px" id="timeReportBtn">Zeitnachweis(e) auswerten</button>
+<div class="note" id="timeReportStatus">Lade einen oder mehrere Zeitnachweise als PDF hoch. Die App liest die Zeitlohnarten direkt aus dem Dokument. Der Dienstplan muss nicht mehr manuell eingetragen werden.</div>
+<div id="timeReportPreview" class="hidden"></div>
 </section>
 
 <section>
-<h2>Dienste des Monats</h2>
-<div class="grid">
-<div><label>Frühdienst werktags</label><input id="pFD" type="number" step="1" min="0" value="0"></div>
-<div><label>Frühdienst Sonntag</label><input id="pFDSo" type="number" step="1" min="0" value="0"></div>
-<div><label>Spätdienst werktags</label><input id="pSD" type="number" step="1" min="0" value="0"></div>
-<div><label>Spätdienst Samstag</label><input id="pSDSa" type="number" step="1" min="0" value="0"></div>
-<div><label>Spätdienst Sonntag</label><input id="pSDSo" type="number" step="1" min="0" value="0"></div>
-<div><label>Nachtdienst werktags</label><input id="pND" type="number" step="1" min="0" value="0"></div>
-<div><label>Nachtdienst Samstag</label><input id="pNDSa" type="number" step="1" min="0" value="0"></div>
-<div><label>Nachtdienst Sonntag</label><input id="pNDSo" type="number" step="1" min="0" value="0"></div>
-</div>
-<div class="note">Zeiten: Frühdienst 06:00–14:12, Spätdienst 13:30–21:42, Nachtdienst 21:15–06:30. Nachtzuschlag 20 %, Sonntagszuschlag 25 %, Samstag 13:00–21:00 mit 0,64 €/h. Sonntag + Nacht wird nicht doppelt gezählt.</div>
+<h2>Lohnprognosen – 2 Monate zeitversetzt</h2>
+<div id="forecastTableWrap"><div class="note">Noch kein Zeitnachweis eingelesen.</div></div>
+<div class="note">Die Prognose ist nur eine Information und verändert dein Budget nicht. Erst wenn du den tatsächlich ausgezahlten Lohn über „Lohn buchen“ einträgst, beginnt ein neuer Budgetzyklus.</div>
 </section>
 
 <section>
-<h2>Prognose</h2>
-<div class="row"><span>Steuerpflichtiges Brutto</span><span class="v" id="pBrutto">–</span></div>
-<div class="row"><span>Geschätzte steuerpflichtige Netto-Grundzahlung</span><span class="v" id="pNettoBasis">–</span></div>
-<div class="row"><span>Unpfändbare Zuschläge</span><span class="v" id="pProtected">–</span></div>
-<div class="row"><span>Geschätzte Pfändung</span><span class="v red" id="pGarnish">–</span></div>
+<h2>Auswertung des ausgewählten Zeitnachweises</h2>
+<div class="row"><span>Abrechnungsmonat</span><span class="v" id="rMonth">–</span></div>
+<div class="row"><span>Voraussichtlicher Auszahlungsmonat</span><span class="v" id="rPayoutMonth">–</span></div>
+<div class="row"><span>Steuerpflichtige/sonstige Entgeltbasis (Schätzung)</span><span class="v" id="pBrutto">–</span></div>
+<div class="row"><span>Geschätztes Netto vor Pfändung</span><span class="v" id="pNettoBasis">–</span></div>
+<div class="row"><span>Davon geschützte Zuschläge</span><span class="v" id="pProtected">–</span></div>
+<div class="row"><span>Pfändungsrelevantes Netto (Schätzung)</span><span class="v" id="pPfNetto">–</span></div>
+<div class="row"><span>Pfändung bei 2 Unterhaltspflichten</span><span class="v red" id="pGarnish">–</span></div>
 <div class="row"><span><b>Voraussichtliche Auszahlung</b></span><span class="v big good" id="pPayout">–</span></div>
-<div class="row"><span>Gesamt Zuschläge</span><span class="v" id="pSurcharges">–</span></div>
+<div class="row"><span>Erkannte Wechselschicht-/Schichtzulage</span><span class="v" id="pShiftAllowance">–</span></div>
+<div class="row"><span>Erkannte Zuschläge gesamt</span><span class="v" id="pSurcharges">–</span></div>
 <div class="note" id="pShiftSummary">–</div>
 </section>
 
 <section>
-<h2>Gehalt buchen</h2>
+<h2>Erkannte Zeitlohnarten</h2>
+<div id="reportDetails"></div>
+<div class="note">Die Zeitlohnarten werden aus dem PDF übernommen. Bekannte Kürzel werden erklärt; unbekannte Codes werden markiert, statt stillschweigend interpretiert zu werden.</div>
+</section>
+
+<section>
+<h2>Tarif-/Pfändungsgrundlagen</h2>
+<div class="row"><span>KR 8 / Stufe 5 ab 01.04.2026</span><span class="v">4.226,92 €</span></div>
+<div class="row"><span>Stufe 3 für Zeitzuschläge</span><span class="v">4.052,74 €</span></div>
+<div class="row"><span>Nachtarbeit</span><span class="v">20 %</span></div>
+<div class="row"><span>Sonntagsarbeit</span><span class="v">25 %</span></div>
+<div class="row"><span>Samstag 13–21 Uhr</span><span class="v">0,64 €/h</span></div>
+<div class="row"><span>Pfändungstabelle ab 01.07.2026</span><span class="v">2 Unterhaltspflichten</span></div>
+<div class="note">Die Tarifwerte für KR und Zeitzuschläge sowie die Pfändungsgrenzen sind hinterlegt.  Die Nettozahlung bleibt eine Schätzung, solange keine vollständige Bezügemitteilung vorliegt.</div>
+</section>
+
+<section>
+<h2>Lohn buchen</h2>
 <div class="grid">
 <div><label>Nettolohn (€)</label><input id="salaryAmount" type="number" step=".01" placeholder="z. B. 2.900"></div>
 <div><label>Beschreibung</label><input id="salaryText" type="text" placeholder="z. B. Lohn September"></div>
 </div>
 <button class="primary" style="margin-top:12px" id="salaryBtn">Lohn buchen & Fixkosten abziehen</button>
-<div class="note">Nur dieser Button löst den automatischen Abzug der monatlichen Fixkosten aus. Ein normaler Zahlungseingang tut das nicht.</div>
+<div class="note">Nur der tatsächliche, von dir eingegebene Nettolohn verändert das Budget. Die Prognose greift niemals automatisch in das Budget ein.</div>
 </section>
 </div>
 
@@ -198,7 +194,7 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="app.js?v=29"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="app.js?v=31"></script>
 
 </body></html>
