@@ -45,6 +45,7 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <nav>
   <button class="tab active" data-tab="budget">Budget</button>
   <button class="tab" data-tab="prognose">Gehaltsprognose</button>
+  <button class="tab" data-tab="fixkosten">Fixkosten</button>
   <button class="tab" data-tab="einstellungen">Testen / Zurücksetzen</button>
 </nav>
 
@@ -64,14 +65,6 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <div class="row"><span><b>Tagessatz (nur Girokonto)</b></span><span class="v big good" id="mainDay">–</span></div>
 <div class="row"><span><b>Wochensatz (nur Girokonto)</b></span><span class="v big good" id="mainWeek">–</span></div>
 <div class="note" id="budgetNote">Budgettage zeigen den Zeitraum bis zur nächsten Abhebung am Sonntag. Nach einer Abhebung beziehen sich Tagessatz und Wochensatz auf das Giroguthaben und die verbleibenden Tage bis zum nächsten Lohn. Die erste Abhebung am Lohntag wird anteilig bis zum folgenden Sonntag berechnet.</div>
-</section>
-
-<section>
-<h2>Fixkosten</h2>
-<div id="fixItems"></div>
-<button class="primary" style="margin-top:10px;background:#f1f1f3;color:#111" id="addFixBtn">+ Fixkosten hinzufügen</button>
-<div class="row" style="margin-top:10px"><span><b>Gesamte monatliche Fixkosten</b></span><span class="v big" id="fixTotal">–</span></div>
-<div class="note">Jede Position ist sichtbar und änderbar. Die Summe wird beim „Lohn buchen“ automatisch einmal je Lohnzyklus vom Giro abgezogen.</div>
 </section>
 
 <section>
@@ -114,6 +107,17 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <div class="note">Du entscheidest selbst, wie viel du sonntags abhebst. Die Summe wird vom Giro abgezogen und zum Bargeldbestand addiert. Nach einer Abhebung startet der nächste 7-Tage-Abhebungszeitraum. Die Abhebung am Lohntag wird bis zum folgenden Sonntag anteilig berechnet; danach gilt jeweils eine volle Woche. Das Bargeld bleibt separat.</div>
 </section>
 
+</div>
+
+<!-- FIXKOSTEN -->
+<div id="fixkosten" class="view hidden">
+<section>
+<h2>Meine Fixkosten</h2>
+<div class="note" style="margin-bottom:10px">Hier verwaltest du deine festen monatlichen Ausgaben. Die Summe wird beim „Lohn buchen“ automatisch einmal je Lohnzyklus vom Girokonto abgezogen.</div>
+<div id="fixItems"></div>
+<button class="primary" style="margin-top:10px;background:#f1f1f3;color:#111" id="addFixBtn">+ Fixkosten hinzufügen</button>
+<div class="row" style="margin-top:12px"><span><b>Gesamte monatliche Fixkosten</b></span><span class="v big" id="fixTotal">–</span></div>
+</section>
 </div>
 
 <!-- PROGNOSE -->
@@ -195,6 +199,6 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="app.js?v=31"></script>
+<script src="app.js?v=32"></script>
 
 </body></html>
