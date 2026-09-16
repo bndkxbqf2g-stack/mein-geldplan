@@ -1,8 +1,12 @@
-# Mein Geldplan v25
+# Mein Geldplan v26
 
-Änderungen:
-- Budget-Engine als Lohnzyklus: Lohn am letzten Bank-/Werktag, erste Abhebung anteilig bis Sonntag, danach 7-Tage-Abhebungszeiträume.
-- Tagessatz/Wochensatz: ausschließlich aktuelles Giroguthaben geteilt durch Resttage bis zum nächsten Lohn; Wochensatz = Tagessatz × 7.
-- Fixkosten als einzeln sichtbare und änderbare Positionen mit automatisch berechneter Summe.
-- Zusätzliche Ausgaben werden dem laufenden Lohnzyklus zugeordnet und in einer eigenen Liste angezeigt. Bei neuem Lohn beginnt die Anzeige mit leerer aktueller Zyklusliste; die alten Buchungen bleiben für die Kontostandberechnung erhalten.
-- Reset-Funktion entfernt lokale Testdaten.
+PWA für Budgetplanung mit getrenntem Giro- und Bargeldbestand, Lohnbuchung, Fixkosten, Lohnzyklus und Gehaltsprognose.
+
+Budgetlogik:
+- Budgettage = bis zur nächsten sonntäglichen Abhebung; Mittwoch bis Samstag sind 4 Tage, Sonntag startet der neue 7-Tage-Zeitraum.
+- Bis zum nächsten Lohn zählt jeder Kalendertag ab heute bis einschließlich Vortag des Lohntags.
+- Tagessatz = (Giro + vorhandenes Bargeld) / verbleibende Tage bis zum nächsten Lohn.
+- Wochensatz = Tagessatz × 7 (nur als Orientierung, kein Zielbetrag).
+- Bargeld wird nur erfasst und zum verfügbaren Vermögen addiert.
+- Tatsächliche Abhebung ist frei wählbar; sie wird vom Giro abgezogen und zum Bargeld addiert.
+- Lohn wird am letzten Bank-/Werktag des Monats angesetzt; beim Lohnbuchen werden die gespeicherten Fixkosten einmal je Lohnzyklus abgezogen.

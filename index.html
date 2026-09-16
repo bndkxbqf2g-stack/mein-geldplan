@@ -71,7 +71,6 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <div id="fixItems"></div>
 <button class="primary" style="margin-top:10px;background:#f1f1f3;color:#111" id="addFixBtn">+ Fixkosten hinzufügen</button>
 <div class="row" style="margin-top:10px"><span><b>Gesamte monatliche Fixkosten</b></span><span class="v big" id="fixTotal">–</span></div>
-<div class="row"><span>Verfügbar nach Fixkosten</span><span class="v" id="afterFixAvailable">–</span></div>
 <div class="note">Jede Position ist sichtbar und änderbar. Die Summe wird beim „Lohn buchen“ automatisch einmal je Lohnzyklus vom Giro abgezogen.</div>
 </section>
 
@@ -103,6 +102,7 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <div class="row"><span>Girokonto</span><span class="v" id="sGiro">–</span></div>
 <div class="row"><span>Bargeld</span><span class="v" id="sCash">–</span></div>
 <div class="row"><span>Aktuell insgesamt verfügbar</span><span class="v" id="sTotal">–</span></div>
+<div class="row"><span>Rechnerischer Betrag für 7 Tage</span><span class="v" id="sSuggested">–</span></div>
 <div style="margin-top:12px"><label>Tatsächlich abheben (€)</label>
 <input id="sWithdrawAmount" type="number" step="1" inputmode="decimal" placeholder="z. B. 110">
 </div>
@@ -110,6 +110,7 @@ input,select{width:100%;padding:12px;border:1px solid #d6d6da;border-radius:12px
 <div class="row"><span>Girokonto nach Abhebung</span><span class="v" id="sAfter">–</span></div>
 <div class="row"><span>Nächste Abhebung</span><span class="v" id="nextWithdrawalDate">–</span></div>
 <div class="row"><span>Tage bis nächste Abhebung</span><span class="v" id="withdrawalDays">–</span></div>
+<div class="note" id="withdrawalHint">Du entscheidest selbst, wie viel du tatsächlich abhebst.</div>
 <div class="note">Du entscheidest selbst, wie viel du sonntags abhebst. Die Summe wird vom Giro abgezogen und zum Bargeldbestand addiert. Nach einer Abhebung startet der nächste 7-Tage-Abhebungszeitraum. Die Abhebung am Lohntag wird bis zum folgenden Sonntag anteilig berechnet; danach gilt jeweils eine volle Woche. Das Bargeld bleibt separat.</div>
 </section>
 
