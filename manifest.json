@@ -1,1 +1,12 @@
-{"name":"Mein Geldplan","short_name":"Geldplan","display":"standalone","start_url":"./","background_color":"#eef2ff","theme_color":"#2563eb"}
+{
+  "name":"Mein Geldplan",
+  "short_name":"Geldplan",
+  "description":"Persönliche Finanz-PWA v35",
+  "display":"standalone",
+  "start_url":"./",
+  "scope":"./",
+  "background_color":"#f5f7fb",
+  "theme_color":"#f5f7fb",
+  "lang":"de-DE",
+  "icons":[]
+}

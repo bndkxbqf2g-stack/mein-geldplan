@@ -1,1 +1,18 @@
-self.addEventListener('install',e=>e.waitUntil(caches.open('v35-4').then(c=>c.addAll(['./','index.html','style.css','app.js','budget.js','fixkosten.js','storage.js']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))))
+const CACHE="mgp-v35-5";
+const CORE=["./","index.html","style.css","app.js","budget.js","history.js","fixkosten.js","payroll.js","storage.js","manifest.json"];
+self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
+self.addEventListener("activate",event=>event.waitUntil(self.clients.claim()));
+self.addEventListener("fetch",event=>{
+  event.respondWith(
+    caches.match(event.request).then(cached=>{
+      if(cached) return cached;
+      return fetch(event.request).then(response=>{
+        if(response && (response.ok || response.type==="opaque")){
+          const copy=response.clone();
+          caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{});
+        }
+        return response;
+      });
+    }).catch(()=>caches.match("index.html"))
+  );
+});
