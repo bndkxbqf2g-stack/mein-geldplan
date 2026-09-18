@@ -1,1 +1,1 @@
-const FIX=2156.99;function calc(s){const total=s.giro+s.cash;const d=Math.max(1,30-new Date().getDate());return{total,day:total/d,week:(total/d)*7}}
+function totalFix(){return load().fix.reduce((a,b)=>a+b[1],0)}function bookSalary(){const n=prompt('Nettolohn');if(!n)return;const d=load();d.giro=Number(n)-totalFix();save(d);render();}function render(){const d=load();document.getElementById('saldo').innerHTML=`<h1>${d.giro.toFixed(2)} €</h1><small>Fixkosten werden nur beim Lohn automatisch abgezogen.</small>`}

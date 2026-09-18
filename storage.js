@@ -1,1 +1,1 @@
-const KEY='mgp_v35';const load=()=>JSON.parse(localStorage.getItem(KEY)||'{"giro":0,"cash":0,"history":[]}');const save=s=>localStorage.setItem(KEY,JSON.stringify(s));
+const KEY='mgp35';const defaults={giro:0,bargeld:0,fix:[['Stefanie',754],['Landkreis Main-Spessart',1133],['Lebensmittel',200],['D-Ticket',63],['Konto',6],['Apple Speicher',0.99]]};const load=()=>JSON.parse(localStorage.getItem(KEY)||JSON.stringify(defaults));const save=d=>localStorage.setItem(KEY,JSON.stringify(d));
