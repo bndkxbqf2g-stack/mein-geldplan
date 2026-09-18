@@ -1,4 +1,4 @@
-const APP_VERSION='v36 Clean';
+const APP_VERSION='v36.1 Payroll Upload Fix';
 let currentView='overview';
 let toastTimer=null;
 function showToast(message){let el=document.querySelector('.toast');if(!el){el=document.createElement('div');el.className='toast';document.body.appendChild(el);}el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2200);}
@@ -47,9 +47,8 @@ document.addEventListener('click',e=>{
   else if(act==='export') exportBackup();
   else if(act==='import') importBackup();
   else if(act==='reset') confirmReset();
-  else if(act==='import-pdf') importPayrollFile();
 });
 document.addEventListener('click',e=>{const type=e.target.closest('.type-seg button');if(type){document.querySelectorAll('.type-seg button').forEach(b=>b.classList.remove('active'));type.classList.add('active');}});
-document.addEventListener('change',e=>{if(e.target.classList.contains('fix-input')) updateFixkosten(Number(e.target.dataset.index),e.target.value);});
+document.addEventListener('change',e=>{if(e.target.classList.contains('fix-input')) updateFixkosten(Number(e.target.dataset.index),e.target.value); if(e.target.id==='payroll-file') handlePayrollFile(e.target.files?.[0]);});
 window.addEventListener('online',updateConnectionPill);window.addEventListener('offline',updateConnectionPill);
 renderApp();if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
