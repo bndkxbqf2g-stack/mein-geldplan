@@ -1,28 +1,13 @@
-function totalFix(){
-  return cents(load().fix.reduce((sum, item) => sum + (Number(item[1]) || 0), 0));
-}
-
-function updateFix(i, value){
-  const d = load();
-  if(!d.fix[i]) return;
-  d.fix[i][1] = Math.max(0, cents(parseMoneyInput(value)));
-  save(d);
-  renderApp("fixed");
-}
-
-function updateFixName(i, value){
-  const d = load();
-  if(!d.fix[i]) return;
-  d.fix[i][0] = String(value).trim() || d.fix[i][0];
-  save(d);
-  renderApp("fixed");
-}
-
+function totalFix(){ return cents(load().fix.reduce((sum,item)=>sum+Number(item.amount||0),0)); }
 function renderFixkosten(){
-  const d = load();
-  const rows = d.fix.map((f,i) => `<div class="fix-row">
-    <input type="text" value="${escapeHtml(f[0])}" onchange="updateFixName(${i},this.value)" aria-label="Bezeichnung ${i+1}">
-    <input type="number" step="0.01" min="0" value="${Number(f[1]).toFixed(2)}" onchange="updateFix(${i},this.value)" aria-label="Betrag ${escapeHtml(f[0])}">
-  </div>`).join("");
-  return `<div class="card"><div class="section-head"><div><h2>Fixkosten</h2><div class="sub">Sechs feste Positionen · einzeln editierbar · automatischer Abzug ausschließlich beim Lohn.</div></div><span class="pill">6 Positionen</span></div>${rows}<div class="total-row"><span>Gesamtsumme</span><span>${formatEUR(totalFix())}</span></div></div>`;
+  const d=load();
+  return `<section class="page-head"><div><p class="eyebrow">LAUFENDE KOSTEN</p><h2>Fixkosten</h2><p class="muted">Diese sechs Positionen werden ausschließlich bei einer Lohnbuchung automatisch abgezogen.</p></div><div class="sum-chip">${formatEUR(totalFix())}<span>pro Monat</span></div></section>
+  <div class="card"><div class="list fixed-list">${d.fix.map((item,i)=>`<div class="fixed-row"><div><div class="list-title">${escapeHtml(item.label)}</div><div class="list-sub">Position ${i+1} · automatisch beim Lohn</div></div><div class="fixed-edit"><input class="money-input fix-input" data-index="${i}" inputmode="decimal" value="${Number(item.amount||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}" aria-label="Betrag ${escapeHtml(item.label)}"><span>€</span></div></div>`).join('')}</div><div class="help">Gesamtsumme: <strong>${formatEUR(totalFix())}</strong></div></div>`;
+}
+function updateFixkosten(index,value){
+  const d=load();
+  if(index<0 || index>=d.fix.length) return;
+  const n=parseMoneyInput(value);
+  if(!Number.isFinite(n)||n<0){showToast('Ungültiger Betrag');return;}
+  d.fix[index].amount=cents(n); save(d); renderApp('fixed'); showToast('Fixkosten gespeichert');
 }

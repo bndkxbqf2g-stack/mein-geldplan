@@ -1,108 +1,26 @@
-function addHistoryEntry(type, amount, description, date = new Date()){
-  const allowed = ["Einnahme", "Ausgabe", "Abheben", "Lohn"];
-  if(!allowed.includes(type)) return false;
-  const value = cents(amount);
-  if(!Number.isFinite(value) || value <= 0) return false;
-  const d = load();
-  d.history.unshift({
-    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    type,
-    amount: value,
-    description: description || type,
-    timestamp: date.toISOString()
-  });
-  save(d);
-  return true;
+function addTransaction(type,amount,description,timestamp=new Date()){
+  const d=load();
+  const value=Math.max(0,cents(amount));
+  if(!Number.isFinite(value)||value<=0) return {ok:false,message:'Betrag muss größer als 0 sein.'};
+  const deltaGiro = type==='Einnahme' ? value : type==='Ausgabe' ? -value : type==='Abheben' ? -value : 0;
+  const deltaCash = type==='Abheben' ? value : 0;
+  d.giro=cents(d.giro+deltaGiro); d.bargeld=Math.max(0,cents(d.bargeld+deltaCash));
+  d.history.unshift({id:uid('h'),type,amount:value,description:String(description||type),timestamp:new Date(timestamp).toISOString(),deltaGiro,deltaCash,salaryCycle:null,undone:false});
+  save(d); return {ok:true};
 }
-
-function undoHistory(id){
-  const d = load();
-  const idx = d.history.findIndex(x => x.id === id);
-  if(idx < 0) return;
-  const entry = d.history[idx];
-
-  if(entry.type === "Einnahme") d.giro = cents(d.giro - entry.amount);
-  if(entry.type === "Ausgabe") d.giro = cents(d.giro + entry.amount);
-  if(entry.type === "Abheben"){
-    d.giro = cents(d.giro + entry.amount);
-    d.bargeld = Math.max(0, cents(d.bargeld - entry.amount));
-  }
-  if(entry.type === "Lohn"){
-    d.giro = cents(d.giro - Number(entry.budgetDelta ?? entry.amount));
-    const match = String(entry.description || "").match(/Lohn (\d{4}-\d{2})/);
-    if(match) delete d.salaryCycles[match[1]];
-  }
-
-  d.history.splice(idx, 1);
-  save(d);
-  renderApp("history");
-  showToast("Buchung rückgängig");
+function undoTransaction(id){
+  const d=load(); const item=d.history.find(x=>x.id===id);
+  if(!item || item.undone) return {ok:false,message:'Buchung bereits rückgängig gemacht.'};
+  d.giro=cents(d.giro-item.deltaGiro); d.bargeld=Math.max(0,cents(d.bargeld-item.deltaCash)); item.undone=true;
+  if(item.salaryCycle && d.salaryCycles[item.salaryCycle]) delete d.salaryCycles[item.salaryCycle];
+  save(d); return {ok:true};
 }
-
-function historyForm(){
-  return `
-    <div class="card">
-      <div class="section-head"><div><h2>Buchung erfassen</h2><div class="sub">Einnahmen und Ausgaben verändern ausschließlich das Giro. Bargeld wird nicht automatisch verändert.</div></div></div>
-      <div class="grid-2">
-        <button class="btn btn-secondary" onclick="manualBooking('Einnahme')">＋ Einnahme</button>
-        <button class="btn btn-secondary" onclick="manualBooking('Ausgabe')">− Ausgabe</button>
-        <button class="btn btn-secondary" onclick="manualBooking('Abheben')">↥ Abheben</button>
-        <button class="btn btn-secondary" onclick="bookSalary()">€ Lohn</button>
-      </div>
-    </div>`;
-}
-
-function manualBooking(type){
-  const raw = prompt(`${type}: Betrag in €`);
-  if(raw === null) return;
-  const amount = cents(parseMoneyInput(raw));
-  if(!Number.isFinite(amount) || amount <= 0){
-    alert("Bitte einen gültigen Betrag eingeben.");
-    return;
-  }
-  const description = (prompt("Beschreibung") || type).trim() || type;
-  const d = load();
-
-  if(type === "Einnahme") d.giro = cents(d.giro + amount);
-  if(type === "Ausgabe") d.giro = cents(d.giro - amount);
-  if(type === "Abheben"){
-    d.giro = cents(d.giro - amount);
-    d.bargeld = cents(d.bargeld + amount);
-  }
-
-  d.history.unshift({
-    id:`${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    type,
-    amount,
-    description,
-    timestamp:new Date().toISOString()
-  });
-  save(d);
-  renderApp("history");
-  showToast("Buchung gespeichert");
-}
-
-function historyDisplay(entry){
-  const dt = new Date(entry.timestamp);
-  let value = formatEUR(entry.amount);
-  if(entry.type === "Einnahme" || entry.type === "Lohn") value = `+${value}`;
-  if(entry.type === "Ausgabe") value = `−${value}`;
-  return `<div class="list-row">
-    <div class="list-main"><div class="list-title">${escapeHtml(entry.description || entry.type)}</div><div class="list-sub">${escapeHtml(entry.type)} · ${dt.toLocaleDateString("de-DE")} ${dt.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${entry.type === "Abheben" ? " · Giro → Bargeld" : ""}</div></div>
-    <div style="display:flex;align-items:center;gap:8px"><div class="list-value">${value}</div><button class="delete-mini" onclick="undoHistory('${entry.id}')" title="Rückgängig">↶</button></div>
-  </div>`;
-}
-
 function renderHistory(){
-  const d = load();
-  const rows = d.history.map(historyDisplay).join("");
-  return `${historyForm()}<div class="card"><div class="section-head"><div><h2>Verlauf</h2><div class="sub">Jede Buchung enthält Datum, Uhrzeit, Betrag, Beschreibung und Rückgängig.</div></div><span class="pill">${d.history.length} Buchungen</span></div>${rows ? `<div class="list">${rows}</div>` : `<div class="empty">Noch keine Buchungen vorhanden.</div>`}</div>`;
-}
-
-function escapeHtml(v){
-  return String(v).replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[ch]));
-}
-
-function formatEUR(v){
-  return new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Number(v)||0);
+  const d=load();
+  const rows=d.history.map(item=>{
+    const sign=item.type==='Einnahme'?'+':item.type==='Ausgabe'?'−':item.type==='Abheben'?'⇄':'+';
+    const state=item.undone?' rückgängig':'';
+    return `<div class="history-row ${item.undone?'is-undone':''}"><div class="history-icon">${item.type==='Einnahme'?'↗':item.type==='Ausgabe'?'↘':item.type==='Abheben'?'⇄':'€'}</div><div class="history-main"><div class="list-title">${escapeHtml(item.description)}</div><div class="list-sub">${escapeHtml(item.type)} · ${formatDateTime(item.timestamp)}${state}</div></div><div class="history-right"><div class="list-value">${sign}${formatEUR(item.amount)}</div>${item.undone?'':`<button class="text-btn" data-action="undo" data-id="${escapeHtml(item.id)}">Rückgängig</button>`}</div></div>`;
+  }).join('');
+  return `<section class="page-head"><div><p class="eyebrow">ALLE BUCHUNGEN</p><h2>Verlauf</h2><p class="muted">Einnahmen, Ausgaben, Abhebungen und Lohnbuchungen.</p></div><button class="btn btn-primary" data-action="open-booking">+ Buchung</button></section><div class="card"><div class="history-list">${rows||'<div class="empty">Noch keine Buchungen.</div>'}</div></div>`;
 }
