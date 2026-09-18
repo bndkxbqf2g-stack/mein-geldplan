@@ -1,7 +1,7 @@
 {
   "name":"Mein Geldplan",
   "short_name":"Geldplan",
-  "description":"Persönliche Finanz-PWA v35",
+  "description":"Persönliche Finanz-PWA v35 Final",
   "display":"standalone",
   "start_url":"./",
   "scope":"./",

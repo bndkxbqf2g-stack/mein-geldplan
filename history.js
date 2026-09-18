@@ -18,13 +18,24 @@ function undoHistory(id){
   const idx = d.history.findIndex(x => x.id === id);
   if(idx < 0) return;
   const entry = d.history[idx];
-  if(entry.type === "Einnahme" || entry.type === "Lohn") d.giro -= entry.amount;
+
+  if(entry.type === "Einnahme") d.giro -= entry.amount;
   if(entry.type === "Ausgabe") d.giro += entry.amount;
-  if(entry.type === "Abheben") d.giro += entry.amount;
-  if(entry.type === "Abheben") d.bargeld -= entry.amount;
+  if(entry.type === "Abheben"){
+    d.giro += entry.amount;
+    d.bargeld -= entry.amount;
+  }
+  if(entry.type === "Lohn") d.giro -= Number(entry.budgetDelta ?? entry.amount);
+
+  if(entry.type === "Lohn") {
+    const match = entry.description.match(/Lohn (\d{4}-\d{2})/);
+    if(match) delete d.salaryCycles[match[1]];
+  }
+
   d.history.splice(idx,1);
   save(d);
   renderApp("history");
+  showToast("Buchung rückgängig");
 }
 
 function historyForm(){
@@ -35,7 +46,7 @@ function historyForm(){
         <button class="btn btn-secondary" onclick="manualBooking('Einnahme')">＋ Einnahme</button>
         <button class="btn btn-secondary" onclick="manualBooking('Ausgabe')">− Ausgabe</button>
         <button class="btn btn-secondary" onclick="manualBooking('Abheben')">↥ Abheben</button>
-        <button class="btn btn-secondary" onclick="manualBooking('Lohn')">€ Lohn</button>
+        <button class="btn btn-secondary" onclick="bookSalary()">€ Lohn</button>
       </div>
     </div>`;
 }

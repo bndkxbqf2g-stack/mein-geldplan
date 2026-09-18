@@ -1,11 +1,23 @@
 let currentView = "overview";
+const APP_VERSION = "v35 Final";
 
-function euro(v){return new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Number(v)||0)}
+function euro(v){
+  return new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Number(v)||0);
+}
+
 function showToast(message){
   let el=document.querySelector(".toast");
-  if(!el){el=document.createElement("div");el.className="toast";document.body.appendChild(el);}
-  el.textContent=message;el.classList.add("show");clearTimeout(showToast.t);showToast.t=setTimeout(()=>el.classList.remove("show"),1800);
+  if(!el){
+    el=document.createElement("div");
+    el.className="toast";
+    document.body.appendChild(el);
+  }
+  el.textContent=message;
+  el.classList.add("show");
+  clearTimeout(showToast.t);
+  showToast.t=setTimeout(()=>el.classList.remove("show"),1800);
 }
+
 function renderOverview(){
   const b=budgetSnapshot();
   const rec=sundayWithdrawalRecommendation();
@@ -20,11 +32,67 @@ function renderOverview(){
 
 function renderBackup(){
   const d=load();
-  return `<div class="card"><div class="section-head"><div><h2>Backup</h2><div class="sub">Lokale Daten exportieren oder zurücksetzen.</div></div></div><button class="btn btn-primary btn-full" onclick="exportBackup()">Backup herunterladen</button><div style="height:8px"></div><button class="btn btn-secondary btn-full" onclick="importBackup()">Backup importieren</button><div style="height:12px"></div><button class="btn btn-danger btn-full" onclick="confirmReset()">Daten zurücksetzen</button></div><div class="card"><div class="notice"><strong>Lokale Speicherung:</strong> ${Object.keys(d.history||{}).length} Verlaufseinträge, ${d.fix.length} Fixkostenpositionen und ${d.payroll.entries.length} Zeitlohnarten im Browser gespeichert.</div></div>`;
+  const historyCount=d.history.length;
+  const fixCount=d.fix.length;
+  const payrollCount=(d.payroll.entries||[]).length;
+  return `<div class="card"><div class="section-head"><div><h2>Backup</h2><div class="sub">Lokale Daten exportieren, importieren oder zurücksetzen.</div></div><span class="pill">${APP_VERSION}</span></div><button class="btn btn-primary btn-full" onclick="exportBackup()">Backup herunterladen</button><div style="height:8px"></div><button class="btn btn-secondary btn-full" onclick="importBackup()">Backup importieren</button><div style="height:12px"></div><button class="btn btn-danger btn-full" onclick="confirmReset()">Daten zurücksetzen</button></div><div class="card"><div class="notice"><strong>Gespeichert:</strong> ${historyCount} Verlaufseinträge · ${fixCount} Fixkostenpositionen · ${payrollCount} Zeitlohnarten.</div><div style="height:10px"></div><div class="notice"><strong>Datenmigration:</strong> Das Datenformat trägt eine Schema-Version und wird beim Laden automatisch normalisiert, ohne vorhandene Budgetwerte neu zu berechnen.</div></div>`;
 }
-function exportBackup(){const blob=new Blob([JSON.stringify(load(),null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`mein-geldplan-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);showToast("Backup exportiert");}
-function importBackup(){const input=document.createElement("input");input.type="file";input.accept="application/json";input.onchange=async()=>{const file=input.files[0];if(!file)return;try{const parsed=JSON.parse(await file.text());save(parsed);location.reload();}catch(e){alert("Backup konnte nicht gelesen werden.");}};input.click();}
-function confirmReset(){if(confirm("Lokale Daten wirklich zurücksetzen?")) resetAll();}
+
+function downloadText(content,filename,type){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
+}
+
+function exportBackup(){
+  const payload={
+    app:"Mein Geldplan",
+    appVersion:APP_VERSION,
+    schemaVersion:DATA_SCHEMA_VERSION,
+    exportedAt:new Date().toISOString(),
+    data:load()
+  };
+  downloadText(JSON.stringify(payload,null,2),`mein-geldplan-backup-${new Date().toISOString().slice(0,10)}.json`,`application/json`);
+  showToast("Backup exportiert");
+}
+
+function importBackup(){
+  const input=document.createElement("input");
+  input.type="file";
+  input.accept="application/json,.json";
+  input.onchange=async()=>{
+    const file=input.files && input.files[0];
+    if(!file) return;
+    try{
+      const parsed=JSON.parse(await file.text());
+      const payload=parsed && parsed.data && typeof parsed.data === "object" ? parsed.data : parsed;
+      const validation=validateBackupPayload(payload);
+      if(!validation.ok){ alert(validation.message); return; }
+      const current=load();
+      if(!confirm("Backup importieren und die aktuell gespeicherten Daten ersetzen?")) return;
+      save(payload);
+      if(parsed && parsed.schemaVersion && parsed.schemaVersion !== current.schemaVersion){
+        showToast("Backup importiert und Datenformat aktualisiert");
+      } else {
+        showToast("Backup importiert");
+      }
+      renderApp(currentView);
+    }catch(e){
+      alert("Backup konnte nicht gelesen werden.");
+    }
+  };
+  input.click();
+}
+
+function confirmReset(){
+  if(confirm("Lokale Daten wirklich zurücksetzen?")) resetAll();
+}
 
 function renderApp(view=currentView){
   currentView=view;
@@ -33,7 +101,12 @@ function renderApp(view=currentView){
   document.getElementById("app").innerHTML=map[view] ? map[view]() : renderOverview();
 }
 
-document.addEventListener("click",e=>{const btn=e.target.closest(".nav-item");if(btn) renderApp(btn.dataset.view);});
+document.addEventListener("click",e=>{
+  const btn=e.target.closest(".nav-item");
+  if(btn) renderApp(btn.dataset.view);
+});
 
 renderApp();
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
