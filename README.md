@@ -1,0 +1,3 @@
+Mein Geldplan v34
+
+Neu: Übersichts-Dashboard, Kontoverlauf, Monatsvergleich, Monatsgrafik, Daten-Backup/Wiederherstellung und aufgefrischtes iPhone-Design. Keine Ausgabenkategorien.
