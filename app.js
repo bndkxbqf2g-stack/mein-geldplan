@@ -1,1 +1,1 @@
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');render();
+function render(){const s=load(),c=calc(s);summary.innerHTML=`<h2>${c.total.toFixed(2)} €</h2><p>Tag ${c.day.toFixed(2)} € · Woche ${c.week.toFixed(2)} €</p>`;history.innerHTML=s.history.map(h=>`<li><b>${h.type}</b> ${h.amt.toFixed(2)} €<br><small>${h.txt}</small></li>`).join('')}addIncome.onclick=()=>{const a=+prompt('Betrag');if(a)add('Einnahme',a,'Manuell')};addExpense.onclick=()=>{const a=+prompt('Betrag');if(a)add('Ausgabe',a,'Manuell')};undo.onclick=undo;render();

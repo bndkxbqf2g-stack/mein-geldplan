@@ -1,0 +1,1 @@
+function add(type,amt,txt){const s=load();s.history.unshift({type,amt,txt,date:new Date().toISOString()});if(type==='Einnahme')s.giro+=amt;if(type==='Ausgabe')s.giro-=amt;save(s);render()}function undo(){const s=load();const h=s.history.shift();if(!h)return;if(h.type==='Einnahme')s.giro-=h.amt;if(h.type==='Ausgabe')s.giro+=h.amt;save(s);render()}
