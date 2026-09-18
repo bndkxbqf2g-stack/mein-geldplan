@@ -1,0 +1,9 @@
+body{margin:0;background:#0f172a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+.app{max-width:430px;margin:auto;padding:20px}
+.hero,.card{background:rgba(255,255,255,.08);backdrop-filter:blur(18px);border-radius:22px;padding:18px;margin:14px 0}
+h1{margin:0 0 4px}h2{font-size:38px;margin:8px 0}.split,.row,.grid{display:grid;gap:12px}.split{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr 1fr}
+.split div,.grid div{background:rgba(255,255,255,.06);padding:12px;border-radius:14px}
+span,label{display:block;font-size:12px;opacity:.7}strong,b{font-size:18px}
+button{flex:1;border:0;border-radius:14px;padding:14px;background:#22c55e;color:#fff;font-weight:700}.alt{background:#334155}
+.row{grid-template-columns:1fr 1fr}input{width:100%;padding:14px;border-radius:12px;border:1px solid #334155;background:#111827;color:#fff;box-sizing:border-box}
+footer{text-align:center;opacity:.55;padding:18px 0}
