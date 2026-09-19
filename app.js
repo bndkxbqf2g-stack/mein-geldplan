@@ -6,7 +6,7 @@ function fmt(d){return new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-d
 function dateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function easter(y){var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da);}
-function holidays(y){var e=easter(y),a=[dateKey(new Date(y,0,1)),dateKey(new Date(y,4,1)),dateKey(new Date(y,9,3)),dateKey(new Date(y,11,25)),dateKey(new Date(y,11,26))];[-2,1,39,50,60].forEach(function(n){a.push(dateKey(addDays(e,n)));});return a;}
+function holidays(y){var e=easter(y),a=[dateKey(new Date(y,0,1)),dateKey(new Date(y,0,6)),dateKey(new Date(y,4,1)),dateKey(new Date(y,9,3)),dateKey(new Date(y,10,1)),dateKey(new Date(y,11,25)),dateKey(new Date(y,11,26))];[-2,1,39,50,60].forEach(function(n){a.push(dateKey(addDays(e,n)));});return a;}
 function isBankDay(d){return d.getDay()!==0&&d.getDay()!==6&&holidays(d.getFullYear()).indexOf(dateKey(d))===-1;}
 function lastBankDay(y,m){var d=new Date(y,m+1,0);while(d.getMonth()===m&&!isBankDay(d))d.setDate(d.getDate()-1);d.setHours(20,30,0,0);return d;}
 function nextLastBankDayAfter(d){var y=d.getFullYear(),m=d.getMonth()+1;if(m>11){m=0;y++;}return lastBankDay(y,m);}
@@ -24,18 +24,13 @@ function activeCycleKey(){
  return s?String(s.cycle||('salary-'+s.id)):'pre-salary-'+dateKey(new Date());
 }
 function currentCyclePayDate(){
- var s=latestSalary(), upcoming=upcomingPayDate();
- if(!s)return upcoming;
- var sd=new Date((s.date||dateKey(new Date()))+'T20:30:00');
- var next=nextLastBankDayAfter(sd);
- return new Date()<sd?sd:next;
+ var s=latestSalary(),now=new Date();
+ // Ein im aktuellen Monat gebuchter Lohn startet bereits den nächsten Monatszyklus.
+ // Damit kann die Anzeige am Buchungstag nicht auf „heute 20:30“ zurückfallen.
+ if(s){var sd=new Date((s.date||dateKey(now))+'T12:00:00');if(sd.getFullYear()===now.getFullYear()&&sd.getMonth()===now.getMonth())return nextLastBankDayAfter(sd);}
+ return upcomingPayDate();
 }
-function nextPayDateForCycle(){
- var s=latestSalary();
- if(!s)return upcomingPayDate();
- var d=new Date((s.date||dateKey(new Date()))+'T20:30:00');
- return nextLastBankDayAfter(d);
-}
+function nextPayDateForCycle(){return currentCyclePayDate();}
 function daysBetweenDates(from,to){var a=new Date(from.getFullYear(),from.getMonth(),from.getDate()),b=new Date(to.getFullYear(),to.getMonth(),to.getDate());return Math.max(0,Math.round((b-a)/86400000));}
 function remainingPayDays(){
  var now=new Date(), pay=currentCyclePayDate();
@@ -141,7 +136,7 @@ function renderOverview(){
 }
 function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){renderForecastTable();}}
 function exportData(){
- var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:33,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
+ var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:34,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
 }
 function importData(){var inp=$("importFile");if(!inp||!inp.files||!inp.files[0]){alert('Bitte zuerst eine Sicherungsdatei auswählen.');return;}var file=inp.files[0],reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(!data||!Array.isArray(data.giroTransactions)||!Array.isArray(data.fixItems)||!Array.isArray(data.timeReports))throw new Error('Ungültige Sicherungsdatei.');if(!confirm('Gespeicherte App-Daten wirklich durch diese Sicherung ersetzen?'))return;localStorage.setItem('meinGeldplanGiroTx',JSON.stringify(data.giroTransactions));localStorage.setItem('meinGeldplanCash',String(Math.max(0,Number(data.cash)||0)));localStorage.setItem('meinGeldplanFixItems',JSON.stringify(data.fixItems));localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(data.timeReports));if($("backupStatus"))$("backupStatus").textContent='Daten erfolgreich wiederhergestellt. Die App wird neu geladen.';setTimeout(function(){location.reload();},500);}catch(e){alert('Wiederherstellung fehlgeschlagen: '+e.message);}};reader.readAsText(file);}
 
@@ -151,7 +146,7 @@ function fixedCostAlreadyBooked(cycle){return txs().some(function(t){return t.ty
 function addSalary(){
  var v=num('salaryAmount');
  if(v<=0){alert('Bitte den Nettolohn eingeben.');return;}
- var now=new Date(),cycle='salary-'+dateKey(now),fix=fixTotal();
+ var now=new Date(),cycle='salary-'+now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'),fix=fixTotal();
  bookTransaction(v,$('salaryText').value.trim()||'Lohn','salary',{cycle:cycle});
  if(fix>0&&!fixedCostAlreadyBooked(cycle))bookTransaction(-fix,'Fixkosten automatisch abgezogen','fixedcost',{cycle:cycle});
  $('salaryAmount').value='';$('salaryText').value='';refresh();
@@ -270,22 +265,14 @@ function protectedSurchargeCalc(rows){
 }
 function allowanceFromRows(rows){var wech=rows.some(function(r){return r.code==='5211'||r.label.toLowerCase().indexOf('wech')>=0;});var schi=rows.some(function(r){return r.code==='5212'||r.label.toLowerCase().indexOf('schiz')>=0;});return {wech:wech,schi:schi};}
 function garnishment2026(net,dependents){
- dependents=Math.max(0,Math.min(5,Number(dependents)||0));
- if(net<=1589.99)return 0;
- if(net>4866.30){
-   // For the 2-dependent column, the fixed table value at the ceiling is 936.94 € and the excess is fully attachable.
-   var base=dependents===2?936.94:(dependents===1?1231.00:dependents===0?1219.40:dependents===3?0:0);
-   // Full generic columns are not embedded; for this app the user's 2 dependents are the calibrated/default case.
-   if(dependents!==2){return Math.max(0,net-1587.40);}
-   return 936.94+(net-4866.30);
- }
- if(dependents!==2){
-   // Conservative fallback: use the 2-dependent table when a different number is selected only if supported; otherwise show zero.
-   dependents=2;
- }
- if(net<2520)return 0;
- var band=Math.floor((Math.min(net,4866.29)-2520)/10);
- return Math.round((0.94+band*4)*100)/100;
+ // Pfändungsfreigrenzenbekanntmachung 2026, Monatswerte ab 01.07.2026 (§ 850c ZPO).
+ // Die Beträge entsprechen den sechs Tabellenspalten für 0 bis 5+ Unterhaltspflichten.
+ var rules=[{start:1590,first:1.82,step:7},{start:2190,first:2.59,step:5},{start:2520,first:0.94,step:4},{start:2860,first:2.86,step:3},{start:3190,first:1.34,step:2},{start:3520,first:0.39,step:1}];
+ var dep=Math.max(0,Math.min(5,Math.floor(Number(dependents)||0))),rule=rules[dep];
+ if(net<=1589.99||net<rule.start)return 0;
+ var capped=Math.min(net,4866.29),band=Math.floor((capped-rule.start)/10),amount=rule.first+band*rule.step;
+ if(net>4866.30){var ceilingBand=Math.floor((4866.29-rule.start)/10);amount=rule.first+ceilingBand*rule.step+(net-4866.30);}
+ return Math.round(Math.max(0,amount)*100)/100;
 }
 function estimateNetFromGross(gross){
  var refGross=4480.43+250; // 4,730.43 calibrated point
