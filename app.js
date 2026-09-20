@@ -171,6 +171,7 @@ function sunday(){
 var PAYROLL_MASTER={
   basePay:4226.92,careAllowance:90.00,universityAllowance:163.51,
   fixedGross:4480.43,nightRate:4.46,saturdayRate:0.64,sundayRate:5.58,
+  shiftAllowance:250.00,schichtAllowance:100.00,
   pensionRate:0.093,unemploymentRate:0.013,healthRate:0.0839,careRate:0.0155,
   churchRate:0.08,dependents:2,tariff:'Bayern KR8',surchargeLevel:3
 };
@@ -291,10 +292,11 @@ function incomeTax2026(annualTaxable){
  return 0.45*x-19470.38;
 }
 function reportVariableExtras(rep,a,p){
- var shiftRows=rep.rows.filter(function(r){return r.code===a.code;});
  var averageRows=rep.rows.filter(function(r){return r.code==='5161';});
  var rowAmount=function(r){return Number(r.amount!=null?r.amount:r.qty)||0;};
- var shiftAllowance=shiftRows.reduce(function(s,r){return s+rowAmount(r);},0);
+ // Bei 5211/5212 ist die Menge nur ein Anspruchskennzeichen (meist 1),
+ // nicht der Eurobetrag. Die Vergütung kommt aus der Tarifstammdaten.
+ var shiftAllowance=a.code==='5211'?PAYROLL_MASTER.shiftAllowance:a.code==='5212'?PAYROLL_MASTER.schichtAllowance:0;
  var averagePay=averageRows.reduce(function(s,r){return s+rowAmount(r);},0);
  return {shiftAllowance:shiftAllowance,averageUnits:averageRows.length,averagePay:averagePay,taxableExtrasGross:shiftAllowance+averagePay};
 }
@@ -322,7 +324,7 @@ function calculateReportForecast(rep,dependents){
 }
 function renderReportDetails(rep){
  var box=$('reportDetails');if(!box)return;
- var rows=rep.rows.map(function(r){var q=(Number(r.qty)||0).toFixed(2).replace('.',','),unit=(r.code==='5211'||r.code==='5212'||r.code==='5161')?'':' h',description=r.known?r.description:'UNBEKANNT – nicht interpretiert';return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(description)+'</span></span><span class="v">'+q+unit+'</span></div>';}).join('');
+ var rows=rep.rows.map(function(r){var isAllowance=r.code==='5211'||r.code==='5212',q=isAllowance?'vorhanden':(Number(r.qty)||0).toFixed(2).replace('.',','),unit=isAllowance||r.code==='5161'?'':' h',description=r.known?r.description:'UNBEKANNT – nicht interpretiert';return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(description)+'</span></span><span class="v">'+q+unit+'</span></div>';}).join('');
  box.innerHTML=rows||'<div class="note">Keine Details.</div>';
 }
 function renderSelectedForecast(rep){
