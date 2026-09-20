@@ -135,6 +135,25 @@ function renderOverview(){
  var s=latestSalary(),pct=0;if(s){var sd=new Date((s.date||dateKey(new Date()))+'T12:00:00'),pd=currentCyclePayDate(),total=Math.max(1,daysBetweenDates(sd,pd)),elapsed=Math.max(0,Math.min(total,daysBetweenDates(sd,new Date())));pct=(elapsed/total)*100;}if($("ovProgress"))$("ovProgress").style.width=pct.toFixed(1)+'%';if($("ovProgressText"))$("ovProgressText").textContent=Math.round(pct)+' % vergangen';
 }
 function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){showLatestForecast();recalculateExactNet();renderForecastTable();renderPayslipComparison();}}
+function checkForUpdate(){
+ var button=$('updateBtn'),status=$('updateStatus');
+ if(button)button.classList.add('spinning');
+ if(status){status.textContent='Suche nach Aktualisierung …';status.style.display='block';}
+ if(!('serviceWorker' in navigator)){
+   if(status)status.textContent='Aktualisierung ist in diesem Browser nicht verfügbar.';
+   if(button)button.classList.remove('spinning');
+   return;
+ }
+ var timeout=new Promise(function(_,reject){setTimeout(function(){reject(new Error('timeout'));},5000);});
+ Promise.race([navigator.serviceWorker.ready,timeout]).then(function(reg){return reg.update();}).then(function(){
+   if(status)status.textContent='Die App ist aktuell.';
+   if(button)button.classList.remove('spinning');
+   setTimeout(function(){if(status)status.style.display='none';},2500);
+ }).catch(function(){
+   if(status)status.textContent='Aktualisierung konnte nicht geprüft werden.';
+   if(button)button.classList.remove('spinning');
+ });
+}
 function exportData(){
  var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:36,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports(),payslips:loadPayslips()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
 }
@@ -455,6 +474,7 @@ function init(){
  if($('bCarryCash'))$('bCarryCash').value=cashBalance().toFixed(2);
  if($('incomeBtn'))$('incomeBtn').onclick=addIncome;if($('expenseBtn'))$('expenseBtn').onclick=addExpense;if($('withdrawBtn'))$('withdrawBtn').onclick=withdraw;if($('salaryBtn'))$('salaryBtn').onclick=addSalary;if($('resetBtn'))$('resetBtn').onclick=resetApp;if($('timeReportBtn'))$('timeReportBtn').onclick=importTimeReports;if($('payslipBtn'))$('payslipBtn').onclick=importPayslips;if($('correctionBtn'))$('correctionBtn').onclick=correctGiro;if($('addFixBtn'))$('addFixBtn').onclick=addFixItem;if($('exportBtn'))$('exportBtn').onclick=exportData;if($('importBtn'))$('importBtn').onclick=importData;
  if($('openHistoryBtn'))$('openHistoryBtn').onclick=function(){openTab('verlauf');};
+ if($('updateBtn'))$('updateBtn').onclick=checkForUpdate;
  document.querySelectorAll('input,select').forEach(function(el){if(el.classList.contains('fix-name')||el.classList.contains('fix-amount')||el.id==='importFile'||el.id==='timeReportFiles')return;el.addEventListener('input',function(){if(el.id==='bCarryCash')saveCash(num('bCarryCash'));refresh();});el.addEventListener('change',function(){if(el.id==='bCarryCash')saveCash(num('bCarryCash'));refresh();});});
  document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){openTab(b.dataset.tab);});});
  openTab('uebersicht');refresh();setInterval(refresh,60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh();});
