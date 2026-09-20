@@ -187,6 +187,7 @@ var PAYROLL_CALIBRATION={
   sundaySurchargeRate:5.58,
   saturdayRate:0.64
 };
+var FORECAST_DEPENDENTS=2;
 function payrollBaseForReport(rep){
   var y=Number(rep.year)||0,m=Number(rep.month)||0;
   return (y>2026 || (y===2026&&m>=3))?PAYROLL_CALIBRATION.fromApr2026:PAYROLL_CALIBRATION.preApr2026;
@@ -336,7 +337,7 @@ function renderSelectedForecast(rep){
    fields.forEach(function(id){var el=$(id);if(el)el.textContent='–';});
    return;
  }
- var f=calculateReportForecast(rep,num('pDependents'));
+ var f=calculateReportForecast(rep,FORECAST_DEPENDENTS);
  var values={
    rMonth:formatMonth(rep.year,rep.month),
    rPayoutMonth:formatMonth(f.payoutYear,f.payoutMonth),
@@ -360,7 +361,8 @@ function renderSelectedForecast(rep){
 }
 function renderForecastTable(){
  var box=$('forecastTableWrap');if(!box)return;var arr=reportStore.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);});if(!arr.length){box.innerHTML='<div class="empty">Noch kein Zeitnachweis eingelesen.</div>';renderSelectedForecast(null);renderForecastChart([],0);return;}
- var dep=num('pDependents');box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="forecast-card"><div class="forecast-head"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'</span></span><span class="badge '+(f.shiftAllowance?'green':'neutral')+'">'+esc(f.allowanceType)+'</span></div><div class="mini-grid"><div class="mini"><div class="t">Netto</div><div class="n">'+eur(f.estimatedPfNet)+'</div></div><div class="mini"><div class="t">Pfändung</div><div class="n red">'+eur(f.garnish)+'</div></div><div class="mini"><div class="t">Auszahlung</div><div class="n good">'+eur(f.payout)+'</div></div></div></div>';}).join('');
+ var dep=FORECAST_DEPENDENTS;box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="forecast-card"><div class="forecast-head"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'</span></span><span class="badge '+(f.shiftAllowance?'green':'neutral')+'">'+esc(f.allowanceType)+'</span></div><div class="mini-grid"><div class="mini"><div class="t">Netto</div><div class="n">'+eur(f.estimatedPfNet)+'</div></div><div class="mini"><div class="t">Pfändung</div><div class="n red">'+eur(f.garnish)+'</div></div><div class="mini"><div class="t">Auszahlung</div><div class="n good">'+eur(f.payout)+'</div></div></div></div>';}).join('');
+ var dep=FORECAST_DEPENDENTS;box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="forecast-card"><div class="forecast-head"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'</span></span><span class="badge '+(f.shiftAllowance?'green':'neutral')+'">'+esc(f.allowanceType)+'</span></div><div class="mini-grid"><div class="mini"><div class="t">Netto</div><div class="n">'+eur(f.estimatedPfNet)+'</div></div><div class="mini"><div class="t">Pfändung</div><div class="n red">'+eur(f.garnish)+'</div></div><div class="mini"><div class="t">Auszahlung</div><div class="n good">'+eur(f.payout)+'</div></div></div></div>';}).join('');
  var selected=lastParsedReport&&arr.some(function(rep){return rep.id===lastParsedReport.id;})?lastParsedReport:arr[arr.length-1];
  lastParsedReport=selected;renderSelectedForecast(selected);renderForecastChart(arr,dep);
 }
@@ -382,7 +384,6 @@ function init(){
  if($('bCarryCash'))$('bCarryCash').value=cashBalance().toFixed(2);
  if($('incomeBtn'))$('incomeBtn').onclick=addIncome;if($('expenseBtn'))$('expenseBtn').onclick=addExpense;if($('withdrawBtn'))$('withdrawBtn').onclick=withdraw;if($('salaryBtn'))$('salaryBtn').onclick=addSalary;if($('resetBtn'))$('resetBtn').onclick=resetApp;if($('timeReportBtn'))$('timeReportBtn').onclick=importTimeReports;if($('correctionBtn'))$('correctionBtn').onclick=correctGiro;if($('addFixBtn'))$('addFixBtn').onclick=addFixItem;if($('exportBtn'))$('exportBtn').onclick=exportData;if($('importBtn'))$('importBtn').onclick=importData;
  if($('openHistoryBtn'))$('openHistoryBtn').onclick=function(){openTab('verlauf');};
- if($('pDependents'))$('pDependents').addEventListener('input',function(){renderForecastTable();if(lastParsedReport)renderReportDetails(lastParsedReport,calculateReportForecast(lastParsedReport,num('pDependents')));});
  document.querySelectorAll('input,select').forEach(function(el){if(el.classList.contains('fix-name')||el.classList.contains('fix-amount')||el.id==='importFile'||el.id==='timeReportFiles')return;el.addEventListener('input',function(){if(el.id==='bCarryCash')saveCash(num('bCarryCash'));refresh();});el.addEventListener('change',function(){if(el.id==='bCarryCash')saveCash(num('bCarryCash'));refresh();});});
  document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){openTab(b.dataset.tab);});});
  openTab('uebersicht');refresh();setInterval(refresh,60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh();});
