@@ -134,11 +134,11 @@ function renderOverview(){
  if($("ovAvailable"))$("ovAvailable").textContent=eur(available);if($("ovGiro"))$("ovGiro").textContent=eur(giro);if($("ovCash"))$("ovCash").textContent=eur(cash);if($("ovNextPay"))$("ovNextPay").textContent='Nächster Lohn: '+fmt(currentCyclePayDate());if($("ovPayDays"))$("ovPayDays").textContent=payDays+' Tage';if($("ovDay"))$("ovDay").textContent=eur(day);if($("ovWeek"))$("ovWeek").textContent=eur(day*7);if($("ovNextWithdraw"))$("ovNextWithdraw").textContent=fmt(next);if($("ovFix"))$("ovFix").textContent=eur(fixTotal());if($("ovCycleExpenses"))$("ovCycleExpenses").textContent=eur(cycleExp);if($("ovCashKpi"))$("ovCashKpi").textContent=eur(cash);if($("ovSalaryCount"))$("ovSalaryCount").textContent=txs().filter(function(t){return t.type==='salary';}).length;
  var s=latestSalary(),pct=0;if(s){var sd=new Date((s.date||dateKey(new Date()))+'T12:00:00'),pd=currentCyclePayDate(),total=Math.max(1,daysBetweenDates(sd,pd)),elapsed=Math.max(0,Math.min(total,daysBetweenDates(sd,new Date())));pct=(elapsed/total)*100;}if($("ovProgress"))$("ovProgress").style.width=pct.toFixed(1)+'%';if($("ovProgressText"))$("ovProgressText").textContent=Math.round(pct)+' % vergangen';
 }
-function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){showLatestForecast();recalculateExactNet();renderForecastTable();}}
+function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){showLatestForecast();recalculateExactNet();renderForecastTable();renderPayslipComparison();}}
 function exportData(){
- var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:35,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
+ var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:36,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports(),payslips:loadPayslips()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
 }
-function importData(){var inp=$("importFile");if(!inp||!inp.files||!inp.files[0]){alert('Bitte zuerst eine Sicherungsdatei auswählen.');return;}var file=inp.files[0],reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(!data||!Array.isArray(data.giroTransactions)||!Array.isArray(data.fixItems)||!Array.isArray(data.timeReports))throw new Error('Ungültige Sicherungsdatei.');if(!confirm('Gespeicherte App-Daten wirklich durch diese Sicherung ersetzen?'))return;localStorage.setItem('meinGeldplanGiroTx',JSON.stringify(data.giroTransactions));localStorage.setItem('meinGeldplanCash',String(Math.max(0,Number(data.cash)||0)));localStorage.setItem('meinGeldplanFixItems',JSON.stringify(data.fixItems));localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(data.timeReports));if($("backupStatus"))$("backupStatus").textContent='Daten erfolgreich wiederhergestellt. Die App wird neu geladen.';setTimeout(function(){location.reload();},500);}catch(e){alert('Wiederherstellung fehlgeschlagen: '+e.message);}};reader.readAsText(file);}
+function importData(){var inp=$("importFile");if(!inp||!inp.files||!inp.files[0]){alert('Bitte zuerst eine Sicherungsdatei auswählen.');return;}var file=inp.files[0],reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(!data||!Array.isArray(data.giroTransactions)||!Array.isArray(data.fixItems)||!Array.isArray(data.timeReports))throw new Error('Ungültige Sicherungsdatei.');if(!confirm('Gespeicherte App-Daten wirklich durch diese Sicherung ersetzen?'))return;localStorage.setItem('meinGeldplanGiroTx',JSON.stringify(data.giroTransactions));localStorage.setItem('meinGeldplanCash',String(Math.max(0,Number(data.cash)||0)));localStorage.setItem('meinGeldplanFixItems',JSON.stringify(data.fixItems));localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(data.timeReports));localStorage.setItem('meinGeldplanPayslips',JSON.stringify(Array.isArray(data.payslips)?data.payslips:[]));if($("backupStatus"))$("backupStatus").textContent='Daten erfolgreich wiederhergestellt. Die App wird neu geladen.';setTimeout(function(){location.reload();},500);}catch(e){alert('Wiederherstellung fehlgeschlagen: '+e.message);}};reader.readAsText(file);}
 
 function renderCycleExpenses(){var list=$("cycleExpenseList");if(!list)return;list.innerHTML="";var c=activeCycleKey();var a=txs().filter(function(t){return t.type==="expense"&&t.cycle===c;}).slice().reverse();if(!a.length){list.innerHTML='<div class="note">Keine zusätzlichen Ausgaben im laufenden Lohnzyklus.</div>';return;}var total=0;a.forEach(function(t){total+=Math.abs(Number(t.amount)||0);var r=document.createElement("div");r.className="row";var l=document.createElement("span");l.textContent=(t.date||"")+" · "+(t.text||"Ausgabe");var v=document.createElement("span");v.className="v red";v.textContent=eur(Math.abs(Number(t.amount)||0));r.appendChild(l);r.appendChild(v);list.appendChild(r);});var rr=document.createElement("div");rr.className="row";rr.innerHTML='<span><b>Zusätzliche Ausgaben im Zyklus</b></span><span class="v">'+eur(total)+'</span>';list.appendChild(rr);}
 function addIncome(){var v=num("giroIncome");if(v<=0){alert("Bitte einen positiven Zahlungseingang eingeben.");return;}bookTransaction(v,$("giroText").value.trim()||"Zahlungseingang","income",{cycle:activeCycleKey()});$("giroIncome").value="";$("giroText").value="";refresh();}
@@ -186,6 +186,8 @@ var lastParsedReport=null;
 var MONTHS={Jan:0,Feb:1,"Mär":2,Mar:2,Apr:3,Mai:4,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Okt:9,Oct:9,Nov:10,Dez:11,Dec:11};
 function loadReports(){try{var a=JSON.parse(localStorage.getItem('meinGeldplanTimeReports')||'[]');return Array.isArray(a)?a:[];}catch(e){return[];}}
 function saveReports(a){reportStore=a;try{localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(a));}catch(e){}}
+function loadPayslips(){try{var a=JSON.parse(localStorage.getItem('meinGeldplanPayslips')||'[]');return Array.isArray(a)?a:[];}catch(e){return[];}}
+function savePayslips(a){try{localStorage.setItem('meinGeldplanPayslips',JSON.stringify(a));}catch(e){}}
 function loadExactCalculation(){try{var v=JSON.parse(localStorage.getItem('meinGeldplanExactCalculation')||'{}');return v&&typeof v==='object'?v:{};}catch(e){return {};}}
 function saveExactCalculation(v){try{localStorage.setItem('meinGeldplanExactCalculation',JSON.stringify(v));}catch(e){}}
 function recalculateExactNet(){
@@ -211,6 +213,41 @@ function reportMonthFromLines(lines){
     var s=lines[i];
     var m=s.match(/\b(Jan|Feb|Mär|Mar|Apr|Mai|May|Jun|Jul|Aug|Sep|Okt|Oct|Nov|Dez|Dec)\s+(\d{2})\b/i);
     if(m){var key=m[1].replace(/^\s+|\s+$/g,'');var mo=MONTHS[key[0].toUpperCase()+key.slice(1)] ; if(mo==null){var lk=key[0].toUpperCase()+key.slice(1);mo=MONTHS[lk];} if(mo!=null)return {year:2000+Number(m[2]),month:mo};
+    }
+    function moneyMatches(s){
+     var matches=String(s||'').match(/-?\d{1,3}(?:\.\d{3})*,\d{2}/g)||[];
+     return matches.map(parseMoney);
+    }
+    function amountAfterLabel(lines,patterns){
+     for(var i=0;i<lines.length;i++){
+       if(patterns.some(function(pattern){return pattern.test(lines[i]);})){
+         var values=moneyMatches(lines[i]);if(values.length)return values[values.length-1];
+         if(i+1<lines.length){values=moneyMatches(lines[i+1]);if(values.length)return values[values.length-1];}
+       }
+     }
+     return null;
+    }
+    function payslipMonthFromLines(lines){
+     var month=reportMonthFromLines(lines);if(month)return month;
+     for(var i=0;i<Math.min(lines.length,40);i++){
+       var full=lines[i].match(/\b(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(20\d{2})\b/i);
+       if(full){var names=['januar','februar','märz','april','mai','juni','juli','august','september','oktober','november','dezember'];return {year:Number(full[2]),month:names.indexOf(full[1].toLowerCase())};}
+       var m=lines[i].match(/\b(0?[1-9]|1[0-2])[./-](20\d{2})\b/);
+       if(m)return {year:Number(m[2]),month:Number(m[1])-1};
+     }
+     return null;
+    }
+    function parsePayslip(lines){
+     var month=payslipMonthFromLines(lines);if(!month)throw new Error('Abrechnungsmonat der Bezügemitteilung konnte nicht erkannt werden.');
+     var actual={
+       year:month.year,month:month.month,
+       gross:amountAfterLabel(lines,[/Gesamtbrutto/i,/Bruttoentgelt/i]),
+       net:amountAfterLabel(lines,[/gesetzliches Netto/i,/gesetzl\.?\s*Netto/i]),
+       payout:amountAfterLabel(lines,[/Auszahlungsbetrag/i,/Auszahlung/i,/Überweisungsbetrag/i]),
+       garnish:amountAfterLabel(lines,[/Pfändung/i,/Abtretung/i])
+     };
+     if(actual.gross==null&&actual.net==null&&actual.payout==null)throw new Error('Keine sicheren Abrechnungswerte erkannt.');
+     return actual;
     }
   }
   return null;
@@ -361,6 +398,24 @@ function renderSelectedForecast(rep){
  Object.keys(values).forEach(function(id){var el=$(id);if(el)el.textContent=values[id];});
  renderReportDetails(rep);
 }
+function signedMoney(value){return value==null?'–':(value>=0?'+':'')+eur(value);}
+function renderPayslipComparison(){
+ var box=$('payslipComparison');if(!box)return;
+ var payslips=loadPayslips(),html=[];
+ payslips.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);}).forEach(function(actual){
+   var match=reportStore.map(function(rep){return {forecast:calculateReportForecast(rep,FORECAST_DEPENDENTS)};}).find(function(item){return item.forecast.payoutYear===actual.year&&item.forecast.payoutMonth===actual.month;});
+   var body='<div class="forecast-card"><div class="forecast-head"><b>Echte Abrechnung: '+esc(formatMonth(actual.year,actual.month))+'</b><span class="badge '+(match?'green':'neutral')+'">'+(match?'Prognose zugeordnet':'Keine passende Prognose')+'</span></div>';
+   if(match){
+     var f=match.forecast;
+     body+='<div class="row"><span>Gesamtbrutto</span><span class="v">'+eur(f.taxableGross)+' → '+(actual.gross==null?'–':eur(actual.gross))+' <span class="note">('+signedMoney(actual.gross==null?null:actual.gross-f.taxableGross)+')</span></span></div>';
+     body+='<div class="row"><span>Gesetzliches Netto</span><span class="v">'+eur(f.netBase)+' → '+(actual.net==null?'–':eur(actual.net))+' <span class="note">('+signedMoney(actual.net==null?null:actual.net-f.netBase)+')</span></span></div>';
+     body+='<div class="row"><span>Pfändung</span><span class="v">'+eur(f.garnish)+' → '+(actual.garnish==null?'–':eur(actual.garnish))+' <span class="note">('+signedMoney(actual.garnish==null?null:actual.garnish-f.garnish)+')</span></span></div>';
+     body+='<div class="row"><span>Auszahlung</span><span class="v">'+eur(f.payout)+' → '+(actual.payout==null?'–':eur(actual.payout))+' <span class="note">('+signedMoney(actual.payout==null?null:actual.payout-f.payout)+')</span></span></div>';
+   }else body+='<div class="note">Es wurde noch kein Zeitnachweis gefunden, dessen Auszahlung diesem Monat zugeordnet ist.</div>';
+   html.push(body+'</div>');
+ });
+ box.innerHTML=html.join('')||'<div class="note">Noch keine echte Lohnabrechnung verglichen.</div>';
+}
 function renderForecastTable(){
  var box=$('forecastTableWrap');if(!box)return;var arr=reportStore.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);});if(!arr.length){box.innerHTML='<div class="empty">Noch kein Zeitnachweis eingelesen.</div>';renderSelectedForecast(null);renderForecastChart([],0);return;}
  var dep=FORECAST_DEPENDENTS;box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="forecast-card"><div class="forecast-head"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'</span></span><span class="badge '+(f.shiftAllowance?'green':'neutral')+'">'+esc(f.allowanceType)+'</span></div><div class="mini-grid"><div class="mini"><div class="t">Netto</div><div class="n">'+eur(f.estimatedPfNet)+'</div></div><div class="mini"><div class="t">Pfändung</div><div class="n red">'+eur(f.garnish)+'</div></div><div class="mini"><div class="t">Auszahlung</div><div class="n good">'+eur(f.payout)+'</div></div></div></div>';}).join('');
@@ -375,15 +430,30 @@ async function importTimeReports(){var files=$('timeReportFiles')&&$('timeReport
  saveReports(reportStore);renderForecastTable();var preview=$('timeReportPreview');if(preview){preview.classList.remove('hidden');preview.innerHTML='<div class="note"><b>'+ok+' Zeitnachweis(e) übernommen.</b>'+(errors.length?'<br>'+errors.map(esc).join('<br>'):'')+'</div>';}
  status.textContent=errors.length?'Import abgeschlossen; einige Dateien konnten nicht vollständig verarbeitet werden.':'Import abgeschlossen. Zeitlohnarten und Zuschläge wurden berechnet.';
  }catch(e){status.textContent='Import fehlgeschlagen: '+e.message;} $('timeReportBtn').disabled=false;}
+async function importPayslips(){
+ var files=$('payslipFiles')&&$('payslipFiles').files,status=$('payslipStatus');
+ if(!files||!files.length){alert('Bitte mindestens eine Bezügemitteilung als PDF auswählen.');return;}
+ status.textContent='Bezügemitteilung wird ausgelesen …';$('payslipBtn').disabled=true;
+ var payslips=loadPayslips(),ok=0,errors=[];
+ try{
+   for(var i=0;i<files.length;i++)try{
+     var actual=parsePayslip(await readPdfLines(files[i]));actual.id=actual.year+'-'+String(actual.month+1).padStart(2,'0');actual.sourceName=files[i].name;actual.importedAt=new Date().toISOString();
+     var existing=payslips.findIndex(function(x){return x.id===actual.id;});if(existing>=0)payslips[existing]=actual;else payslips.push(actual);ok++;
+   }catch(e){errors.push(files[i].name+': '+e.message);}
+   savePayslips(payslips);renderPayslipComparison();
+   status.textContent=errors.length?'Vergleich abgeschlossen; einige Dateien konnten nicht verarbeitet werden.':'Abrechnung erfolgreich verglichen.';
+ }catch(e){status.textContent='Import fehlgeschlagen: '+e.message;}
+ $('payslipBtn').disabled=false;
+}
 function showLatestForecast(){reportStore=loadReports();if(!lastParsedReport&&reportStore.length)lastParsedReport=reportStore[reportStore.length-1];}
 function correctGiro(){var target=num("giroCorrection");if(target<0){alert("Bitte einen gültigen Kontostand eingeben.");return;}var current=currentGiro(),delta=target-current;if(Math.abs(delta)<0.005){$("giroCorrection").value="";alert("Der Kontostand entspricht bereits dem eingegebenen Wert.");return;}bookTransaction(delta,"Kontostand korrigiert","correction",{target:target,cycle:activeCycleKey()});$("giroCorrection").value="";refresh();}
-function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchungen löschen?"))return;["meinGeldplanGiroTx","meinGeldplanCash","meinGeldplanFixItems","meinGeldplanMonthlyFix","meinGeldplanTimeReports"].forEach(function(k){localStorage.removeItem(k);});location.reload();}
+function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchungen löschen?"))return;["meinGeldplanGiroTx","meinGeldplanCash","meinGeldplanFixItems","meinGeldplanMonthlyFix","meinGeldplanTimeReports","meinGeldplanPayslips"].forEach(function(k){localStorage.removeItem(k);});location.reload();}
 function refresh(){renderTx();renderCycleExpenses();updateBudget();sunday();renderOverview();if($('giroCurrent'))$('giroCurrent').textContent=eur(currentGiro());showLatestForecast();if(!$('verlauf').classList.contains('hidden')){renderMonthlyCompare();renderMonthlyChart();}}
 function setDefaultMonth(){if($("pMonth")&&!$("pMonth").value){var d=new Date();$("pMonth").value=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}}
 function init(){
  ensureBase();reportStore=loadReports();setDefaultMonth();renderFixItems();initExactCalculator();
  if($('bCarryCash'))$('bCarryCash').value=cashBalance().toFixed(2);
- if($('incomeBtn'))$('incomeBtn').onclick=addIncome;if($('expenseBtn'))$('expenseBtn').onclick=addExpense;if($('withdrawBtn'))$('withdrawBtn').onclick=withdraw;if($('salaryBtn'))$('salaryBtn').onclick=addSalary;if($('resetBtn'))$('resetBtn').onclick=resetApp;if($('timeReportBtn'))$('timeReportBtn').onclick=importTimeReports;if($('correctionBtn'))$('correctionBtn').onclick=correctGiro;if($('addFixBtn'))$('addFixBtn').onclick=addFixItem;if($('exportBtn'))$('exportBtn').onclick=exportData;if($('importBtn'))$('importBtn').onclick=importData;
+ if($('incomeBtn'))$('incomeBtn').onclick=addIncome;if($('expenseBtn'))$('expenseBtn').onclick=addExpense;if($('withdrawBtn'))$('withdrawBtn').onclick=withdraw;if($('salaryBtn'))$('salaryBtn').onclick=addSalary;if($('resetBtn'))$('resetBtn').onclick=resetApp;if($('timeReportBtn'))$('timeReportBtn').onclick=importTimeReports;if($('payslipBtn'))$('payslipBtn').onclick=importPayslips;if($('correctionBtn'))$('correctionBtn').onclick=correctGiro;if($('addFixBtn'))$('addFixBtn').onclick=addFixItem;if($('exportBtn'))$('exportBtn').onclick=exportData;if($('importBtn'))$('importBtn').onclick=importData;
  if($('openHistoryBtn'))$('openHistoryBtn').onclick=function(){openTab('verlauf');};
  document.querySelectorAll('input,select').forEach(function(el){if(el.classList.contains('fix-name')||el.classList.contains('fix-amount')||el.id==='importFile'||el.id==='timeReportFiles')return;el.addEventListener('input',function(){if(el.id==='bCarryCash')saveCash(num('bCarryCash'));refresh();});el.addEventListener('change',function(){if(el.id==='bCarryCash')saveCash(num('bCarryCash'));refresh();});});
  document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){openTab(b.dataset.tab);});});
