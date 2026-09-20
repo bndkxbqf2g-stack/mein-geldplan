@@ -461,5 +461,8 @@ function init(){
 }
 
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
-if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('./service-worker.js').catch(function(){/* Offline-Modus bleibt optional. */});});
+if('serviceWorker' in navigator)window.addEventListener('load',function(){
+ navigator.serviceWorker.register('./service-worker.js').then(function(reg){return reg.update();}).catch(function(){/* Offline-Modus bleibt optional. */});
+ navigator.serviceWorker.addEventListener('controllerchange',function(){if(!window.__appReloadedForUpdate){window.__appReloadedForUpdate=true;location.reload();}});
+});
 })();
