@@ -134,7 +134,7 @@ function renderOverview(){
  if($("ovAvailable"))$("ovAvailable").textContent=eur(available);if($("ovGiro"))$("ovGiro").textContent=eur(giro);if($("ovCash"))$("ovCash").textContent=eur(cash);if($("ovNextPay"))$("ovNextPay").textContent='Nächster Lohn: '+fmt(currentCyclePayDate());if($("ovPayDays"))$("ovPayDays").textContent=payDays+' Tage';if($("ovDay"))$("ovDay").textContent=eur(day);if($("ovWeek"))$("ovWeek").textContent=eur(day*7);if($("ovNextWithdraw"))$("ovNextWithdraw").textContent=fmt(next);if($("ovFix"))$("ovFix").textContent=eur(fixTotal());if($("ovCycleExpenses"))$("ovCycleExpenses").textContent=eur(cycleExp);if($("ovCashKpi"))$("ovCashKpi").textContent=eur(cash);if($("ovSalaryCount"))$("ovSalaryCount").textContent=txs().filter(function(t){return t.type==='salary';}).length;
  var s=latestSalary(),pct=0;if(s){var sd=new Date((s.date||dateKey(new Date()))+'T12:00:00'),pd=currentCyclePayDate(),total=Math.max(1,daysBetweenDates(sd,pd)),elapsed=Math.max(0,Math.min(total,daysBetweenDates(sd,new Date())));pct=(elapsed/total)*100;}if($("ovProgress"))$("ovProgress").style.width=pct.toFixed(1)+'%';if($("ovProgressText"))$("ovProgressText").textContent=Math.round(pct)+' % vergangen';
 }
-function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){recalculateExactNet();}}
+function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){showLatestForecast();recalculateExactNet();renderForecastTable();}}
 function exportData(){
  var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:35,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
 }
@@ -330,16 +330,46 @@ function renderReportDetails(rep){
  var rows=rep.rows.map(function(r){var q=(Number(r.qty)||0).toFixed(2).replace('.',',');return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(r.description)+'</span></span><span class="v">'+q+' h</span></div>';}).join('');
  box.innerHTML=rows||'<div class="note">Keine Details.</div>';
 }
+function renderSelectedForecast(rep){
+ var fields=['rMonth','rPayoutMonth','pNettoBasis','pPayout','pBaseNet','pVariableNet','pBrutto','pProtected','pPfNetto','pGarnish','pShiftAllowance','pSurcharges','pShiftSummary'];
+ if(!rep){
+   fields.forEach(function(id){var el=$(id);if(el)el.textContent='–';});
+   return;
+ }
+ var f=calculateReportForecast(rep,num('pDependents'));
+ var values={
+   rMonth:formatMonth(rep.year,rep.month),
+   rPayoutMonth:formatMonth(f.payoutYear,f.payoutMonth),
+   pNettoBasis:eur(f.netBase),
+   pPayout:eur(f.payout),
+   pBaseNet:eur(f.baseLegalNet),
+   pVariableNet:eur(f.taxableExtraNet),
+   pBrutto:eur(f.taxableGross),
+   pProtected:eur(f.protected),
+   pPfNetto:eur(f.estimatedPfNet),
+   pGarnish:eur(f.garnish),
+   pShiftAllowance:eur(f.shiftAllowance),
+   pSurcharges:eur(f.taxableExtrasGross),
+   pShiftSummary:'Zeitnachweis '+(rep.sourceName||formatMonth(rep.year,rep.month))+': '+f.allowanceType+
+     ' · Nacht '+(f.p.nightHours||0).toFixed(2).replace('.',',')+' h'+
+     ' · Sonntag '+(f.p.sunHours||0).toFixed(2).replace('.',',')+' h'+
+     ' · Samstag '+(f.p.saturdayHours||0).toFixed(2).replace('.',',')+' h'
+ };
+ Object.keys(values).forEach(function(id){var el=$(id);if(el)el.textContent=values[id];});
+ renderReportDetails(rep);
+}
 function renderForecastTable(){
- var box=$('forecastTableWrap');if(!box)return;var arr=reportStore.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);});if(!arr.length){box.innerHTML='<div class="empty">Noch kein Zeitnachweis eingelesen.</div>';return;}
- var dep=num('pDependents');box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="forecast-card"><div class="forecast-head"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'</span></span><span class="badge '+(f.shiftAllowance?'green':'neutral')+'">'+esc(f.allowanceType)+'</span></div><div class="mini-grid"><div class="mini"><div class="t">Netto</div><div class="n">'+eur(f.estimatedPfNet)+'</div></div><div class="mini"><div class="t">Pfändung</div><div class="n red">'+eur(f.garnish)+'</div></div><div class="mini"><div class="t">Auszahlung</div><div class="n good">'+eur(f.payout)+'</div></div></div></div>';}).join('');renderForecastChart(arr,dep);
+ var box=$('forecastTableWrap');if(!box)return;var arr=reportStore.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);});if(!arr.length){box.innerHTML='<div class="empty">Noch kein Zeitnachweis eingelesen.</div>';renderSelectedForecast(null);renderForecastChart([],0);return;}
+ var dep=num('pDependents');box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="forecast-card"><div class="forecast-head"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'</span></span><span class="badge '+(f.shiftAllowance?'green':'neutral')+'">'+esc(f.allowanceType)+'</span></div><div class="mini-grid"><div class="mini"><div class="t">Netto</div><div class="n">'+eur(f.estimatedPfNet)+'</div></div><div class="mini"><div class="t">Pfändung</div><div class="n red">'+eur(f.garnish)+'</div></div><div class="mini"><div class="t">Auszahlung</div><div class="n good">'+eur(f.payout)+'</div></div></div></div>';}).join('');
+ var selected=lastParsedReport&&arr.some(function(rep){return rep.id===lastParsedReport.id;})?lastParsedReport:arr[arr.length-1];
+ lastParsedReport=selected;renderSelectedForecast(selected);renderForecastChart(arr,dep);
 }
 function renderForecastChart(arr,dep){var box=$("forecastChart");if(!box)return;if(!arr.length){box.innerHTML='<div class="empty">Noch keine Prognosen.</div>';return;}var vals=arr.map(function(r){return calculateReportForecast(r,dep).payout;}),max=Math.max.apply(null,vals.concat([1]));box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep),h=Math.max(5,Math.round((f.payout/max)*125));return '<div class="bar-wrap"><div class="bar-value">'+eur(f.payout)+'</div><div class="bar" style="height:'+h+'px" title="'+esc(formatMonth(rep.year,rep.month))+' → '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'"></div><div class="bar-label">'+monthName(rep.month).slice(0,3)+'</div></div>';}).join('');}
 function ensurePdfJs(){if(!window.pdfjsLib)throw new Error('PDF-Bibliothek konnte nicht geladen werden. Bitte Internetverbindung prüfen.');window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';return window.pdfjsLib;}
 async function readPdfLines(file){var pdfjs=await ensurePdfJs(),buf=await file.arrayBuffer(),pdf=await pdfjs.getDocument({data:buf}).promise,lines=[];for(var p=1;p<=pdf.numPages;p++){var page=await pdf.getPage(p),tc=await page.getTextContent();lines=lines.concat(groupPdfText(tc.items));}return lines;}
 async function importTimeReports(){var files=$('timeReportFiles')&&$('timeReportFiles').files,status=$('timeReportStatus');if(!files||!files.length){alert('Bitte mindestens einen Zeitnachweis als PDF auswählen.');return;}status.textContent='Zeitnachweis wird ausgelesen …';$('timeReportBtn').disabled=true;var ok=0,errors=[];
  try{for(var i=0;i<files.length;i++){try{var lines=await readPdfLines(files[i]),rep=parseTimeReports(lines);rep.id=rep.year+'-'+String(rep.month+1).padStart(2,'0');rep.sourceName=files[i].name;rep.importedAt=new Date().toISOString();var existing=reportStore.findIndex(function(x){return x.id===rep.id;});if(existing>=0)reportStore[existing]=rep;else reportStore.push(rep);ok++;lastParsedReport=rep;}catch(e){errors.push(files[i].name+': '+e.message);}}
- saveReports(reportStore);if(lastParsedReport)renderReportDetails(lastParsedReport);var preview=$('timeReportPreview');if(preview){preview.classList.remove('hidden');preview.innerHTML='<div class="note"><b>'+ok+' Zeitnachweis(e) übernommen.</b>'+(errors.length?'<br>'+errors.map(esc).join('<br>'):'')+'</div>';}
+ saveReports(reportStore);renderForecastTable();var preview=$('timeReportPreview');if(preview){preview.classList.remove('hidden');preview.innerHTML='<div class="note"><b>'+ok+' Zeitnachweis(e) übernommen.</b>'+(errors.length?'<br>'+errors.map(esc).join('<br>'):'')+'</div>';}
  status.textContent=errors.length?'Import abgeschlossen; einige Dateien konnten nicht vollständig verarbeitet werden.':'Import abgeschlossen. Zeitlohnarten und Zuschläge wurden berechnet.';
  }catch(e){status.textContent='Import fehlgeschlagen: '+e.message;} $('timeReportBtn').disabled=false;}
 function showLatestForecast(){reportStore=loadReports();if(!lastParsedReport&&reportStore.length)lastParsedReport=reportStore[reportStore.length-1];}
