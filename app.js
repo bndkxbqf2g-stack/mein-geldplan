@@ -140,18 +140,21 @@ function checkForUpdate(){
  if(button)button.classList.add('spinning');
  if(status){status.textContent='Suche nach Aktualisierung …';status.style.display='block';}
  if(!('serviceWorker' in navigator)){
-   if(status)status.textContent='Aktualisierung ist in diesem Browser nicht verfügbar.';
+   if(status)status.textContent='Diese lokale Vorschau kann nicht online aktualisiert werden.';
    if(button)button.classList.remove('spinning');
    return;
  }
  var timeout=new Promise(function(_,reject){setTimeout(function(){reject(new Error('timeout'));},5000);});
- Promise.race([navigator.serviceWorker.ready,timeout]).then(function(reg){return reg.update();}).then(function(){
-   if(status)status.textContent='Die App ist aktuell.';
-   if(button)button.classList.remove('spinning');
-   setTimeout(function(){if(status)status.style.display='none';},2500);
+ Promise.race([navigator.serviceWorker.getRegistration('./'),timeout]).then(function(reg){
+   if(!reg)throw new Error('no-registration');
+   return reg.update();
+ }).then(function(){
+   if(status)status.textContent='Aktualisierung geprüft. App wird neu geladen …';
+   setTimeout(function(){location.reload();},300);
  }).catch(function(){
-   if(status)status.textContent='Aktualisierung konnte nicht geprüft werden.';
+   if(status)status.textContent='Aktualisierung konnte nicht geprüft werden. Bitte Internetverbindung prüfen.';
    if(button)button.classList.remove('spinning');
+   setTimeout(function(){if(status)status.style.display='none';},3500);
  });
 }
 function exportData(){
