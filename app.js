@@ -168,29 +168,16 @@ function sunday(){
  if($('withdrawalDays'))$('withdrawalDays').textContent=daysUntilNextWithdrawal();
  if($('withdrawalHint'))$('withdrawalHint').textContent='Der rechnerische 7-Tage-Betrag ist nur eine Orientierung. Du entscheidest selbst, wie viel du abhebst.';
 }
-// Historisch aus den hochgeladenen Bezügemitteilungen kalibriert.
-// Wir verwenden das tatsächlich ausgewiesene Regel-Netto als Basis und
-// schätzen nur die variablen Zeitbezüge. Das ist stabiler als ein grober
-// Brutto->Netto-Faktor.
-var PAYROLL_CALIBRATION={
-  // 2026 vor der Entgelt-/Zulagenänderung ab 01.04.2026
-  preApr2026:{gross:4360.85,legalNet:2767.80},
-  // Regelabrechnungen ab 04/2026 zeigen durchgehend diese Basis
-  fromApr2026:{gross:4480.43,legalNet:2827.98},
-  // Aus den Rückrechnungs-Perioden 2026 ergibt sich für steuer-/SV-pflichtige
-  // variable Bezüge ein sehr stabiler Auszahlungsfaktor um 48,2 %.
-  taxableExtraNetRate:0.482,
-  // Durchschnitt-VM §21 wird in den jüngsten Abrechnungen mit 1,44 €/Einheit
-  // ausgewiesen (z. B. 7 × 1,44 € = 10,08 €).
-  average21Rate:1.44,
-  nightSurchargeRate:4.58,
-  sundaySurchargeRate:5.58,
-  saturdayRate:0.64
+var PAYROLL_MASTER={
+  basePay:4226.92,careAllowance:90.00,universityAllowance:163.51,
+  fixedGross:4480.43,nightRate:4.46,saturdayRate:0.64,sundayRate:5.58,
+  shiftAllowance:250.00,schichtAllowance:100.00,
+  pensionRate:0.093,unemploymentRate:0.013,healthRate:0.0839,careRate:0.0155,
+  churchRate:0.08,dependents:2,tariff:'Bayern KR8',surchargeLevel:3
 };
 var FORECAST_DEPENDENTS=2;
 function payrollBaseForReport(rep){
-  var y=Number(rep.year)||0,m=Number(rep.month)||0;
-  return (y>2026 || (y===2026&&m>=3))?PAYROLL_CALIBRATION.fromApr2026:PAYROLL_CALIBRATION.preApr2026;
+  return {gross:PAYROLL_MASTER.fixedGross};
 }
 
 
@@ -239,7 +226,7 @@ function groupPdfText(items){
 function normalizeReportLine(s){return s.replace(/\s+/g,' ').trim();}
 function codeDescription(code){
  var m={
-  '5010':'Nachtarbeit (20 %)','5011':'Nacht Beginn vor 0:00 (Nachtarbeit)','5014':'Samstag 13–20 Uhr, 0,64 €/h','5024':'Sonntagsarbeit 25 %','5161':'Durchschnitt § 21 TV-L','5211':'Wechselschichtzulage §43','5212':'Schichtzulage §43','3A10':'Nachtarbeit Zeitlohnart','3A11':'Nacht Beginn vor 0:00','3A14':'Samstag 13–20 Uhr','3B61':'Durchschnitt §21 TV-L','3C11':'Wechselschichtzulage §43','3C12':'Schichtzulage §43'};
+  '5010':'Nachtarbeit','5011':'Nachtarbeit (Beginn vor 0:00)','5014':'Samstag','5024':'Sonntag','5161':'Durchschnitt §21','5211':'Wechselschichtzulage','5212':'Schichtzulage'};
  return m[code]||null;
 }
 function parseTimeReports(lines){
@@ -253,9 +240,11 @@ function parseTimeReports(lines){
    var m=rest.match(/^(?:(\d{1,2}:\d{2})\s+(\d{1,2}:\d{2})\s+)?([A-Z0-9]{4})\s+(\d{4}):?\s*(.*?)\s+(-?\d+(?:[,.]\d+)?)$/i);
    if(!m)continue;
    var code=m[4],shortCode=m[3],label=m[5],qty=parseMoney(m[6]);
-   rows.push({date:dm[1],from:m[1]||'',to:m[2]||'',code:code,shortCode:shortCode,label:label,qty:qty,description:codeDescription(code)||codeDescription(shortCode)||'Unbekannte Zeitlohnart'});
+   rows.push({date:dm[1],from:m[1]||'',to:m[2]||'',code:code,shortCode:shortCode,label:label,qty:qty,amount:qty,description:codeDescription(code)||'Unbekannte Zeitlohnart',known:!!codeDescription(code)});
  }
  if(!rows.length)throw new Error('Keine abrechnungsrelevanten Zeitlohnarten erkannt.');
+ var hasWechsel=rows.some(function(r){return r.code==='5211';}),hasSchicht=rows.some(function(r){return r.code==='5212';});
+ if(hasWechsel&&hasSchicht)throw new Error('Der Zeitnachweis enthält gleichzeitig 5211 und 5212. Diese Lohnarten schließen sich aus.');
  return {year:month.year,month:month.month,rows:rows};
 }
 function extractShiftSummary(lines){
@@ -268,18 +257,22 @@ function protectedSurchargeCalc(rows){
  rows.forEach(function(r){
    if(r.code==='5010'||r.code==='5011')nightHours+=Number(r.qty)||0;
    else if(r.code==='5024')sunHours+=Number(r.qty)||0;
-   else if(r.code==='5014'){var q=Number(r.qty)||0;saturdayHours+=q;saturdayPay+=q*PAYROLL_CALIBRATION.saturdayRate;}
+   else if(r.code==='5014'){var q=Number(r.qty)||0;saturdayHours+=q;saturdayPay+=q*PAYROLL_MASTER.saturdayRate;}
  });
  return {
    nightHours:nightHours,
    sunHours:sunHours,
    saturdayHours:saturdayHours,
-   nightPay:nightHours*PAYROLL_CALIBRATION.nightSurchargeRate,
-   sundayPay:sunHours*PAYROLL_CALIBRATION.sundaySurchargeRate,
+   nightPay:nightHours*PAYROLL_MASTER.nightRate,
+   sundayPay:sunHours*PAYROLL_MASTER.sundayRate,
    saturdayPay:saturdayPay
  };
 }
-function allowanceFromRows(rows){var wech=rows.some(function(r){return r.code==='5211'||r.label.toLowerCase().indexOf('wech')>=0;});var schi=rows.some(function(r){return r.code==='5212'||r.label.toLowerCase().indexOf('schiz')>=0;});return {wech:wech,schi:schi};}
+function allowanceFromRows(rows){
+ var wech=rows.some(function(r){return r.code==='5211';});
+ var schi=rows.some(function(r){return r.code==='5212';});
+ return {wech:wech,schi:schi,code:wech?'5211':schi?'5212':null};
+}
 function garnishment2026(net,dependents){
  // Pfändungsfreigrenzenbekanntmachung 2026, Monatswerte ab 01.07.2026 (§ 850c ZPO).
  // Die Beträge entsprechen den sechs Tabellenspalten für 0 bis 5+ Unterhaltspflichten.
@@ -290,49 +283,52 @@ function garnishment2026(net,dependents){
  if(net>4866.30){var ceilingBand=Math.floor((4866.29-rule.start)/10);amount=rule.first+ceilingBand*rule.step+(net-4866.30);}
  return Math.round(Math.max(0,amount)*100)/100;
 }
-function estimateNetFromGross(gross){
- var refGross=4480.43+250; // 4,730.43 calibrated point
- var refNet=2991.52;
- if(gross<=0)return 0;
- return gross*(refNet/refGross);
+function incomeTax2026(annualTaxable){
+ var x=Math.max(0,annualTaxable),y;
+ if(x<=12348)return 0;
+ if(x<=17799){y=(x-12348)/10000;return (914.51*y+1400)*y;}
+ if(x<=69878){y=(x-17799)/10000;return (173.10*y+2397)*y+1014.70;}
+ if(x<=277825)return 0.42*x-11135.74;
+ return 0.45*x-19470.38;
 }
 function reportVariableExtras(rep,a,p){
- var shiftAllowance=a.wech?250:(a.schi?100:0);
- var avgUnits=rep.rows.filter(function(r){return r.code==='5161';}).reduce(function(s,r){return s+(Number(r.qty)||0);},0);
- var averagePay=avgUnits*PAYROLL_CALIBRATION.average21Rate;
- var taxableExtrasGross=shiftAllowance+p.saturdayPay+averagePay;
- return {shiftAllowance:shiftAllowance,averageUnits:avgUnits,averagePay:averagePay,taxableExtrasGross:taxableExtrasGross};
+ var averageRows=rep.rows.filter(function(r){return r.code==='5161';});
+ var rowAmount=function(r){return Number(r.amount!=null?r.amount:r.qty)||0;};
+ // Bei 5211/5212 ist die Menge nur ein Anspruchskennzeichen (meist 1),
+ // nicht der Eurobetrag. Die Vergütung kommt aus der Tarifstammdaten.
+ var shiftAllowance=a.code==='5211'?PAYROLL_MASTER.shiftAllowance:a.code==='5212'?PAYROLL_MASTER.schichtAllowance:0;
+ var averagePay=averageRows.reduce(function(s,r){return s+rowAmount(r);},0);
+ return {shiftAllowance:shiftAllowance,averageUnits:averageRows.length,averagePay:averagePay,taxableExtrasGross:shiftAllowance+averagePay};
 }
 function calculateReportForecast(rep,dependents){
  var p=protectedSurchargeCalc(rep.rows),a=allowanceFromRows(rep.rows),base=payrollBaseForReport(rep),v=reportVariableExtras(rep,a,p);
- // Die Basis ist das tatsächlich beobachtete Regel-Netto aus den Abrechnungen.
- // Nur variable, steuer-/SV-pflichtige Bestandteile werden zusätzlich geschätzt.
- var taxableExtraNet=v.taxableExtrasGross*PAYROLL_CALIBRATION.taxableExtraNetRate;
- var protected=p.nightPay+p.sundayPay;
- var estimatedLegalNet=base.legalNet+taxableExtraNet+protected;
- // Pfändung nur auf den nicht geschützten Teil anwenden.
- var estimatedPfNet=Math.max(0,base.legalNet+taxableExtraNet);
- var garnish=garnishment2026(estimatedPfNet,dependents);
- var payout=estimatedLegalNet-garnish;
+ var taxableGross=base.gross+v.taxableExtrasGross,svBase=taxableGross;
+ var pension=svBase*PAYROLL_MASTER.pensionRate,unemployment=svBase*PAYROLL_MASTER.unemploymentRate;
+ var health=svBase*PAYROLL_MASTER.healthRate,care=svBase*PAYROLL_MASTER.careRate;
+ var annualTaxable=Math.max(0,(taxableGross-pension-unemployment-health-care)*12-1266);
+ var tax=incomeTax2026(annualTaxable)/12,church=tax*PAYROLL_MASTER.churchRate,soli=0;
+ var taxableNet=taxableGross-pension-unemployment-health-care-tax-church-soli;
+ var protected=p.nightPay+p.saturdayPay+p.sundayPay,estimatedLegalNet=taxableNet+protected;
+ var estimatedPfNet=Math.max(0,estimatedLegalNet-protected),garnish=garnishment2026(estimatedPfNet,dependents),payout=estimatedLegalNet-garnish;
  var pm=payoutMonthFor(rep.year,rep.month);
  return {
   report:rep,payoutYear:pm.year,payoutMonth:pm.month,
-  baseGross:base.gross,baseLegalNet:base.legalNet,
-  taxableGross:base.gross+v.taxableExtrasGross,
-  taxableExtrasGross:v.taxableExtrasGross,taxableExtraNet:taxableExtraNet,
+  baseGross:base.gross,baseLegalNet:taxableNet-v.taxableExtrasGross,
+  taxableGross:taxableGross,taxableExtrasGross:v.taxableExtrasGross,taxableExtraNet:taxableNet-(taxableGross-v.taxableExtrasGross),
   netBase:estimatedLegalNet,protected:protected,estimatedPfNet:estimatedPfNet,
   garnish:garnish,payout:payout,shiftAllowance:v.shiftAllowance,
   averageUnits:v.averageUnits,averagePay:v.averagePay,
-  allowanceType:a.wech?'Wechselschichtzulage §43':a.schi?'Schichtzulage §43':'keine aus Zeitlohnarten',p:p
+  allowanceType:a.wech?'Wechselschichtzulage §43 (5211)':a.schi?'Schichtzulage §43 (5212)':'keine aus Zeitlohnarten',p:p,
+  deductions:{tax:tax,church:church,soli:soli,pension:pension,unemployment:unemployment,health:health,care:care}
  };
 }
 function renderReportDetails(rep){
  var box=$('reportDetails');if(!box)return;
- var rows=rep.rows.map(function(r){var q=(Number(r.qty)||0).toFixed(2).replace('.',',');return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(r.description)+'</span></span><span class="v">'+q+' h</span></div>';}).join('');
+ var rows=rep.rows.map(function(r){var isAllowance=r.code==='5211'||r.code==='5212',q=isAllowance?'vorhanden':(Number(r.qty)||0).toFixed(2).replace('.',','),unit=isAllowance||r.code==='5161'?'':' h',description=r.known?r.description:'UNBEKANNT – nicht interpretiert';return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(description)+'</span></span><span class="v">'+q+unit+'</span></div>';}).join('');
  box.innerHTML=rows||'<div class="note">Keine Details.</div>';
 }
 function renderSelectedForecast(rep){
- var fields=['rMonth','rPayoutMonth','pNettoBasis','pPayout','pBaseNet','pVariableNet','pBrutto','pProtected','pPfNetto','pGarnish','pShiftAllowance','pSurcharges','pShiftSummary'];
+ var fields=['rMonth','rPayoutMonth','pNettoBasis','pPayout','pBaseNet','pBasePay','pCareAllowance','pUniversityAllowance','pVariableNet','pBrutto','pLegalNet','pProtected','pPfNetto','pGarnish','pShiftAllowance','pSurcharges','pPayoutDetail','pShiftSummary'];
  if(!rep){
    fields.forEach(function(id){var el=$(id);if(el)el.textContent='–';});
    return;
@@ -344,17 +340,23 @@ function renderSelectedForecast(rep){
    pNettoBasis:eur(f.netBase),
    pPayout:eur(f.payout),
    pBaseNet:eur(f.baseLegalNet),
+   pBasePay:eur(PAYROLL_MASTER.basePay),
+   pCareAllowance:eur(PAYROLL_MASTER.careAllowance),
+   pUniversityAllowance:eur(PAYROLL_MASTER.universityAllowance),
    pVariableNet:eur(f.taxableExtraNet),
    pBrutto:eur(f.taxableGross),
+   pLegalNet:eur(f.netBase),
    pProtected:eur(f.protected),
    pPfNetto:eur(f.estimatedPfNet),
    pGarnish:eur(f.garnish),
    pShiftAllowance:eur(f.shiftAllowance),
-   pSurcharges:eur(f.taxableExtrasGross),
+   pSurcharges:eur(f.taxableExtrasGross+f.protected),
+   pPayoutDetail:eur(f.payout),
    pShiftSummary:'Zeitnachweis '+(rep.sourceName||formatMonth(rep.year,rep.month))+': '+f.allowanceType+
      ' · Nacht '+(f.p.nightHours||0).toFixed(2).replace('.',',')+' h'+
      ' · Sonntag '+(f.p.sunHours||0).toFixed(2).replace('.',',')+' h'+
-     ' · Samstag '+(f.p.saturdayHours||0).toFixed(2).replace('.',',')+' h'
+     ' · Samstag '+(f.p.saturdayHours||0).toFixed(2).replace('.',',')+' h'+
+     ' · Zuschläge gesamt '+eur(f.taxableExtrasGross+f.protected)
  };
  Object.keys(values).forEach(function(id){var el=$(id);if(el)el.textContent=values[id];});
  renderReportDetails(rep);
