@@ -8,6 +8,7 @@ Lokale Budget-, Lohn- und Prognose-App. Alle eingegebenen Daten werden im Browse
 - Beim Buchen eines Lohns beginnt ein neuer Monatszyklus. Fixkosten werden innerhalb desselben Monats nur einmal automatisch abgezogen.
 - Die Pfändungsprognose verwendet die monatliche Tabelle der Pfändungsfreigrenzenbekanntmachung 2026 nach § 850c ZPO für null bis fünf Unterhaltspflichten. Sie ist nur eine Orientierung und ersetzt keine Lohnabrechnung oder Rechtsberatung.
 - Zeitnachweise bleiben lokal; zum Auslesen wird die PDF-Bibliothek beim Öffnen der App vom CDN geladen.
+- Bezügemitteilungen können lokal mit einer bestehenden Prognose verglichen werden. Der Vergleich verändert keine Berechnung automatisch.
 
 ## Daten
 
