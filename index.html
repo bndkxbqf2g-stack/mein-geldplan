@@ -44,7 +44,7 @@ input:focus,select:focus{border-color:#9ca3af;box-shadow:0 0 0 4px rgba(17,24,39
 .hero-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px}.metric-title{font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:650}.metric{font-size:22px;font-weight:800;letter-spacing:-.3px}.metric.small{font-size:17px}
 .progress{height:10px;background:#e9edf3;border-radius:999px;overflow:hidden}.progress>span{display:block;height:100%;background:#111827;border-radius:inherit;width:0;transition:width .25s ease}
 .chart{display:flex;gap:10px;align-items:flex-end;height:160px;padding:10px 4px 0}.bar-wrap{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;min-width:0}.bar{width:100%;background:linear-gradient(180deg,#111827,#64748b);border-radius:12px 12px 5px 5px;min-height:4px}.bar-label{font-size:10px;text-align:center;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar-value{font-size:10px;text-align:center;font-weight:750}
-.fix-item{display:grid;grid-template-columns:1fr 120px 42px;gap:8px;align-items:center;margin:8px 0}.fix-item input{min-width:0}.fix-item button{border:0;background:#f1f1f3;border-radius:12px;font-size:24px;height:48px}
+.fixkosten-section{border-top:4px solid #16a34a;padding-top:15px}.fixkosten-intro{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:12px 13px;color:#166534}.fixkosten-intro .note{margin-top:0;color:#4d7c5c}.fix-list{margin-top:14px}.fix-item{display:grid;grid-template-columns:1fr 120px 42px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.fix-item:last-child{border-bottom:0}.fix-item input{min-width:0}.fix-item button{border:1px solid #fecaca;background:#fff7f7;color:#b91c1c;border-radius:12px;font-size:22px;height:48px;cursor:pointer;transition:background .15s,transform .15s}.fix-item button:hover{background:#fee2e2}.fix-item button:active{transform:scale(.95)}.fix-total{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:16px;padding:14px 15px;background:#f8fafc;border:1px solid var(--line);border-radius:16px}.fix-total .label{font-size:12px;color:var(--muted);font-weight:700}.fix-total .value{font-size:24px;font-weight:850;color:#166534;white-space:nowrap}
 .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.kpi{background:var(--soft);border:1px solid var(--line);border-radius:17px;padding:13px}.kpi .label{font-size:11px;color:var(--muted)}.kpi .value{font-size:20px;font-weight:800;margin-top:3px}
 .forecast-card{background:var(--soft);border:1px solid var(--line);border-radius:17px;padding:13px;margin:8px 0}.forecast-head{display:flex;justify-content:space-between;gap:10px}.forecast-amount{font-size:22px;font-weight:850}.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}.mini{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px}.mini .t{font-size:10px;color:var(--muted)}.mini .n{font-weight:800;margin-top:2px}
 .forecast-section{border-top:4px solid #0ea5e9}.forecast-section .kpi{background:#f0f9ff;border-color:#bae6fd}.forecast-section .good{color:#047857}
@@ -110,10 +110,10 @@ input:focus,select:focus{border-color:#9ca3af;box-shadow:0 0 0 4px rgba(17,24,39
 <div class="row"><span>Bargeld</span><span class="v" id="mainCash">–</span></div>
 <div class="row"><span><b>Insgesamt verfügbar</b></span><span class="v big good" id="mainAvailable">–</span></div>
 <div class="row"><span>Nächster Lohn</span><span class="v" id="mainNextPay">–</span></div>
-<div class="row"><span>Bis nächste Abhebung</span><span class="v" id="mainDays">–</span></div>
-<div class="row"><span><b>Tagessatz</b></span><span class="v big good" id="mainDay">–</span></div>
-<div class="row"><span><b>Wochensatz</b></span><span class="v big good" id="mainWeek">–</span></div>
-<div class="note" id="budgetNote">Tagessatz und Wochensatz beziehen Giro + vorhandenes Bargeld ein und teilen das verfügbare Geld durch die verbleibenden Tage bis zum nächsten Lohn.</div>
+<div class="row"><span>Bis zum nächsten Kassensturz</span><span class="v" id="mainDays">–</span></div>
+<div class="row"><span><b>Tagesbudget</b></span><span class="v big good" id="mainDay">–</span></div>
+<div class="row"><span><b>Wochenbudget</b></span><span class="v big good" id="mainWeek">–</span></div>
+<div class="note" id="budgetNote">Das Tagesbudget berechnet sich aus dem aktuellen Giroguthaben geteilt durch die verbleibenden Tage bis zum nächsten Kassensturz. Das Wochenbudget entspricht dem Tagesbudget mal 7 bzw. dem verbleibenden Zyklus, falls der letzte Abschnitt kürzer als 7 Tage ist.</div>
 </section>
 
 <section>
@@ -160,7 +160,7 @@ input:focus,select:focus{border-color:#9ca3af;box-shadow:0 0 0 4px rgba(17,24,39
 
 <!-- FIXKOSTEN -->
 <div id="fixkosten" class="view hidden">
-<section><h2>Meine Fixkosten</h2><div class="note" style="margin-bottom:10px">Hier verwaltest du deine festen monatlichen Ausgaben. Die Summe wird beim „Lohn buchen“ automatisch einmal je Lohnzyklus vom Girokonto abgezogen.</div><div id="fixItems"></div><button class="primary secondary" style="margin-top:10px" id="addFixBtn">+ Fixkosten hinzufügen</button><div class="row" style="margin-top:12px"><span><b>Gesamte monatliche Fixkosten</b></span><span class="v big" id="fixTotal">–</span></div></section>
+<section class="fixkosten-section"><h2>Meine Fixkosten</h2><div class="fixkosten-intro"><div class="note">Hier verwaltest du deine festen monatlichen Ausgaben. Die Summe wird beim „Lohn buchen“ automatisch einmal je Lohnzyklus vom Girokonto abgezogen.</div></div><div id="fixItems" class="fix-list"></div><button class="primary secondary" style="margin-top:14px" id="addFixBtn">+ Fixkosten hinzufügen</button><div class="fix-total"><span class="label">Gesamte monatliche Fixkosten</span><span class="value" id="fixTotal">–</span></div></section>
 </div>
 
 <!-- PROGNOSE -->
@@ -183,6 +183,6 @@ input:focus,select:focus{border-color:#9ca3af;box-shadow:0 0 0 4px rgba(17,24,39
 <p class="note" style="text-align:center;margin:22px 8px 0">Alle Berechnungen laufen lokal im Browser. Die App speichert keine Kontodaten online.</p>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 
 </body></html>
