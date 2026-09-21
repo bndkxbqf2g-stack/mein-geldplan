@@ -110,10 +110,10 @@ input:focus,select:focus{border-color:#9ca3af;box-shadow:0 0 0 4px rgba(17,24,39
 <div class="row"><span>Bargeld</span><span class="v" id="mainCash">–</span></div>
 <div class="row"><span><b>Insgesamt verfügbar</b></span><span class="v big good" id="mainAvailable">–</span></div>
 <div class="row"><span>Nächster Lohn</span><span class="v" id="mainNextPay">–</span></div>
-<div class="row"><span>Bis nächste Abhebung</span><span class="v" id="mainDays">–</span></div>
-<div class="row"><span><b>Tagessatz</b></span><span class="v big good" id="mainDay">–</span></div>
-<div class="row"><span><b>Wochensatz</b></span><span class="v big good" id="mainWeek">–</span></div>
-<div class="note" id="budgetNote">Tagessatz und Wochensatz beziehen Giro + vorhandenes Bargeld ein und teilen das verfügbare Geld durch die verbleibenden Tage bis zum nächsten Lohn.</div>
+<div class="row"><span>Bis zum nächsten Kassensturz</span><span class="v" id="mainDays">–</span></div>
+<div class="row"><span><b>Tagesbudget</b></span><span class="v big good" id="mainDay">–</span></div>
+<div class="row"><span><b>Wochenbudget</b></span><span class="v big good" id="mainWeek">–</span></div>
+<div class="note" id="budgetNote">Das Tagesbudget berechnet sich aus dem aktuellen Giroguthaben geteilt durch die verbleibenden Tage bis zum nächsten Kassensturz. Das Wochenbudget entspricht dem Tagesbudget mal 7 bzw. dem verbleibenden Zyklus, falls der letzte Abschnitt kürzer als 7 Tage ist.</div>
 </section>
 
 <section>
