@@ -37,9 +37,12 @@ function remainingPayDays(){
  return Math.max(1,daysBetweenDates(now,pay));
 }
 function weeklyGiroBudget(){
- var giro=currentGiro(),payDays=remainingPayDays(),withdrawDays=currentCycleDaysLeft(),cycleDays=Math.min(7,payDays,withdrawDays);
- var daily=payDays>0?giro/payDays:0;
- return {day:daily,week:payDays>0?daily*cycleDays:0,cycleDays:cycleDays};
+ var giro=currentGiro(),payDate=currentCyclePayDate(),nextW=nextWithdrawalDate(),payDays=remainingPayDays();
+ var useWithdrawalWindow=!!nextW&&nextW<payDate;
+ var baseDays=useWithdrawalWindow?Math.max(1,daysBetweenDates(nextW,payDate)):payDays;
+ var cycleDays=Math.min(7,baseDays);
+ var daily=baseDays>0?giro/baseDays:0;
+ return {day:daily,week:baseDays>0?daily*cycleDays:0,cycleDays:cycleDays,baseDays:baseDays};
 }
 function lastWithdrawal(){var a=txs().filter(function(t){return t.type==='withdrawal';});return a.length?a[a.length-1]:null;}
 function nextWithdrawalDate(){
@@ -104,7 +107,7 @@ function updateBudget(){
  if($('mainDays'))$('mainDays').textContent=daysW;
  if($('mainDay'))$('mainDay').textContent=eur(cycleBudget.day);
  if($('mainWeek'))$('mainWeek').textContent=eur(cycleBudget.week);
- if($('budgetNote'))$('budgetNote').textContent='Der Tagessatz berechnet sich aus dem aktuellen Girokontostand geteilt durch die verbleibenden Tage bis zum nächsten Lohn. Der Wochensatz ist der Tagessatz mal die verbleibenden Tage bis zur nächsten Sonntagsabhebung (max. 7, begrenzt durch die Resttage bis zum Lohn). Zusatzausgaben und Bargeldabhebungen verringern das Girokonto, sobald sie erfasst werden.';
+ if($('budgetNote'))$('budgetNote').textContent='Der Tagessatz berechnet sich aus dem aktuellen Girokontostand geteilt durch die verbleibenden Tage vom nächsten Abhebungstag bis zum nächsten Lohn (fällt keine Abhebung mehr vor den Lohn, gelten die Resttage ab heute). Der Wochensatz ist der Tagessatz mal diese Tage (max. 7). Zusatzausgaben und Bargeldabhebungen verringern das Girokonto, sobald sie erfasst werden.';
  renderFixItems();
 }
 function renderTx(){
