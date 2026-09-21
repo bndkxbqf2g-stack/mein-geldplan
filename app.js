@@ -242,43 +242,43 @@ function reportMonthFromLines(lines){
     var m=s.match(/\b(Jan|Feb|Mär|Mar|Apr|Mai|May|Jun|Jul|Aug|Sep|Okt|Oct|Nov|Dez|Dec)\s+(\d{2})\b/i);
     if(m){var key=m[1].replace(/^\s+|\s+$/g,'');var mo=MONTHS[key[0].toUpperCase()+key.slice(1)] ; if(mo==null){var lk=key[0].toUpperCase()+key.slice(1);mo=MONTHS[lk];} if(mo!=null)return {year:2000+Number(m[2]),month:mo};
     }
-    function moneyMatches(s){
-     var matches=String(s||'').match(/-?\d{1,3}(?:\.\d{3})*,\d{2}/g)||[];
-     return matches.map(parseMoney);
-    }
-    function amountAfterLabel(lines,patterns){
-     for(var i=0;i<lines.length;i++){
-       if(patterns.some(function(pattern){return pattern.test(lines[i]);})){
-         var values=moneyMatches(lines[i]);if(values.length)return values[values.length-1];
-         if(i+1<lines.length){values=moneyMatches(lines[i+1]);if(values.length)return values[values.length-1];}
-       }
-     }
-     return null;
-    }
-    function payslipMonthFromLines(lines){
-     var month=reportMonthFromLines(lines);if(month)return month;
-     for(var i=0;i<Math.min(lines.length,40);i++){
-       var full=lines[i].match(/\b(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(20\d{2})\b/i);
-       if(full){var names=['januar','februar','märz','april','mai','juni','juli','august','september','oktober','november','dezember'];return {year:Number(full[2]),month:names.indexOf(full[1].toLowerCase())};}
-       var m=lines[i].match(/\b(0?[1-9]|1[0-2])[./-](20\d{2})\b/);
-       if(m)return {year:Number(m[2]),month:Number(m[1])-1};
-     }
-     return null;
-    }
-    function parsePayslip(lines){
-     var month=payslipMonthFromLines(lines);if(!month)throw new Error('Abrechnungsmonat der Bezügemitteilung konnte nicht erkannt werden.');
-     var actual={
-       year:month.year,month:month.month,
-       gross:amountAfterLabel(lines,[/Gesamtbrutto/i,/Bruttoentgelt/i]),
-       net:amountAfterLabel(lines,[/gesetzliches Netto/i,/gesetzl\.?\s*Netto/i]),
-       payout:amountAfterLabel(lines,[/Auszahlungsbetrag/i,/Auszahlung/i,/Überweisungsbetrag/i]),
-       garnish:amountAfterLabel(lines,[/Pfändung/i,/Abtretung/i])
-     };
-     if(actual.gross==null&&actual.net==null&&actual.payout==null)throw new Error('Keine sicheren Abrechnungswerte erkannt.');
-     return actual;
-    }
   }
   return null;
+}
+function moneyMatches(s){
+ var matches=String(s||'').match(/-?\d{1,3}(?:\.\d{3})*,\d{2}/g)||[];
+ return matches.map(parseMoney);
+}
+function amountAfterLabel(lines,patterns){
+ for(var i=0;i<lines.length;i++){
+   if(patterns.some(function(pattern){return pattern.test(lines[i]);})){
+     var values=moneyMatches(lines[i]);if(values.length)return values[values.length-1];
+     if(i+1<lines.length){values=moneyMatches(lines[i+1]);if(values.length)return values[values.length-1];}
+   }
+ }
+ return null;
+}
+function payslipMonthFromLines(lines){
+ var month=reportMonthFromLines(lines);if(month)return month;
+ for(var i=0;i<Math.min(lines.length,40);i++){
+   var full=lines[i].match(/\b(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(20\d{2})\b/i);
+   if(full){var names=['januar','februar','märz','april','mai','juni','juli','august','september','oktober','november','dezember'];return {year:Number(full[2]),month:names.indexOf(full[1].toLowerCase())};}
+   var m=lines[i].match(/\b(0?[1-9]|1[0-2])[./-](20\d{2})\b);
+   if(m)return {year:Number(m[2]),month:Number(m[1])-1};
+ }
+ return null;
+}
+function parsePayslip(lines){
+ var month=payslipMonthFromLines(lines);if(!month)throw new Error('Abrechnungsmonat der Bezügemitteilung konnte nicht erkannt werden.');
+ var actual={
+   year:month.year,month:month.month,
+   gross:amountAfterLabel(lines,[/Gesamtbrutto/i,/Bruttoentgelt/i]),
+   net:amountAfterLabel(lines,[/gesetzliches Netto/i,/gesetzl\.?\s*Netto/i]),
+   payout:amountAfterLabel(lines,[/Auszahlungsbetrag/i,/Auszahlung/i,/Überweisungsbetrag/i]),
+   garnish:amountAfterLabel(lines,[/Pfändung/i,/Abtretung/i])
+ };
+ if(actual.gross==null&&actual.net==null&&actual.payout==null)throw new Error('Keine sicheren Abrechnungswerte erkannt.');
+ return actual;
 }
 function groupPdfText(items){
   var arr=items.filter(function(x){return x.str&&x.str.trim();}).map(function(x){return {str:x.str.trim(),x:x.transform[4],y:x.transform[5]};});
