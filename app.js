@@ -53,6 +53,9 @@ function daysUntilNextWithdrawal(){
  var n=nextWithdrawalDate();
  return n?daysBetweenDates(new Date(),n):7;
 }
+function currentCycleDaysLeft(){
+ return Math.max(1,daysUntilNextWithdrawal());
+}
 function daysToFollowingSundayFrom(d){
  var dow=d.getDay(),delta=(7-dow)%7;
  return delta===0?7:delta;
@@ -92,7 +95,7 @@ function bookTransaction(amount,text,type,meta){var a=txs(),t={id:Date.now()+Mat
 
 function updateBudget(){
  var giro=currentGiro(),cash=cashBalance(),available=giro+cash,payDays=remainingPayDays(),nextPay=currentCyclePayDate(),nextW=nextWithdrawalDate();
- var daysW=daysUntilNextWithdrawal();
+ var daysW=currentCycleDaysLeft();
  var cycleBudget=weeklyGiroBudget();
  if($('mainGiro'))$('mainGiro').textContent=eur(giro);
  if($('mainCash'))$('mainCash').textContent=eur(cash);
