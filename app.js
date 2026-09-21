@@ -53,6 +53,9 @@ function daysUntilNextWithdrawal(){
  var n=nextWithdrawalDate();
  return n?daysBetweenDates(new Date(),n):7;
 }
+function currentCycleDaysLeft(){
+ return Math.max(1,daysUntilNextWithdrawal());
+}
 function daysToFollowingSundayFrom(d){
  var dow=d.getDay(),delta=(7-dow)%7;
  return delta===0?7:delta;
@@ -92,7 +95,7 @@ function bookTransaction(amount,text,type,meta){var a=txs(),t={id:Date.now()+Mat
 
 function updateBudget(){
  var giro=currentGiro(),cash=cashBalance(),available=giro+cash,payDays=remainingPayDays(),nextPay=currentCyclePayDate(),nextW=nextWithdrawalDate();
- var daysW=daysUntilNextWithdrawal();
+ var daysW=currentCycleDaysLeft();
  var cycleBudget=weeklyGiroBudget();
  if($('mainGiro'))$('mainGiro').textContent=eur(giro);
  if($('mainCash'))$('mainCash').textContent=eur(cash);
@@ -151,12 +154,16 @@ function checkForUpdate(){
    return;
  }
  var timeout=new Promise(function(_,reject){setTimeout(function(){reject(new Error('timeout'));},5000);});
- Promise.race([navigator.serviceWorker.getRegistration('./'),timeout]).then(function(reg){
-   if(!reg)throw new Error('no-registration');
+ Promise.race([navigator.serviceWorker.getRegistration('./').then(function(reg){return reg||navigator.serviceWorker.register('./service-worker.js');}),timeout]).then(function(reg){
    return reg.update();
  }).then(function(){
    if(status)status.textContent='Aktualisierung geprüft. App wird neu geladen …';
-   setTimeout(function(){location.reload();},300);
+   if(navigator.serviceWorker.controller){
+     setTimeout(function(){if(!window.__appReloadedForUpdate){window.__appReloadedForUpdate=true;location.reload();}},300);
+   }else{
+     if(button)button.classList.remove('spinning');
+     if(status)status.textContent='Die App ist aktuell.';
+   }
  }).catch(function(){
    if(status)status.textContent='Aktualisierung konnte nicht geprüft werden. Bitte Internetverbindung prüfen.';
    if(button)button.classList.remove('spinning');
@@ -164,9 +171,9 @@ function checkForUpdate(){
  });
 }
 function exportData(){
- var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:36,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports(),payslips:loadPayslips()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
+ var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:44,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports(),payslips:loadPayslips(),savings:savingsEntries(),exactCalculation:loadExactCalculation()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
 }
-function importData(){var inp=$("importFile");if(!inp||!inp.files||!inp.files[0]){alert('Bitte zuerst eine Sicherungsdatei auswählen.');return;}var file=inp.files[0],reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(!data||!Array.isArray(data.giroTransactions)||!Array.isArray(data.fixItems)||!Array.isArray(data.timeReports))throw new Error('Ungültige Sicherungsdatei.');if(!confirm('Gespeicherte App-Daten wirklich durch diese Sicherung ersetzen?'))return;localStorage.setItem('meinGeldplanGiroTx',JSON.stringify(data.giroTransactions));localStorage.setItem('meinGeldplanCash',String(Math.max(0,Number(data.cash)||0)));localStorage.setItem('meinGeldplanFixItems',JSON.stringify(data.fixItems));localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(data.timeReports));localStorage.setItem('meinGeldplanPayslips',JSON.stringify(Array.isArray(data.payslips)?data.payslips:[]));if($("backupStatus"))$("backupStatus").textContent='Daten erfolgreich wiederhergestellt. Die App wird neu geladen.';setTimeout(function(){location.reload();},500);}catch(e){alert('Wiederherstellung fehlgeschlagen: '+e.message);}};reader.readAsText(file);}
+function importData(){var inp=$("importFile");if(!inp||!inp.files||!inp.files[0]){alert('Bitte zuerst eine Sicherungsdatei auswählen.');return;}var file=inp.files[0],reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(!data||!Array.isArray(data.giroTransactions)||!Array.isArray(data.fixItems)||!Array.isArray(data.timeReports))throw new Error('Ungültige Sicherungsdatei.');if(!confirm('Gespeicherte App-Daten wirklich durch diese Sicherung ersetzen?'))return;localStorage.setItem('meinGeldplanGiroTx',JSON.stringify(data.giroTransactions));localStorage.setItem('meinGeldplanCash',String(Math.max(0,Number(data.cash)||0)));localStorage.setItem('meinGeldplanFixItems',JSON.stringify(data.fixItems));localStorage.setItem('meinGeldplanSavings',JSON.stringify(Array.isArray(data.savings)?data.savings:[]));localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(data.timeReports));localStorage.setItem('meinGeldplanPayslips',JSON.stringify(Array.isArray(data.payslips)?data.payslips:[]));localStorage.setItem('meinGeldplanExactCalculation',JSON.stringify(data.exactCalculation&&typeof data.exactCalculation==='object'?data.exactCalculation:{}));if($("backupStatus"))$("backupStatus").textContent='Daten erfolgreich wiederhergestellt. Die App wird neu geladen.';setTimeout(function(){location.reload();},500);}catch(e){alert('Wiederherstellung fehlgeschlagen: '+e.message);}};reader.readAsText(file);}
 
 function renderCycleExpenses(){var list=$("cycleExpenseList");if(!list)return;list.innerHTML="";var c=activeCycleKey();var a=txs().filter(function(t){return t.type==="expense"&&t.cycle===c;}).slice().reverse();if(!a.length){list.innerHTML='<div class="note">Keine zusätzlichen Ausgaben im laufenden Lohnzyklus.</div>';return;}var total=0;a.forEach(function(t){total+=Math.abs(Number(t.amount)||0);var r=document.createElement("div");r.className="row";var l=document.createElement("span");l.textContent=(t.date||"")+" · "+(t.text||"Ausgabe");var v=document.createElement("span");v.className="v red";v.textContent=eur(Math.abs(Number(t.amount)||0));r.appendChild(l);r.appendChild(v);list.appendChild(r);});var rr=document.createElement("div");rr.className="row";rr.innerHTML='<span><b>Zusätzliche Ausgaben im Zyklus</b></span><span class="v">'+eur(total)+'</span>';list.appendChild(rr);}
 function addIncome(){var v=num("giroIncome");if(v<=0){alert("Bitte einen positiven Zahlungseingang eingeben.");return;}bookTransaction(v,$("giroText").value.trim()||"Zahlungseingang","income",{cycle:activeCycleKey()});$("giroIncome").value="";$("giroText").value="";refresh();}
