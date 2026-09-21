@@ -101,7 +101,7 @@ function updateBudget(){
  if($('mainDays'))$('mainDays').textContent=daysW;
  if($('mainDay'))$('mainDay').textContent=eur(cycleBudget.day);
  if($('mainWeek'))$('mainWeek').textContent=eur(cycleBudget.week);
- if($('budgetNote'))$('budgetNote').textContent='Der Tagessatz berechnet sich aus dem aktuellen Girokontostand geteilt durch die verbleibenden Tage bis zum nächsten Lohn. Der Wochensatz ist der Tagessatz mal 7; am Sonntag wird er mit dem dann aktuellen Giroguthaben neu berechnet. Zusatzausgaben und Bargeldabhebungen verringern das Girokonto, sobald sie erfasst werden.';
+ if($('budgetNote'))$('budgetNote').textContent='Der Tagessatz berechnet sich aus dem aktuellen Girokontostand geteilt durch die verbleibenden Tage bis zum nächsten Lohn. Der Wochensatz ist der Tagessatz mal die Anzahl der Tage bis zum Lohn (max. 7); am Sonntag wird er mit dem dann aktuellen Giroguthaben neu berechnet. Zusatzausgaben und Bargeldabhebungen verringern das Girokonto, sobald sie erfasst werden.';
  renderFixItems();
 }
 function renderTx(){

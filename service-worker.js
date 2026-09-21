@@ -1,5 +1,5 @@
-var CACHE_NAME='mein-geldplan-v4';
-var APP_SHELL=['./','./index.html','./app.js?v=39','./manifest.webmanifest','./icon.svg'];
+var CACHE_NAME='mein-geldplan-v6';
+var APP_SHELL=['./','./index.html','./app.js?v=41','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',function(event){
   event.waitUntil(caches.open(CACHE_NAME).then(function(cache){return cache.addAll(APP_SHELL);}));
