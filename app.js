@@ -60,6 +60,9 @@ function regularWithdrawalSuggested(available){
  var payDays=remainingPayDays();
  return payDays>0?Math.max(0,available/payDays*Math.min(7,payDays)):Math.max(0,available);
 }
+function weeklyBudget(available,payDays){
+ return payDays>0?Math.max(0,available/payDays*Math.min(7,payDays)):Math.max(0,available);
+}
 var DEFAULT_FIX=[
  {id:"steffi754",name:"Stefanie Wölling",amount:754},
  {id:"lk1",name:"Landkreis Main-Spessart",amount:456.50},
@@ -93,10 +96,10 @@ function updateBudget(){
  if($('mainAvailable'))$('mainAvailable').textContent=eur(available);
  if($('mainNextPay'))$('mainNextPay').textContent=fmt(nextPay)+' 20:30';
  if($('mainDays'))$('mainDays').textContent=daysW;
- var day=payDays>0?available/payDays:0,week=day*7;
+ var day=payDays>0?available/payDays:0,week=weeklyBudget(available,payDays);
  if($('mainDay'))$('mainDay').textContent=eur(day);
  if($('mainWeek'))$('mainWeek').textContent=eur(week);
- if($('budgetNote'))$('budgetNote').textContent='Die Budgettage zeigen den Zeitraum bis zur nächsten Abhebung. Tagessatz und Wochensatz berechnen sich aus Giro + vorhandenem Bargeld, geteilt durch die verbleibenden Tage bis zum nächsten Lohn. Du bestimmst die tatsächliche Abhebung selbst.';
+ if($('budgetNote'))$('budgetNote').textContent='Tagessatz und Wochensatz berechnen sich aus Giro + vorhandenem Bargeld bis zum nächsten Lohn. Liegen weniger als sieben Tage vor dem Lohn, zeigt der Wochensatz nur den Betrag für diese restlichen Tage.';
  renderFixItems();
 }
 function renderTx(){
@@ -131,7 +134,7 @@ function renderMonthlyChart(){
 function renderOverview(){
  var giro=currentGiro(),cash=cashBalance(),available=giro+cash,payDays=remainingPayDays(),day=payDays>0?available/payDays:0,next=nextWithdrawalDate(),cycle=activeCycleKey();
  var cycleExp=txs().filter(function(t){return t.type==='expense'&&t.cycle===cycle;}).reduce(function(s,t){return s+Math.abs(Number(t.amount)||0);},0);
- if($("ovAvailable"))$("ovAvailable").textContent=eur(available);if($("ovGiro"))$("ovGiro").textContent=eur(giro);if($("ovCash"))$("ovCash").textContent=eur(cash);if($("ovNextPay"))$("ovNextPay").textContent='Nächster Lohn: '+fmt(currentCyclePayDate());if($("ovPayDays"))$("ovPayDays").textContent=payDays+' Tage';if($("ovDay"))$("ovDay").textContent=eur(day);if($("ovWeek"))$("ovWeek").textContent=eur(day*7);if($("ovNextWithdraw"))$("ovNextWithdraw").textContent=fmt(next);if($("ovFix"))$("ovFix").textContent=eur(fixTotal());if($("ovCycleExpenses"))$("ovCycleExpenses").textContent=eur(cycleExp);if($("ovCashKpi"))$("ovCashKpi").textContent=eur(cash);if($("ovSalaryCount"))$("ovSalaryCount").textContent=txs().filter(function(t){return t.type==='salary';}).length;
+ if($("ovAvailable"))$("ovAvailable").textContent=eur(available);if($("ovGiro"))$("ovGiro").textContent=eur(giro);if($("ovCash"))$("ovCash").textContent=eur(cash);if($("ovNextPay"))$("ovNextPay").textContent='Nächster Lohn: '+fmt(currentCyclePayDate());if($("ovPayDays"))$("ovPayDays").textContent=payDays+' Tage';if($("ovDay"))$("ovDay").textContent=eur(day);if($("ovWeek"))$("ovWeek").textContent=eur(weeklyBudget(available,payDays));if($("ovNextWithdraw"))$("ovNextWithdraw").textContent=fmt(next);if($("ovFix"))$("ovFix").textContent=eur(fixTotal());if($("ovCycleExpenses"))$("ovCycleExpenses").textContent=eur(cycleExp);if($("ovCashKpi"))$("ovCashKpi").textContent=eur(cash);if($("ovSalaryCount"))$("ovSalaryCount").textContent=txs().filter(function(t){return t.type==='salary';}).length;
  var s=latestSalary(),pct=0;if(s){var sd=new Date((s.date||dateKey(new Date()))+'T12:00:00'),pd=currentCyclePayDate(),total=Math.max(1,daysBetweenDates(sd,pd)),elapsed=Math.max(0,Math.min(total,daysBetweenDates(sd,new Date())));pct=(elapsed/total)*100;}if($("ovProgress"))$("ovProgress").style.width=pct.toFixed(1)+'%';if($("ovProgressText"))$("ovProgressText").textContent=Math.round(pct)+' % vergangen';
 }
 function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){showLatestForecast();recalculateExactNet();renderForecastTable();renderPayslipComparison();}}
