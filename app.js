@@ -263,7 +263,7 @@ function payslipMonthFromLines(lines){
  for(var i=0;i<Math.min(lines.length,40);i++){
    var full=lines[i].match(/\b(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(20\d{2})\b/i);
    if(full){var names=['januar','februar','märz','april','mai','juni','juli','august','september','oktober','november','dezember'];return {year:Number(full[2]),month:names.indexOf(full[1].toLowerCase())};}
-   var m=lines[i].match(/\b(0?[1-9]|1[0-2])[./-](20\d{2})\b);
+   var m=lines[i].match(/\b(0?[1-9]|1[0-2])[./-](20\d{2})\b/);
    if(m)return {year:Number(m[2]),month:Number(m[1])-1};
  }
  return null;
