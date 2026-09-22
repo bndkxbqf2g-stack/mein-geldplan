@@ -2,10 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizeFixedCosts,totalFixedCosts,addFixedCost,updateFixedCost,removeFixedCost} from '../lib/fixed-costs.js';
 
-test('alter Fixkosten-Gesamtwert bleibt als Standard erhalten',()=>{
+test('persönliche Fixkosten sind als Standard hinterlegt',()=>{
   const items=normalizeFixedCosts(null);
-  assert.equal(items.length,1);
-  assert.equal(totalFixedCosts(items),2156);
+  assert.equal(items.length,10);
+  assert.equal(totalFixedCosts(items),2160.31);
+  assert.equal(items.find(x=>x.id==='apple-speicher').amount,4.31);
 });
 
 test('gespeicherte leere Liste bleibt leer',()=>assert.deepEqual(normalizeFixedCosts([]),[]));
