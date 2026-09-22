@@ -5,7 +5,8 @@ import {
   nextPaydayFrom,
   cycleSegments,
   calculateBudget,
-  maxAdditionalWithdrawal
+  maxAdditionalWithdrawal,
+  plannedPaydayForDate
 } from "../lib/cycle.js";
 
 const iso = d => d.toISOString().slice(0, 10);
@@ -80,4 +81,13 @@ test("Budget bleibt innerhalb 30.09.-03.10. auf derselben Abschnittsbasis", asyn
   assert.equal(b.dailyBudget, 70);
   assert.equal(a.weeklyBudget, 280);
   assert.equal(b.weeklyBudget, 280);
+});
+
+
+test("geplanter Lohntag vor aktivem Zyklus ist der letzte Arbeitstag des aktuellen Monats", () => {
+  assert.equal(iso(plannedPaydayForDate("2026-09-22")), "2026-09-30");
+});
+
+test("nach dem Monatslohntag zeigt die Planung den Folgemonat", () => {
+  assert.equal(iso(plannedPaydayForDate("2026-10-31")), "2026-11-30");
 });

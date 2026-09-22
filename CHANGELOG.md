@@ -1,3 +1,9 @@
+## v0.18.1 – Vor-Lohn-Zustand
+- Kein 01.01.1970 mehr ohne aktiven Lohnzyklus.
+- Geplanter Lohntag wird separat angezeigt.
+- Tages-/Wochenbudget bleibt bis zur echten Lohnbuchung auf „–“.
+- Übersichtslabel wechselt auf „Aktuell verfügbar“.
+
 # Changelog
 
 ## v0.1.0
