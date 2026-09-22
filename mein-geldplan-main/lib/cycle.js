@@ -131,3 +131,71 @@ export function calculateBudget({ giro, segmentStart, nextPayday }) {
 export function maxAdditionalWithdrawal(weeklyBudget, existingCash) {
   return Math.max(0, Number(weeklyBudget || 0) - Math.max(0, Number(existingCash || 0)));
 }
+export function cycleForDate(value) {
+  const today = dateOnly(value);
+  const thisMonthPayday = lastWorkday(today.getFullYear(), today.getMonth());
+
+  let payday;
+  if (today >= thisMonthPayday) {
+    payday = thisMonthPayday;
+  } else {
+    let year = today.getFullYear();
+    let month = today.getMonth() - 1;
+    if (month < 0) {
+      month = 11;
+      year -= 1;
+    }
+    payday = lastWorkday(year, month);
+  }
+
+  return { payday, nextPayday: nextPaydayFrom(payday) };
+}
+
+export function activeSegmentForDate(value, payday, nextPayday) {
+  const today = dateOnly(value);
+  const segments = cycleSegments(payday, nextPayday);
+  return segments.find(({ start, end }) => today >= start && today <= end) || null;
+}
+
+export function budgetForDate({ giro, today, payday, nextPayday } = {}) {
+  const date = dateOnly(today || new Date());
+  const cycle = payday && nextPayday
+    ? { payday: dateOnly(payday), nextPayday: dateOnly(nextPayday) }
+    : cycleForDate(date);
+  const segment = activeSegmentForDate(date, cycle.payday, cycle.nextPayday);
+
+  if (!segment) {
+    return {
+      payday: cycle.payday,
+      nextPayday: cycle.nextPayday,
+      segmentStart: null,
+      segmentEnd: null,
+      remainingDays: 0,
+      segmentDays: 0,
+      dailyBudget: 0,
+      weeklyBudget: 0
+    };
+  }
+
+  return {
+    payday: cycle.payday,
+    nextPayday: cycle.nextPayday,
+    segmentStart: segment.start,
+    segmentEnd: segment.end,
+    ...calculateBudget({
+      giro,
+      segmentStart: segment.start,
+      nextPayday: cycle.nextPayday
+    })
+  };
+}
+
+
+export function isWithdrawalDay(value, payday, nextPayday) {
+  const date = dateOnly(value);
+  const cycle = payday && nextPayday
+    ? { payday: dateOnly(payday), nextPayday: dateOnly(nextPayday) }
+    : cycleForDate(date);
+  const segment = activeSegmentForDate(date, cycle.payday, cycle.nextPayday);
+  return Boolean(segment && date.getDay() === 0 && dateKey(segment.start) === dateKey(date));
+}

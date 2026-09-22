@@ -5,9 +5,9 @@ Lokale Budget-, Lohn- und Prognose-App. Alle eingegebenen Daten werden im Browse
 ## Wichtige Regeln
 
 - Der nächste Lohn wird am letzten Banktag des Monats berechnet. Die Kalenderlogik berücksichtigt bundesweite Feiertage sowie die in Bayern landesweit geltenden Feiertage Heilige Drei Könige, Fronleichnam und Allerheiligen.
-- Beim Buchen eines Lohns beginnt ein neuer Monatszyklus. Fixkosten werden innerhalb desselben Monats nur einmal automatisch abgezogen.
+- Beim Buchen eines Lohns beginnt ein neuer Lohnzyklus. Die verwalteten Fixkosten werden innerhalb desselben Zyklus nur einmal automatisch abgezogen.
 - Die Pfändungsprognose verwendet die monatliche Tabelle der Pfändungsfreigrenzenbekanntmachung 2026 nach § 850c ZPO für null bis fünf Unterhaltspflichten. Sie ist nur eine Orientierung und ersetzt keine Lohnabrechnung oder Rechtsberatung.
-- Zeitnachweise bleiben lokal; zum Auslesen wird die PDF-Bibliothek beim Öffnen der App vom CDN geladen.
+- Zeitnachweise bleiben lokal; die PDF-Bibliothek wird erst beim PDF-Import vom CDN geladen.
 - Bezügemitteilungen können lokal mit einer bestehenden Prognose verglichen werden. Der Vergleich verändert keine Berechnung automatisch.
 
 ## Daten

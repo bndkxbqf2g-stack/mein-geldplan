@@ -62,3 +62,22 @@ test("vorhandenes Bargeld reduziert nur die maximal mögliche zusätzliche Abheb
 test("Monatsende am Wochenende: letzter Werktag wird korrekt vorgezogen", () => {
   assert.equal(iso(lastWorkday(2027, 0)), "2027-01-29");
 });
+
+test("01.10.2026 gehört weiter zum am 30.09. gestarteten Zyklus", async () => {
+  const { cycleForDate } = await import("../lib/cycle.js");
+  const cycle = cycleForDate("2026-10-01");
+  assert.equal(iso(cycle.payday), "2026-09-30");
+  assert.equal(iso(cycle.nextPayday), "2026-10-30");
+});
+
+test("Budget bleibt innerhalb 30.09.-03.10. auf derselben Abschnittsbasis", async () => {
+  const { budgetForDate } = await import("../lib/cycle.js");
+  const a = budgetForDate({ giro: 2100, today: "2026-09-30" });
+  const b = budgetForDate({ giro: 2100, today: "2026-10-01" });
+  assert.equal(iso(a.segmentStart), "2026-09-30");
+  assert.equal(iso(b.segmentStart), "2026-09-30");
+  assert.equal(a.dailyBudget, 70);
+  assert.equal(b.dailyBudget, 70);
+  assert.equal(a.weeklyBudget, 280);
+  assert.equal(b.weeklyBudget, 280);
+});
