@@ -1,6 +1,6 @@
-var CACHE_NAME='mein-geldplan-v0.99.1';
+var CACHE_NAME='mein-geldplan-v0.99.2';
 var APP_SHELL=[
-  './','./index.html','./app.js?v=0.99.1','./manifest.webmanifest','./icon.svg',
+  './','./index.html','./app.js?v=0.99.2','./manifest.webmanifest','./icon.svg',
   './config/version.js','./config/salary-2026.js',
   './lib/ui.js','./lib/storage.js','./lib/theme-ui.js','./lib/cycle.js','./lib/budget.js','./lib/budget-ui.js',
   './lib/savings.js','./lib/savings-ui.js','./lib/fixed-costs.js','./lib/fixed-costs-ui.js','./lib/history-ui.js','./lib/statistics.js',
