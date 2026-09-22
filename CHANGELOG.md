@@ -1,3 +1,11 @@
+# v0.18.2
+
+- Bugfix: bestehendes Budget wird vor dem nächsten Lohneingang als laufender Abschnitt behandelt.
+- 22.09.–26.09.2026: 5 Abschnittstage, Budgetbasis 8 Finanzierungstage bis 30.09.2026.
+- Am Sonntag beginnt automatisch der nächste Abschnitt; 27.09.–29.09.2026 sind 3 Tage.
+- „Tage bis Lohn“ zeigt echte Kalendertage, während Tages-/Wochenbudget bis zum Abschnittswechsel stabil bleiben.
+- Ein gespeicherter Budgetanker verhindert tägliches Verschieben der Berechnungsbasis.
+
 ## v0.18.1 – Vor-Lohn-Zustand
 - Kein 01.01.1970 mehr ohne aktiven Lohnzyklus.
 - Geplanter Lohntag wird separat angezeigt.

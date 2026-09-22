@@ -88,3 +88,14 @@ test('Fixkosten werden getrennt gespeichert und geladen', async()=>{
   assert.equal(saveFixedCosts(value,storage),true);
   assert.deepEqual(getFixedCosts(storage),value);
 });
+
+
+test("Budgetanker wird gespeichert und mit Budgetdaten gelöscht", async () => {
+  const {getBudgetAnchor,saveBudgetAnchor,clearBudgetStorage}=await import('../lib/storage.js');
+  const store=memoryStorage();
+  assert.equal(getBudgetAnchor(store),'');
+  assert.equal(saveBudgetAnchor('2026-09-22',store),true);
+  assert.equal(getBudgetAnchor(store),'2026-09-22');
+  clearBudgetStorage(store);
+  assert.equal(getBudgetAnchor(store),'');
+});
