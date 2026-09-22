@@ -7,7 +7,7 @@ const root=path.join(path.dirname(fileURLToPath(import.meta.url)),'..');
 const allJs=['app.js',...fs.readdirSync(path.join(root,'lib')).filter(x=>x.endsWith('.js')).map(x=>`lib/${x}`)].map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n');
 
 test('sichtbare Aktionsbuttons sind im JavaScript verdrahtet',()=>{
-  ['incomeBtn','expenseBtn','correctionBtn','withdrawBtn','savingPositionBtn','savingRateBtn','salaryBtn','openHistoryBtn','addFixBtn','timeReportBtn','payslipBtn','exportBtn','importBtn','updateBtn','resetBtn'].forEach(id=>assert.match(allJs,new RegExp(id),id));
+  ['incomeBtn','expenseBtn','correctionBtn','withdrawBtn','savingRateBtn','salaryBtn','openHistoryBtn','addFixBtn','timeReportBtn','payslipBtn','exportBtn','importBtn','updateBtn','resetBtn'].forEach(id=>assert.match(allJs,new RegExp(id),id));
 });
 
 test('PWA Service Worker wird wieder registriert',()=>assert.match(allJs,/serviceWorker\.register/));

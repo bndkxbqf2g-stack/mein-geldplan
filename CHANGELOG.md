@@ -1,11 +1,20 @@
+# v0.99.1
+- Sparbereich vereinfacht: nur noch Zweck, Betrag und Sparverlauf; keine separate Sparziel-Verwaltung mehr.
+- Bestehende Zwecke werden intern automatisch wiederverwendet; neue Zwecke automatisch angelegt.
+- Aktive Sparbuchungen können im Verlauf weiterhin freigegeben werden.
+- Gehaltsprognose auf kleinen iPhone-Breiten responsiver gemacht; lange Werte brechen sauber um.
+- Abrechnungsvergleich in mobile, mehrzeilige Prognose/Abrechnung/Abweichung-Darstellung umgebaut.
+- Zeitlohnarten im UI deutsch beschriftet; 5211/5212 werden als monatliche Zulage statt 0,00 h angezeigt.
+- Prognosegrafik kompakter und klarer dargestellt.
+
 # Changelog
 
-## v0.99.0 – Release Candidate
+## v0.99.1 – Release Candidate
 - Keine neuen Fachfunktionen.
 - Gesamtcheck für Repo-Root, PWA-Versionierung, Service Worker und Test-Suite.
 - Release-Candidate-Stand für den Praxistest auf GitHub Pages/iPhone.
 
-## v0.99.0 – UX & Fehlerzustände
+## v0.99.1 – UX & Fehlerzustände
 - Nicht-blockierende Statusmeldungen statt vieler Browser-Alerts.
 - Update-Button zeigt einen echten Busy-Zustand und verhindert Doppelklicks während der Prüfung.
 - Leere Listen und mobile Touch-Ziele klarer dargestellt.
@@ -68,7 +77,7 @@
 
 # Changelog
 
-## v0.99.0 – Release Candidate
+## v0.99.1 – Release Candidate
 - Keine neuen Fachfunktionen.
 - Gesamtcheck für Repo-Root, PWA-Versionierung, Service Worker und Test-Suite.
 - Release-Candidate-Stand für den Praxistest auf GitHub Pages/iPhone.

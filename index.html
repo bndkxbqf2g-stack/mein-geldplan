@@ -76,15 +76,25 @@ input,select{background:var(--card);border-color:var(--line);color:var(--text)}i
 @media(max-width:650px){nav{top:85px}.privacy-badge{display:none}.headline{gap:8px}.header-actions{flex-shrink:0}h1{font-size:26px}.sub{font-size:12px}section{border-radius:24px;padding:18px}.hero{border-radius:28px}}
 
 
-/* v0.99.0 UX polish */
+/* v0.99.1 UX polish */
 button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:none!important;box-shadow:none!important}
 .app-notice{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translate(-50%,18px);z-index:50;max-width:min(92vw,560px);padding:11px 14px;border-radius:14px;background:rgba(15,23,42,.94);color:#fff;box-shadow:0 16px 40px rgba(15,23,42,.28);font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease}.app-notice.show{opacity:1;transform:translate(-50%,0)}.app-notice.error{background:rgba(153,27,27,.96)}.app-notice.success{background:rgba(22,101,52,.96)}
 .empty{border:1px dashed var(--line);border-radius:14px;background:var(--soft);margin-top:8px}.note[role="status"]{min-height:18px}
 @media(max-width:650px){main{padding-bottom:calc(72px + env(safe-area-inset-bottom))}nav{padding-left:12px;padding-right:12px}.primary{min-height:48px}.saving-action{min-height:38px}.update-button{min-width:38px;min-height:38px}}
+
+/* v0.99.1 mobile salary + simplified savings */
+.saving-history-title{font-size:14px;margin:18px 0 8px;color:var(--muted)}
+.saving-history-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.saving-history-row:last-child{border-bottom:0}.saving-history-info{min-width:0;display:flex;flex-direction:column;gap:3px}.saving-history-info span{font-size:11px;color:var(--muted)}.saving-history-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.saving-history-actions strong{white-space:nowrap}
+#prognose .row>span:first-child{min-width:0}#prognose .row .v{max-width:62%;white-space:normal;overflow-wrap:anywhere}
+.comparison-row{display:grid;grid-template-columns:minmax(110px,.8fr) minmax(0,1.7fr);gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.comparison-row:last-child{border-bottom:0}.comparison-label{font-weight:650}.comparison-values{display:grid;gap:4px;text-align:right;min-width:0}.comparison-values span{font-size:11px;color:var(--muted);overflow-wrap:anywhere}.comparison-values strong{font-size:12px;overflow-wrap:anywhere}
+.wage-row .v{max-width:none!important}.wage-unit{white-space:nowrap}.forecast-chart-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0}.forecast-chart-track{height:9px;background:var(--soft);border:1px solid var(--line);border-radius:99px;overflow:hidden}.forecast-chart-fill{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:99px}.forecast-chart-value{font-weight:800;font-size:12px;white-space:nowrap}
+@media(max-width:650px){nav{-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}nav button{scroll-snap-align:start;flex:0 0 auto}#prognose .row{align-items:flex-start}#prognose .row .v{max-width:58%;font-size:14px}.comparison-row{grid-template-columns:1fr}.comparison-values{text-align:left}.forecast-head{align-items:flex-start}.forecast-amount{font-size:19px}.saving-history-row{align-items:flex-start}.saving-history-actions{max-width:46%}}
+@media(max-width:430px){#prognose .row{display:grid;grid-template-columns:1fr;gap:5px}#prognose .row .v{max-width:none;text-align:left}.forecast-chart-row{grid-template-columns:58px minmax(0,1fr);}.forecast-chart-value{grid-column:2;text-align:right;margin-top:-3px}.saving-history-row{display:grid;grid-template-columns:1fr}.saving-history-actions{max-width:none;justify-content:space-between}}
 </style>
 </head>
 <body>
-<header><div class="headline"><div class="brand"><div class="eyebrow">MEIN FINANZPLAN</div><h1>Mein Geldplan</h1><div class="sub">Privat auf diesem Gerät · <span id="appVersion">v0.99.0</span></div></div><div class="header-actions"><button class="update-button theme-button" id="themeBtn" type="button" title="Darstellung: System" aria-label="Darstellung: System">◐</button><button class="update-button" id="updateBtn" type="button" title="Auf neue Version prüfen" aria-label="Auf neue Version prüfen">↻</button><div class="privacy-badge" title="Deine Daten bleiben lokal im Browser"><span class="status-dot"></span><span class="privacy-text">Lokal &amp; privat</span></div></div></div><div class="note" id="updateStatus" style="display:none;text-align:right;color:#dbeafe;max-width:860px;margin:4px auto 0"></div></header>
+<header><div class="headline"><div class="brand"><div class="eyebrow">MEIN FINANZPLAN</div><h1>Mein Geldplan</h1><div class="sub">Privat auf diesem Gerät · <span id="appVersion">v0.99.1</span></div></div><div class="header-actions"><button class="update-button theme-button" id="themeBtn" type="button" title="Darstellung: System" aria-label="Darstellung: System">◐</button><button class="update-button" id="updateBtn" type="button" title="Auf neue Version prüfen" aria-label="Auf neue Version prüfen">↻</button><div class="privacy-badge" title="Deine Daten bleiben lokal im Browser"><span class="status-dot"></span><span class="privacy-text">Lokal &amp; privat</span></div></div></div><div class="note" id="updateStatus" style="display:none;text-align:right;color:#dbeafe;max-width:860px;margin:4px auto 0"></div></header>
 <div id="appNotice" class="app-notice" role="status" aria-live="polite" aria-atomic="true"></div>
 <nav>
   <button class="tab active" data-tab="uebersicht">Übersicht</button>
@@ -179,20 +189,16 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 </section>
 
 <section>
-<h2>Sparen aus dem Wochenbudget</h2>
-<div class="row"><span>Bereits reserviert</span><span class="v good" id="mainSaved">–</span></div>
-<div class="row"><span>Max. zusätzliche Sparrate in diesem Abschnitt</span><span class="v" id="sSaveMax">–</span></div>
-<div class="grid" style="margin-top:10px">
-<div><label>Neue Sparposition</label><input id="sSavingName" type="text" placeholder="z. B. Urlaub, Auto"></div>
-<div><label>&nbsp;</label><button class="primary secondary" id="savingPositionBtn">Sparposition anlegen</button></div>
+<h2>Sparen</h2>
+<div class="row"><span>Aktuell reserviert</span><span class="v good" id="mainSaved">–</span></div>
+<div class="grid" style="margin-top:12px">
+<div><label>Wofür sparst du?</label><input id="sSavingPurpose" type="text" placeholder="z. B. Urlaub, Auto" autocomplete="off"></div>
+<div><label>Betrag (€)</label><input id="sSavingAmount" type="number" min="0" step=".01" inputmode="decimal" placeholder="z. B. 50"></div>
 </div>
-<div class="grid" style="margin-top:10px">
-<div><label>Sparposition</label><select id="sSavingPosition"><option value="">Sparposition wählen</option></select></div>
-<div><label>Sparrate (€)</label><input id="sSavingAmount" type="number" min="0" step=".01" placeholder="z. B. 100"></div>
-</div>
-<button class="primary" style="margin-top:12px" id="savingRateBtn">Sparrate reservieren</button>
-<div id="savingsList" style="margin-top:10px"></div>
-<div class="note">Die Sparrate bleibt physisch auf dem Girokonto, wird aber ab dem nächsten Budgetabschnitt nicht erneut als frei verfügbares Budget gerechnet.</div>
+<button class="primary" style="margin-top:12px" id="savingRateBtn">Sparen</button>
+<h3 class="saving-history-title">Sparverlauf</h3>
+<div id="savingsList"></div>
+<div class="note">Gesparte Beträge bleiben physisch auf dem Girokonto, sind aber für dein Budget reserviert. Aktive Einträge kannst du im Verlauf wieder freigeben.</div>
 </section>
 
 <section><h2>Lohn buchen</h2><div class="grid"><div><label>Nettolohn (€)</label><input id="salaryAmount" type="number" step=".01" placeholder="z. B. 2.900"></div><div><label>Beschreibung</label><input id="salaryText" type="text" placeholder="z. B. Lohn September"></div></div><button class="primary" style="margin-top:12px" id="salaryBtn">Lohn buchen & Fixkosten abziehen</button><div class="note">Nur der tatsächlich ausgezahlte Nettolohn verändert dein Budget. Die Prognose greift niemals automatisch ein.</div></section>
@@ -231,6 +237,6 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 
 <p class="note" style="text-align:center;margin:22px 8px 0">Alle Berechnungen laufen lokal im Browser. Die App speichert keine Kontodaten online.</p>
 </main>
-<script type="module" src="app.js?v=0.99.0"></script>
+<script type="module" src="app.js?v=0.99.1"></script>
 
 </body></html>

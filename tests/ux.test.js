@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-test('v0.99.0 exposes accessible global status notice',()=>{
+test('v0.99.1 exposes accessible global status notice',()=>{
   const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/id="appNotice"/);
   assert.match(html,/aria-live="polite"/);
