@@ -1,3 +1,4 @@
+import {APP_VERSION} from './config/version.js';
 import {clearAllStorage} from './lib/storage.js';
 import {createBudgetUi} from './lib/budget-ui.js';
 import {createSavingsUi} from './lib/savings-ui.js';
@@ -15,6 +16,7 @@ function resetApp(){
   clearAllStorage();location.reload();
 }
 function init(){
+  if($('appVersion'))$('appVersion').textContent=`v${APP_VERSION}`;
   budgetUi=createBudgetUi({refresh});
   savingsUi=createSavingsUi({budgetUi,refresh});
   fixedCostsUi=createFixedCostsUi({refresh});

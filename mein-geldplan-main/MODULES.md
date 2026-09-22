@@ -28,3 +28,9 @@ Backup/Restore, Service-Worker-Registrierung und Updateprüfung.
 - `tests/simulation.test.js`: kompletter Monatszyklus als Integrations-/Simulationstest
 - `lib/cycle.js`: `isWithdrawalDay()` für Sonntagsregel
 
+
+### Versionierung
+`config/version.js` enthält die sichtbare App-Version. Die Version wird in der Kopfzeile angezeigt. Ein Test stellt sicher, dass HTML- und Service-Worker-Version dazu passen.
+
+### Zyklusaktivierung
+Der aktive Budgetzyklus wird in `budget-ui.js` aus der letzten tatsächlichen `salary`-Transaktion abgeleitet. `cycle.js` liefert weiterhin reine Datums-/Abschnittsberechnungen und startet selbst keinen produktiven Zyklus.

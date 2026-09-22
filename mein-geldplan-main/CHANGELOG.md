@@ -62,3 +62,11 @@
 - PWA-Cache auf v54 angehoben
 - 62/62 Tests bestanden
 
+
+## v0.18.0 – Step 18
+- Neuer Budgetzyklus startet nur noch durch eine tatsächliche Lohnbuchung.
+- Erreichen des erwarteten Lohndatums allein erzeugt keinen neuen Zyklus mehr.
+- Ohne aktiven Lohnzyklus werden Tages-/Wochenbudget nicht künstlich berechnet.
+- Sichtbare Versionsnummer in der Kopfzeile nach „Privat auf diesem Gerät“.
+- Service-Worker-/Asset-Version auf v0.18.0 vereinheitlicht.
+- Neue Tests für Lohnaktivierung, ausbleibenden Folgelohn und Versionskonsistenz.

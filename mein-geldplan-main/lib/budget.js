@@ -55,6 +55,17 @@ export function hasFixedCostForCycle(transactions, cycle) {
   return list.some((item) => item && item.type === "fixedcost" && item.cycle === cycle);
 }
 
+
+export function getLatestSalaryTransaction(transactions, upToDate = "9999-12-31") {
+  const list = Array.isArray(transactions) ? transactions : [];
+  const limit = String(upToDate || "9999-12-31").slice(0, 10);
+  return list
+    .filter((item) => item && item.type === "salary" && item.date && item.date <= limit)
+    .slice()
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+    .at(-1) || null;
+}
+
 export function getLastWithdrawal(transactions) {
   const list = (Array.isArray(transactions) ? transactions : [])
     .filter((item) => item && item.type === "withdrawal");

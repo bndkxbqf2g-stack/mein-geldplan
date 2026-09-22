@@ -64,3 +64,16 @@ test("Abhebungen eines Abschnitts können für die Budgetbasis neutralisiert wer
   ];
   assert.equal(getWithdrawalTotalForRange(transactions, "2026-10-04", "2026-10-10"), 300);
 });
+
+import {getLatestSalaryTransaction} from '../lib/budget.js';
+
+test('letzte tatsächliche Lohnbuchung wird als Zyklusstart ermittelt',()=>{
+  const list=[
+    {type:'salary',date:'2026-09-30',amount:2000},
+    {type:'income',date:'2026-10-10',amount:50},
+    {type:'salary',date:'2026-10-30',amount:2100}
+  ];
+  assert.equal(getLatestSalaryTransaction(list,'2026-10-29').date,'2026-09-30');
+  assert.equal(getLatestSalaryTransaction(list,'2026-10-30').date,'2026-10-30');
+  assert.equal(getLatestSalaryTransaction([], '2026-10-30'),null);
+});
