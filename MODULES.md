@@ -34,3 +34,15 @@ Backup/Restore, Service-Worker-Registrierung und Updateprüfung.
 
 ### Zyklusaktivierung
 Der aktive Budgetzyklus wird in `budget-ui.js` aus der letzten tatsächlichen `salary`-Transaktion abgeleitet. `cycle.js` liefert weiterhin reine Datums-/Abschnittsberechnungen und startet selbst keinen produktiven Zyklus.
+
+- `lib/cycle.js`: enthält ab v0.20.0 den vollständigen landesweiten bayerischen Feiertagskalender für die Lohntermin-Berechnung.
+
+- `lib/pdf.js` (v0.21.1): rekonstruiert PDF-Zeilen anhand der PDF.js-Koordinaten, erkennt eindeutige Zeiträume und extrahiert Stunden nur aus sicheren/prüfbaren Mustern.
+
+### `lib/statistics.js`
+Reine Statistikfunktionen für Monatswerte, Transaktionssummen und Sparentwicklung. Keine DOM- oder Storage-Abhängigkeit.
+
+- `lib/theme-ui.js` – Theme-Modus (System/Hell/Dunkel), Meta-Theme-Color und Header-Schalter.
+
+- `lib/storage.js`: Schema-3-Migration, defensive Normalisierung und Datumsvalidierung.
+- `lib/maintenance-ui.js`: Backup v3, Validierung und rückrollbarer Restore.

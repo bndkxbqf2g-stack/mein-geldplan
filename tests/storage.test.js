@@ -99,3 +99,30 @@ test("Budgetanker wird gespeichert und mit Budgetdaten gelöscht", async () => {
   clearBudgetStorage(store);
   assert.equal(getBudgetAnchor(store),'');
 });
+
+test('ungültige Datumswerte erzeugen keinen 1970-/NaN-Zustand', async()=>{
+  const {getTransactions,getBudgetAnchor,isValidDateKey}=await import('../lib/storage.js');
+  const store=memoryStorage({
+    [storageKeys.transactions]:JSON.stringify([{type:'salary',amount:2800,date:'kaputt',text:'Lohn'}]),
+    [storageKeys.budgetAnchor]:'1970-00-99'
+  });
+  assert.equal(isValidDateKey('2026-09-30'),true);
+  assert.equal(isValidDateKey('2026-02-31'),false);
+  assert.equal(getTransactions(store)[0].date,'');
+  assert.equal(getBudgetAnchor(store),'');
+});
+
+test('Migration repariert alte Spar-IDs und defekte Speicherwerte', async()=>{
+  const {migrateStorage,getSavings,getCash,DATA_SCHEMA_VERSION}=await import('../lib/storage.js');
+  const store=memoryStorage({
+    [storageKeys.cash]:'NaN',
+    [storageKeys.savings]:JSON.stringify({positions:[{name:'Urlaub'}],allocations:[{positionId:'x',amount:'25',date:'2026-09-01'}]}),
+    [storageKeys.budgetAnchor]:'kein-datum'
+  });
+  const result=migrateStorage(store);
+  assert.equal(result.version,DATA_SCHEMA_VERSION);
+  assert.equal(getCash(store),0);
+  assert.match(getSavings(store).positions[0].id,/legacy-pos-/);
+  assert.equal(store.getItem(storageKeys.budgetAnchor),null);
+  assert.equal(store.getItem(storageKeys.schemaVersion),String(DATA_SCHEMA_VERSION));
+});

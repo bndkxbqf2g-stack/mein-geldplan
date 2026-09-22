@@ -16,3 +16,17 @@ Unter **Mehr** können alle lokalen Daten als JSON-Datei gesichert und später w
 
 ## Version v0.18.0
 Ab v0.18.0 startet ein Budgetzyklus erst mit einer tatsächlich gebuchten Lohnzahlung. Das erwartete Lohndatum allein aktiviert keinen neuen Zyklus. Die aktuelle Version steht sichtbar in der Kopfzeile hinter „Privat auf diesem Gerät“.
+
+
+### v0.20.0
+Die Lohntermin-Kalenderlogik berücksichtigt die landesweiten gesetzlichen Feiertage in Bayern.
+
+### v0.21.1
+Zeitnachweis-Import: positionsbasierte PDF-Zeilenrekonstruktion, sichere Stundenextraktion, Datumsbereich-Erkennung und robuste Lohncode-Prüfung. Eine echte UKW-Zeitnachweis-PDF bleibt für die abschließende Praxisvalidierung erforderlich.
+
+### Statistik
+Der Verlauf trennt echte Ausgaben, Bargeldabhebungen und Sparreservierungen. Abhebungen sind Transfers und werden nicht als Verbrauch gezählt; rückgängig gemachte Sparraten werden aus der Sparstatistik entfernt.
+
+
+## Datenintegrität (v0.28.0)
+Beim Start werden lokale Alt-Daten defensiv auf Schema 3 migriert. Ungültige Datumswerte werden nicht als Datum interpretiert. Backups tragen App- und Schema-Version und werden vor dem Restore validiert.

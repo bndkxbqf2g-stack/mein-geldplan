@@ -26,7 +26,7 @@ test("persönliche Stufe und Pfändungsparameter sind getrennt konfiguriert", ()
 });
 
 test("relevante Zeitlohnarten sind zentral bekannt", () => {
-  assert.deepEqual(Object.keys(SALARY_2026.wageTypes).map(Number), [5010,5011,5014,5024,5161,5211,5212]);
+  assert.deepEqual(Object.keys(SALARY_2026.wageTypes).map(Number), [5010,5011,5014,5024,5161,5162,5211,5212]);
   assert.equal(SALARY_2026.wageTypes[5211], "wechsel");
   assert.equal(SALARY_2026.wageTypes[5212], "schicht");
 });

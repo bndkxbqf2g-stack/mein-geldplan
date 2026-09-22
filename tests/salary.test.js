@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildBmfInputs,socialContributions,reportComponents,garnishment2026} from '../lib/salary.js';
+import {buildBmfInputs,socialContributions,reportComponents,garnishment2026,springInHourlyRate,springInPay} from '../lib/salary.js';
 import {SALARY_2026} from '../config/salary-2026.js';
 
 test('BMF-Profil entspricht der Bezügemitteilung',()=>{
@@ -19,4 +19,43 @@ test('Pfändungstabelle 2026 für zwei Unterhaltspflichten',()=>{
 test('Referenzwerte VBL und SV-Hinzubetrag sind kalibriert',()=>{
   assert.equal(Math.round(4480.43*SALARY_2026.social.vblEmployeeRate*100)/100,81.10);
   assert.equal(Math.round(4480.43*SALARY_2026.social.zvSvAddonRate*100)/100,178.22);
+});
+
+test("Wechselschicht wird durch Code 5211 auch ohne Stundenwert berücksichtigt", () => {
+  const c=reportComponents({items:[{code:'5211',hours:null,status:'ok'}],needsReview:false});
+  assert.equal(c.pay.shift,250);
+  assert.equal(c.shift,'wechsel');
+});
+
+test("Schichtzulage wird durch Code 5212 auch ohne Stundenwert berücksichtigt", () => {
+  const c=reportComponents({items:[{code:'5212',hours:null,status:'ok'}],needsReview:false});
+  assert.equal(c.pay.shift,100);
+  assert.equal(c.shift,'schicht');
+});
+
+import {calculateSalaryForecastCore} from '../lib/salary.js';
+
+test('reiner Festbezug reproduziert die echte 2026-Kernabrechnung',()=>{
+  const f=calculateSalaryForecastCore({items:[]},{wageTax:662.58,solidarity:0,churchTax:32.99,churchBase:0});
+  assert.equal(f.totalGross,4480.43);
+  assert.equal(f.svGross,4658.65);
+  assert.equal(f.legalNet,2827.98);
+  assert.equal(f.vbl,81.10);
+});
+
+
+test('Einspring-Stundenentgelt wird aus persönlicher KR-Stufe abgeleitet',()=>{
+  assert.equal(springInHourlyRate(),25.25);
+});
+
+test('Einspringprämie besteht aus 150 Euro je Dienst plus Stundenentgelt',()=>{
+  assert.deepEqual(springInPay({duties:1,hours:7.7}),{duties:1,hours:7.7,hourlyRate:25.25,premium:150,hourly:194.43,total:344.43});
+});
+
+test('Einspringen wird einmalig als steuerpflichtiger Zusatzlohn ergänzt',()=>{
+  const c=reportComponents({items:[{code:'5010',hours:2}],springIn:{duties:1,hours:7.7}});
+  assert.equal(c.pay.springIn,344.43);
+  assert.equal(c.taxableExtra,344.43);
+  assert.equal(c.taxFreePay,9.16);
+  assert.equal(c.needsReview,true);
 });

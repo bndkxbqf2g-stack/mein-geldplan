@@ -7,7 +7,8 @@ import {
   calculateBudget,
   maxAdditionalWithdrawal,
   plannedPaydayForDate,
-  nextWithdrawalOrPayday
+  nextWithdrawalOrPayday,
+  bavariaPublicHolidays
 } from "../lib/cycle.js";
 
 const iso = d => d.toISOString().slice(0, 10);
@@ -100,4 +101,27 @@ test("nächste Abhebung ist der kommende Sonntag, wenn er vor dem Lohntag liegt"
 
 test("liegt der Lohntag vor dem kommenden Sonntag, wird der Lohntag als nächste Abhebung angezeigt", () => {
   assert.equal(iso(nextWithdrawalOrPayday(new Date("2026-09-28T12:00:00"), new Date("2026-09-30T00:00:00"))), "2026-09-30");
+});
+
+
+test("bayerische landesweite Feiertage 2026 sind vollständig im Kalender", () => {
+  const holidays = bavariaPublicHolidays(2026);
+  for (const day of [
+    "2026-01-01", "2026-01-06", "2026-04-03", "2026-04-06",
+    "2026-05-01", "2026-05-14", "2026-05-25", "2026-06-04",
+    "2026-10-03", "2026-11-01", "2026-12-25", "2026-12-26"
+  ]) assert.equal(holidays.has(day), true, `${day} fehlt`);
+});
+
+test("Heilige Drei Könige, Fronleichnam und Allerheiligen gelten nicht als Arbeitstage", async () => {
+  const { isWorkday } = await import("../lib/cycle.js");
+  assert.equal(isWorkday("2026-01-06"), false);
+  assert.equal(isWorkday("2026-06-04"), false);
+  assert.equal(isWorkday("2026-11-01"), false);
+});
+
+test("normale Werktage bleiben Arbeitstage", async () => {
+  const { isWorkday } = await import("../lib/cycle.js");
+  assert.equal(isWorkday("2026-01-07"), true);
+  assert.equal(isWorkday("2026-06-05"), true);
 });

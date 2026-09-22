@@ -1,5 +1,78 @@
 # Changelog
 
+## v0.99.0 – Release Candidate
+- Keine neuen Fachfunktionen.
+- Gesamtcheck für Repo-Root, PWA-Versionierung, Service Worker und Test-Suite.
+- Release-Candidate-Stand für den Praxistest auf GitHub Pages/iPhone.
+
+## v0.99.0 – UX & Fehlerzustände
+- Nicht-blockierende Statusmeldungen statt vieler Browser-Alerts.
+- Update-Button zeigt einen echten Busy-Zustand und verhindert Doppelklicks während der Prüfung.
+- Leere Listen und mobile Touch-Ziele klarer dargestellt.
+- Safe-Area-Abstand für iPhone/PWA verbessert.
+- Keine Änderung an Budget-, Spar- oder Gehaltsformeln.
+
+
+## v0.28.0 – End-to-End-Absicherung
+- kompletter Budgetzyklus als Integrationsfluss abgesichert: Lohn, Fixkosten, Sonntag-Abhebung, Sparrate, Giro-Ausgabe, verkürzter Schlussabschnitt und neuer Lohn
+- Statistik prüft dabei, dass Bargeldabhebungen keine Ausgaben sind
+- Zeitnachweis -> Prognose -> Bezügemitteilung als zusammenhängender Integrationspfad getestet
+- Nachverrechnungen beeinflussen Pfändung/Auszahlung weiterhin nicht als Prognosefehler
+- keine fachliche Änderung an Budget- oder Gehaltsformeln
+
+## v0.27.0 – Datenintegrität & Migration
+- automatische, idempotente Migration lokaler Alt-Daten auf Schema 3
+- ungültige Datumswerte können keinen 1970-/NaN-Zustand mehr erzeugen
+- Transaktionen, Bargeld, Sparziele, Fixkosten und Historien werden beim Lesen defensiv normalisiert
+- Backup-Format v3 mit App-/Schema-Version und Theme
+- Restore prüft Backups vor dem Schreiben und behält vorhandene Daten bei, wenn die Wiederherstellung fehlschlägt
+- alte Backup-Versionen 1/2 bleiben kompatibel; unbekannte zukünftige Versionen werden abgewiesen
+
+
+## v0.26.0 – Premium-UI & Dark Mode
+- Drei Darstellungsmodi: System, Hell und Dunkel; Umschaltung direkt im Header.
+- Theme-Präferenz wird lokal gespeichert und folgt im Systemmodus automatisch iOS/macOS.
+- Karten, Navigation, Buttons, Eingaben und Charts auf einen ruhigeren Apple/N26-inspirierten Glass-Look vereinheitlicht.
+- Safe-Area, mobile Header-Abstände und Touch-Ziele verbessert.
+- Budget-, Spar-, Statistik- und Gehaltsberechnungen unverändert.
+
+## v0.22.0
+- Gehaltsprognose gegen echte 2026-Bezügemitteilungen validiert.
+- Nachverrechnungen werden getrennt erkannt und verfälschen den Prognosevergleich nicht mehr.
+- Tarifgruppe, Stufe und feste Entgeltbestandteile werden aus Bezügemitteilungen erkannt.
+- Reine Kernabrechnung KR8/5 (ab 04/2026) als Regressionstest hinterlegt.
+
+## v0.21.1
+- Step 21 Praxisvalidierung mit echten UKW-Zeitnachweisen März, April, Mai, Juli und August 2026.
+- UKW-Kopfzeilen mit Monatskürzeln (Mrz/Apr/Mai/Jul/Aug) werden sicher erkannt.
+- Lohnart-Codes mit Doppelpunkt (z. B. 5010:, 5211:) werden korrekt gelesen.
+- Bei echten Zeitnachweiszeilen wird die Spalte Anzahl am Zeilenende verwendet; Zahlen in Bezeichnungen wie „Sa 13-20 Uhr 0,64 E“ oder „25%“ werden nicht mit Stunden verwechselt.
+- 5162 „Durchsch.§21TVL-Folg“ als bekannte §21-Folgeposition ergänzt.
+- Reale Validierung: März→Mai, April→Juni, Mai→Juli, Juli→September, August→Oktober.
+- Budget- und Sparlogik unverändert.
+
+## v0.21.0
+- Step 21: Zeitnachweis-PDF-Import für reale PDF-Strukturen gehärtet.
+- PDF.js-Textbausteine werden anhand ihrer Koordinaten wieder zu Zeilen zusammengesetzt; Lohnarten gehen dadurch nicht mehr in einem Seiten-Fließtext verloren.
+- Monat kann zusätzlich aus einem eindeutigen Datumsbereich erkannt werden; Auszahlung bleibt +2 Monate.
+- Stunden werden nur aus eindeutigen Angaben, expliziten Std./h-Werten oder rechnerisch verifizierbaren UKW-Lohnzeilen übernommen; bei Mehrdeutigkeit weiterhin „Bitte prüfen“.
+- 5211/5212 werden allein durch den Code als Wechsel-/Schichtzulage erkannt, ohne erfundene Stunden.
+- Unbekannte 5xxx-Codes werden vollständig zur Prüfung markiert.
+- OCR bleibt weiterhin nur Fallback/Prüffall; es wird nichts geraten.
+- Hinweis: Die technische Importlogik ist vorbereitet und getestet. Eine abschließende Validierung gegen einen echten UKW-Zeitnachweis benötigt noch ein solches Original-PDF.
+
+## v0.20.0
+- Kalenderlogik für Bayern vervollständigt: Heilige Drei Könige, Fronleichnam und Allerheiligen ergänzt.
+- Landesweite bayerische Feiertage zentral testbar gemacht.
+- Zusätzliche Tests für Feiertage und normale Werktage ergänzt.
+
+# Changelog
+
+## v0.99.0 – Release Candidate
+- Keine neuen Fachfunktionen.
+- Gesamtcheck für Repo-Root, PWA-Versionierung, Service Worker und Test-Suite.
+- Release-Candidate-Stand für den Praxistest auf GitHub Pages/iPhone.
+
 ## v0.18.4
 - „Nächste Abhebung“ zeigt den kommenden Sonntag.
 - Liegt der nächste Lohntag vor diesem Sonntag, wird stattdessen der Lohntag angezeigt.
@@ -81,3 +154,28 @@
 - Sichtbare Versionsnummer in der Kopfzeile nach „Privat auf diesem Gerät“.
 - Service-Worker-/Asset-Version auf v0.18.0 vereinheitlicht.
 - Neue Tests für Lohnaktivierung, ausbleibenden Folgelohn und Versionskonsistenz.
+
+## v0.19.0
+- Sparpositionen können umbenannt werden.
+- Sparpositionen können gelöscht werden; aktive Reservierungen werden dabei wieder freigegeben.
+- Einzelne Sparraten können rückgängig gemacht und wieder für das Budget freigegeben werden.
+- Rückgängig gemachte Sparraten bleiben intern als Historie erhalten, zählen aber nicht mehr als reserviertes Geld.
+
+## v0.23.0
+- Einspringprämie ergänzt: 150 € je Einspringdienst plus Einspringstunden × persönliches Stundenentgelt.
+- Persönliches Stundenentgelt wird aus hinterlegtem Tabellenentgelt, Wochenarbeitszeit und Monatsfaktor abgeleitet.
+- Normale Nacht-/Wochenend-/Schichtzuschläge bleiben ausschließlich im Zeitnachweis, damit nichts doppelt gezählt wird.
+- Steuer-/SV-/Pfändungsbehandlung der Einspringprämie bleibt bis zur ersten echten Referenzabrechnung als prüfpflichtige Annahme markiert.
+
+## v0.24.0 – Step 24
+- Leichtgewichtige Statistik ohne Chart-Framework ergänzt.
+- Einnahmen, echte Giro-Ausgaben, Bargeldabhebungen und aktuell reservierte Sparbeträge werden getrennt ausgewiesen.
+- Monatsvergleich zeigt Einnahmen, Ausgaben und Sparreservierungen der letzten Monate.
+- Sparentwicklung wird je Sparposition dargestellt; rückgängig gemachte Sparraten werden nicht gezählt.
+- Abhebungen bleiben Transfers Giro → Bargeld und werden ausdrücklich nicht als Verbrauch gewertet.
+
+## v0.26.0
+- PWA-Updateprüfung lädt `version.js` explizit ohne Cache und zeigt den tatsächlichen Prüfstatus.
+- Service-Worker-Registrierung nutzt `updateViaCache: none`, aktiviert neue Worker sofort und lädt bei neuer Version neu.
+- Lokale Kernmodule werden als App-Shell vorgehalten, damit Budget, Verlauf und gespeicherte Daten nach einem erfolgreichen Online-Start auch offline öffnen können.
+- App-Assets bleiben network-first mit Cache-Fallback, damit GitHub-Pages-Updates nicht an alten JS-Dateien hängen bleiben.

@@ -8,3 +8,4 @@ test('comparison label unterscheidet Treffer, Abweichung und Prüfung',()=>{
   assert.equal(comparisonLabel('different'),'Abweichung erkannt');
   assert.equal(comparisonLabel('review'),'Bitte prüfen');
 });
+test('comparison label kennzeichnet Nachverrechnung ohne falschen Prognosefehler',()=>assert.equal(comparisonLabel('adjusted'),'Kernwerte stimmen · Nachverrechnung vorhanden'));

@@ -17,6 +17,8 @@ export const SALARY_2026 = Object.freeze({
     schicht: 100
   }),
   payroll: Object.freeze({ dependents: 2, payoutDelayMonths: 2 }),
+  work: Object.freeze({ weeklyHours: 38.5, monthFactor: 4.348 }),
+  springIn: Object.freeze({ basePremium: 150, taxMode: 'taxable-unverified' }),
   profile: Object.freeze({ taxClass: 1, childAllowance: 1.0, churchTaxRate: 0.08, kvAdditionalRate: 2.18, childless: false, careChildDeductions: 1, saxony: false }),
   social: Object.freeze({
     healthEmployee: 0.0839, careEmployee: 0.0155, pensionEmployee: 0.093, unemploymentEmployee: 0.013,
@@ -29,6 +31,7 @@ export const SALARY_2026 = Object.freeze({
     5014: "saturday",
     5024: "sunday",
     5161: "average21",
+    5162: "average21Followup",
     5211: "wechsel",
     5212: "schicht"
   })
