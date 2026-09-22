@@ -1,18 +1,10 @@
-# v0.18.2
-
-- Bugfix: bestehendes Budget wird vor dem nächsten Lohneingang als laufender Abschnitt behandelt.
-- 22.09.–26.09.2026: 5 Abschnittstage, Budgetbasis 8 Finanzierungstage bis 30.09.2026.
-- Am Sonntag beginnt automatisch der nächste Abschnitt; 27.09.–29.09.2026 sind 3 Tage.
-- „Tage bis Lohn“ zeigt echte Kalendertage, während Tages-/Wochenbudget bis zum Abschnittswechsel stabil bleiben.
-- Ein gespeicherter Budgetanker verhindert tägliches Verschieben der Berechnungsbasis.
-
-## v0.18.1 – Vor-Lohn-Zustand
-- Kein 01.01.1970 mehr ohne aktiven Lohnzyklus.
-- Geplanter Lohntag wird separat angezeigt.
-- Tages-/Wochenbudget bleibt bis zur echten Lohnbuchung auf „–“.
-- Übersichtslabel wechselt auf „Aktuell verfügbar“.
-
 # Changelog
+
+## v0.18.3
+- Bugfix: Im laufenden Altbestand vor dem nächsten Lohn wird das Giro-Budget nicht mehr für die bereits durch Bargeld abgedeckten Tage bis Samstag berechnet.
+- Tages- und Wochenbudget beziehen sich auf den nächsten Abhebungssonntag und dessen Budgetabschnitt bis Samstag bzw. bis zum Tag vor dem Lohneingang.
+- Beispiel 22.09.2026: 8 Tage bis Lohn bleiben sichtbar; Budgetbasis ist 27.09.–29.09. (3 Tage).
+- Bargeld bleibt vollständig außerhalb der Tages-/Wochenbudget-Berechnung und reduziert nur die zusätzlich mögliche Abhebung.
 
 ## v0.1.0
 - Modulstruktur angelegt

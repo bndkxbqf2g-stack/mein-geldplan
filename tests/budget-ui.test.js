@@ -36,20 +36,21 @@ test('laufender Altbestand nutzt festen Budgetanker bis zum kommenden Lohn',()=>
   assert.equal(result.active,true);
   assert.equal(result.provisional,true);
   assert.equal(result.daysToPayday,8);
-  assert.equal(result.remainingDays,8);
-  assert.equal(result.segmentDays,5);
-  assert.equal(Number(result.dailyBudget.toFixed(2)),8.91);
-  assert.equal(Number(result.weeklyBudget.toFixed(2)),44.57);
+  assert.equal(result.remainingDays,3);
+  assert.equal(result.segmentDays,3);
+  assert.equal(result.segmentStart.toISOString().slice(0,10),'2026-09-27');
+  assert.equal(Number(result.dailyBudget.toFixed(2)),23.77);
+  assert.equal(Number(result.weeklyBudget.toFixed(2)),71.31);
 });
 
 test('Budgetanker bleibt innerhalb des Abschnitts stabil und rechnet Sonntag neu',()=>{
   const args={giro:80,transactions:[{type:'base',amount:80,date:'2026-09-22'}],savings:{positions:[],allocations:[]},anchorDate:'2026-09-22'};
   const wed=calculateCurrentCycleBudget({...args,today:new Date('2026-09-23T12:00:00')});
   assert.equal(wed.daysToPayday,7);
-  assert.equal(wed.remainingDays,8);
-  assert.equal(wed.segmentDays,5);
-  assert.equal(wed.dailyBudget,10);
-  assert.equal(wed.weeklyBudget,50);
+  assert.equal(wed.remainingDays,3);
+  assert.equal(wed.segmentDays,3);
+  assert.equal(Number(wed.dailyBudget.toFixed(2)),26.67);
+  assert.equal(wed.weeklyBudget,80);
   const sun=calculateCurrentCycleBudget({...args,today:new Date('2026-09-27T12:00:00')});
   assert.equal(sun.daysToPayday,3);
   assert.equal(sun.remainingDays,3);
