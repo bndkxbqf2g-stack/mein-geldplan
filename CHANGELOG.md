@@ -1,3 +1,9 @@
+# v0.99.2
+
+- Persönliche Fixkosten aktualisiert.
+- Neue Fixkostensumme: 2.160,31 €.
+- Einmalige Migration ersetzt den bisherigen Fixkostenstand beim Update; spätere manuelle Änderungen bleiben erhalten.
+
 # v0.99.1
 - Sparbereich vereinfacht: nur noch Zweck, Betrag und Sparverlauf; keine separate Sparziel-Verwaltung mehr.
 - Bestehende Zwecke werden intern automatisch wiederverwendet; neue Zwecke automatisch angelegt.
