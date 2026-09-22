@@ -6,7 +6,8 @@ import {
   cycleSegments,
   calculateBudget,
   maxAdditionalWithdrawal,
-  plannedPaydayForDate
+  plannedPaydayForDate,
+  nextWithdrawalOrPayday
 } from "../lib/cycle.js";
 
 const iso = d => d.toISOString().slice(0, 10);
@@ -90,4 +91,13 @@ test("geplanter Lohntag vor aktivem Zyklus ist der letzte Arbeitstag des aktuell
 
 test("nach dem Monatslohntag zeigt die Planung den Folgemonat", () => {
   assert.equal(iso(plannedPaydayForDate("2026-10-31")), "2026-11-30");
+});
+
+
+test("nächste Abhebung ist der kommende Sonntag, wenn er vor dem Lohntag liegt", () => {
+  assert.equal(iso(nextWithdrawalOrPayday(new Date("2026-09-22T12:00:00"), new Date("2026-09-30T00:00:00"))), "2026-09-27");
+});
+
+test("liegt der Lohntag vor dem kommenden Sonntag, wird der Lohntag als nächste Abhebung angezeigt", () => {
+  assert.equal(iso(nextWithdrawalOrPayday(new Date("2026-09-28T12:00:00"), new Date("2026-09-30T00:00:00"))), "2026-09-30");
 });

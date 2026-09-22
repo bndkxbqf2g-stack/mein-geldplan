@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.18.4
+- „Nächste Abhebung“ zeigt den kommenden Sonntag.
+- Liegt der nächste Lohntag vor diesem Sonntag, wird stattdessen der Lohntag angezeigt.
+- Budgetberechnung aus v0.18.3 bleibt unverändert.
+
 ## v0.18.3
 - Bugfix: Im laufenden Altbestand vor dem nächsten Lohn wird das Giro-Budget nicht mehr für die bereits durch Bargeld abgedeckten Tage bis Samstag berechnet.
 - Tages- und Wochenbudget beziehen sich auf den nächsten Abhebungssonntag und dessen Budgetabschnitt bis Samstag bzw. bis zum Tag vor dem Lohneingang.
