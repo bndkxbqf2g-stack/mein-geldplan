@@ -35,7 +35,7 @@ function updateBudget(){
   // Das Budget für Tagessatz und Wochensatz basiert ausschließlich auf dem aktuellen Girokonto-Guthaben.
   // Nach einer Abhebung beginnt ein neuer 7-Tage-Zeitraum; innerhalb dieses
   // Zeitraums werden die verbleibenden Tage bis zum Ende der Woche angezeigt.
-  var days=Math.max(1, cycleDays()-(weekly?weekly.days:7));
+  var days=Math.max(1, weekly?cycleDays()-weekly.days:cycleDays());
   // Tagessatz/Wochensatz basieren ausschließlich auf dem aktuell verfügbaren Girokonto-Guthaben.
   var basis=giro;
   if($("mainGiro"))$("mainGiro").textContent=eur(giro);
