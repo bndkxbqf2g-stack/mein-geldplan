@@ -92,7 +92,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 @media(max-width:650px){nav{-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}nav button{scroll-snap-align:start;flex:0 0 auto}#prognose .row{align-items:flex-start}#prognose .row .v{max-width:58%;font-size:14px}.comparison-row{grid-template-columns:1fr}.comparison-values{text-align:left}.forecast-head{align-items:flex-start}.forecast-amount{font-size:19px}.saving-history-row{align-items:flex-start}.saving-history-actions{max-width:46%}}
 @media(max-width:430px){#prognose .row{display:grid;grid-template-columns:1fr;gap:5px}#prognose .row .v{max-width:none;text-align:left}.forecast-chart-row{grid-template-columns:58px minmax(0,1fr);}.forecast-chart-value{grid-column:2;text-align:right;margin-top:-3px}.saving-history-row{display:grid;grid-template-columns:1fr}.saving-history-actions{max-width:none;justify-content:space-between}}
 </style>
-<link rel="stylesheet" href="design-refresh.css?v=2">
+<link rel="stylesheet" href="design-refresh.css?v=3">
 </head>
 <body>
 <header><div class="headline"><div class="brand"><div class="eyebrow">MEIN FINANZPLAN</div><h1>Mein Geldplan</h1><div class="sub">Privat auf diesem Gerät · <span id="appVersion">v0.99.2</span></div></div><div class="header-actions"><button class="update-button theme-button" id="themeBtn" type="button" title="Darstellung: System" aria-label="Darstellung: System">◐</button><button class="update-button" id="updateBtn" type="button" title="Auf neue Version prüfen" aria-label="Auf neue Version prüfen">↻</button><div class="privacy-badge" title="Deine Daten bleiben lokal im Browser"><span class="status-dot"></span><span class="privacy-text">Lokal &amp; privat</span></div></div></div><div class="note" id="updateStatus" style="display:none;text-align:right;color:#dbeafe;max-width:860px;margin:4px auto 0"></div></header>
@@ -109,6 +109,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 <main>
 <!-- ÜBERSICHT -->
 <div id="uebersicht" class="view">
+<div class="page-intro"><div class="intro-kicker">MEIN GELDPLAN <span class="intro-dot">✦</span></div><h2>Dein Geld. Dein Überblick.</h2><p>Alles Wichtige für deinen finanziellen Alltag auf einen Blick.</p></div>
 <section class="hero">
   <div class="hero-grid">
     <div class="subcard wide"><div class="hero-muted" id="ovAvailableLabel">Verfügbar bis zum nächsten Lohn</div><div class="big" id="ovAvailable">–</div><div class="hero-muted" id="ovNextPay">–</div><div class="hero-muted">Dein Tagessatz wird unten angezeigt.</div></div>
@@ -144,6 +145,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 
 <!-- BUDGET -->
 <div id="budget" class="view hidden">
+<div class="page-intro"><div class="intro-kicker">MEIN GELDPLAN <span class="intro-dot">✦</span></div><h2>Plane entspannt.</h2><p>Dein Budget, deine Buchungen und deine Sparziele.</p></div>
 <section>
 <h2>Mein aktuelles Budget</h2>
 <div class="row"><span>Girokonto</span><span class="v" id="mainGiro">–</span></div>
@@ -207,6 +209,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 
 <!-- VERLAUF -->
 <div id="verlauf" class="view hidden">
+<div class="page-intro"><div class="intro-kicker">MEIN GELDPLAN <span class="intro-dot">✦</span></div><h2>Deine Entwicklung.</h2><p>Alle Bewegungen und Fortschritte übersichtlich an einem Ort.</p></div>
 <section><h2>Statistik</h2><div class="kpi-grid"><div class="kpi"><div class="label">Einnahmen gesamt</div><div class="value good" id="statIncome">–</div></div><div class="kpi"><div class="label">Ausgaben gesamt</div><div class="value red" id="statExpenses">–</div></div><div class="kpi"><div class="label">Bargeld abgehoben</div><div class="value" id="statWithdrawals">–</div></div><div class="kpi"><div class="label">Aktuell reserviert</div><div class="value" id="statSaved">–</div></div></div><div class="note">Abhebungen sind Transfers Giro → Bargeld und werden deshalb nicht als Ausgabe gezählt. Kontokorrekturen fließen nicht in Einnahmen oder Ausgaben ein.</div></section>
 <section><h2>Sparentwicklung</h2><div id="savingStats"></div></section>
 <section><h2>Kontoverlauf</h2><div class="note">Alle Buchungen werden chronologisch angezeigt. Abhebungen werden separat ausgewiesen, weil sie nur Geld vom Giro ins Bargeld verschieben.</div><div id="fullTxList"></div></section>
@@ -216,11 +219,13 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 
 <!-- FIXKOSTEN -->
 <div id="fixkosten" class="view hidden">
+<div class="page-intro"><div class="intro-kicker">MEIN GELDPLAN <span class="intro-dot">✦</span></div><h2>Alles fest im Blick.</h2><p>Deine regelmäßigen Ausgaben an einem Ort.</p></div>
 <section class="fixkosten-section"><h2>Meine Fixkosten</h2><div class="fixkosten-intro"><div class="note">Hier verwaltest du deine festen monatlichen Ausgaben. Die Summe wird beim „Lohn buchen“ automatisch einmal je Lohnzyklus vom Girokonto abgezogen.</div></div><div id="fixItems" class="fix-list"></div><button class="primary secondary" style="margin-top:14px" id="addFixBtn">+ Fixkosten hinzufügen</button><div class="fix-total"><span class="label">Gesamte monatliche Fixkosten</span><span class="value" id="fixTotal">–</span></div></section>
 </div>
 
 <!-- PROGNOSE -->
 <div id="prognose" class="view hidden">
+<div class="page-intro"><div class="intro-kicker">MEIN GELDPLAN <span class="intro-dot">✦</span></div><h2>Blick nach vorn.</h2><p>Deine Gehaltsprognose klar und verständlich aufbereitet.</p></div>
 <section><h2>Gehaltsprognose</h2><div class="note">Zeitnachweise werden mit zwei Monaten Verzögerung eingeordnet. Die Prognose bleibt rein informativ und verändert dein Budget nicht. Die Berechnung berücksichtigt zwei Unterhaltspflichten.</div><div style="margin-top:12px"><label>Zeitnachweis (PDF)</label><input id="timeReportFiles" type="file" accept="application/pdf" multiple></div><button class="primary" style="margin-top:12px" id="timeReportBtn">Zeitnachweis(e) auswerten</button><div class="note" id="timeReportStatus">Lade einen oder mehrere Zeitnachweise hoch.</div><div id="timeReportPreview" class="hidden"></div></section>
 <section><h2>Tatsächliche Lohnabrechnung vergleichen</h2><div class="note">Lade eine spätere Bezügemitteilung hoch. Die erkannten Werte werden nur mit der Prognose verglichen und verändern keine Berechnung automatisch.</div><div style="margin-top:12px"><label>Bezügemitteilung (PDF)</label><input id="payslipFiles" type="file" accept="application/pdf" multiple></div><button class="primary secondary" style="margin-top:12px" id="payslipBtn">Bezügemitteilung vergleichen</button><div class="note" id="payslipStatus">Noch keine echte Lohnabrechnung verglichen.</div><div id="payslipComparison"></div></section>
 <section><h2>Einspringprämie</h2><div class="note">Für den ausgewählten Zeitnachweis: 150 € je Einspringdienst plus Einspringstunden × persönliches Stundenentgelt aus hinterlegter KR-Gruppe/Stufe. Nacht-, Wochenend- und Schichtzuschläge kommen weiterhin aus dem Zeitnachweis und werden nicht doppelt berechnet.</div><div class="grid" style="margin-top:12px"><div><label>Anzahl Einspringdienste</label><input id="springInDuties" type="number" min="0" step="1" value="0"></div><div><label>Einspringstunden gesamt</label><input id="springInHours" type="number" min="0" step=".01" value="0"></div></div><div class="row" style="margin-top:10px"><span>Persönliches Stundenentgelt</span><span class="v" id="springInHourlyRate">–</span></div><button class="primary secondary" style="margin-top:12px" id="springInBtn">Einspringen übernehmen</button><div class="note" id="springInStatus">Noch keine Einspringprämie angesetzt.</div><div class="note">Steuer-/SV-/Pfändungsbehandlung wird bis zur ersten echten Abrechnung mit Einspringprämie vorläufig als regulärer steuerpflichtiger Zusatzlohn gerechnet und deshalb mit „Bitte prüfen“ markiert.</div></section><section><h2>Prognosen nach Auszahlungsmonat</h2><div id="forecastTableWrap"><div class="empty">Noch kein Zeitnachweis eingelesen.</div></div></section>
@@ -232,6 +237,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 
 <!-- MEHR -->
 <div id="einstellungen" class="view hidden">
+<div class="page-intro"><div class="intro-kicker">MEIN GELDPLAN <span class="intro-dot">✦</span></div><h2>Gut organisiert.</h2><p>Sicherung und Verwaltung deiner persönlichen Daten.</p></div>
 <section><h2>Daten sichern</h2><p class="note">Sichere alle lokalen Daten inklusive Kontobewegungen, Bargeld, Fixkosten und eingelesener Zeitnachweise als Datei.</p><button class="primary" id="exportBtn">Daten sichern</button><div style="margin-top:12px"><label>Gespeicherte Daten wiederherstellen</label><input id="importFile" type="file" accept="application/json,.json"></div><button class="primary secondary" style="margin-top:8px" id="importBtn">Daten wiederherstellen</button><div class="note" id="backupStatus">Die Sicherung bleibt auf deinem Gerät bzw. dort, wo du die Datei speicherst.</div></section>
 <section><h2>Testmodus</h2><p class="note">Damit andere die App mit eigenen Werten testen können, lassen sich alle gespeicherten Eingaben und Buchungen hier zurücksetzen.</p><button class="primary danger" id="resetBtn" style="margin-top:12px">Alle Eingaben & Buchungen löschen</button></section>
 </div>
