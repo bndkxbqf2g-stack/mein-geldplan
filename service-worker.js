@@ -1,6 +1,6 @@
-var CACHE_NAME='mein-geldplan-v0.99.2';
+var CACHE_NAME='mein-geldplan-design-v1';
 var APP_SHELL=[
-  './','./index.html','./app.js?v=0.99.2','./manifest.webmanifest','./icon.svg',
+  './','./index.html','./design-refresh.css?v=2','./app.js?v=0.99.2','./manifest.webmanifest','./icon.svg',
   './config/version.js','./config/salary-2026.js',
   './lib/ui.js','./lib/storage.js','./lib/theme-ui.js','./lib/cycle.js','./lib/budget.js','./lib/budget-ui.js',
   './lib/savings.js','./lib/savings-ui.js','./lib/fixed-costs.js','./lib/fixed-costs-ui.js','./lib/history-ui.js','./lib/statistics.js',
@@ -27,7 +27,7 @@ self.addEventListener('fetch',function(event){
   if(event.request.method!=='GET')return;
   var url=new URL(event.request.url);
   var local=url.origin===self.location.origin;
-  var appAsset=local&&(event.request.mode==='navigate'||url.pathname.endsWith('/index.html')||url.pathname.endsWith('.js')||url.pathname.endsWith('/manifest.webmanifest'));
+  var appAsset=local&&(event.request.mode==='navigate'||url.pathname.endsWith('/index.html')||url.pathname.endsWith('.js')||url.pathname.endsWith('.css')||url.pathname.endsWith('/manifest.webmanifest'));
   if(appAsset){
     event.respondWith(fetch(event.request,{cache:'no-store'}).then(function(response){
       if(response&&response.status===200){var copy=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(event.request,copy);});}
