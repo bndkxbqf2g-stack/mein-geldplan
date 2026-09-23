@@ -1,0 +1,58 @@
+/* Mein Geldplan visual refresh — presentation only; no app logic changed. */
+:root{--bg:#f4f8f5;--card:#fff;--text:#203631;--muted:#6e827b;--line:#e1ebe5;--accent:#285e4c;--soft:#f0f6f1;--green:#297354;--orange:#b77939;--red:#ba655d;--blue:#507f96;--shadow:0 8px 28px rgba(35,72,57,.075);--radius:23px;--glass:#fff;--glass-line:#e1ebe5;--nav-bg:rgba(248,251,248,.96);--header-a:#f8fcf8;--header-b:#e9f3ec;--focus:rgba(52,112,83,.16);color-scheme:light}
+body{background:radial-gradient(circle at 90% 0%,#e4f0e8,transparent 38%),linear-gradient(#fbfdfb,#f2f7f3);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+header{background:linear-gradient(115deg,#f9fcf9,#e8f2ea)!important;box-shadow:none;border-bottom:1px solid #e2ece4;padding:15px 18px 13px}
+.headline{max-width:980px}.eyebrow{color:#56816d;letter-spacing:1.5px}.brand h1{color:#1f4336;font-size:25px;letter-spacing:-.8px}.sub{color:#748c7f}.privacy-badge{color:#356d51;background:#edf6ef;border-color:#d7e9db}.update-button{color:#275c48;background:#fff;border:1px solid #dce8df;box-shadow:0 3px 12px rgba(38,76,54,.06)}
+nav{background:var(--nav-bg);border-bottom:1px solid #e2ece5;top:88px;justify-content:center;gap:8px}
+nav button{background:#fff;border:1px solid #e2ece5;color:#527366;box-shadow:none;font-size:13px}
+nav button.active{background:#285e4c;border-color:#285e4c;color:#fff;box-shadow:0 5px 14px rgba(38,94,76,.18)}
+main{max-width:980px;padding:15px 17px 70px}
+section{background:#fff;border:1px solid #e3ede5;border-radius:24px;box-shadow:var(--shadow);padding:20px;margin:14px 0}
+h2{color:#244a3b;font-size:19px;letter-spacing:-.45px}
+.hero{background:linear-gradient(130deg,#285b49,#387c61)!important;border:0;box-shadow:0 12px 30px rgba(32,95,68,.18);border-radius:27px}
+.hero .subcard{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.15)}
+.hero .hero-muted{color:#e1f1e7}.hero .big{font-size:37px}
+.kpi,.forecast-card,.saving-card,.fix-total{background:#f6faf6;border-color:#e5eee6;border-radius:18px}
+.kpi .label,.metric-title,label{color:#70877b}.kpi .value{color:#244b3b}.good{color:#31815a}.red{color:#b65f57}.warn{color:#b77939}
+input,select{border:1px solid #dce9df;border-radius:14px;background:#fbfdfb;color:#264538}
+input:focus,select:focus{border-color:#659a79;box-shadow:0 0 0 4px rgba(52,112,83,.12)}
+.primary{background:#285e4c;box-shadow:0 6px 15px rgba(39,96,75,.14);border-radius:14px}
+.secondary{background:#edf5ee;color:#2c654f;border:1px solid #dce9df;box-shadow:none}
+.income-button{background:#397c5c}.expense-button,.danger{background:#b85d57}
+.progress>span,.forecast-chart-fill{background:linear-gradient(90deg,#478a68,#8cbb96)}
+.bar{background:linear-gradient(180deg,#38785a,#a5cbb1)}
+.fixkosten-section{border-top:4px solid #72a98a}.forecast-section{border-top:4px solid #7aa6a0}
+.fixkosten-intro{background:#f1f8f1;border-color:#d7e9da;color:#347351}
+html[data-theme="dark"]{--bg:#101b17;--card:#192b23;--text:#e8f3eb;--muted:#a7bcb0;--line:#324a3d;--soft:#1c3126;--green:#86c79a;--orange:#e0b57d;--red:#f0a6a0;--blue:#a3c8c5;--glass:#192b23;--glass-line:#324a3d;--nav-bg:#14231b;color-scheme:dark}
+html[data-theme="dark"] body{background:linear-gradient(#172920,#101b17);color:var(--text)}
+html[data-theme="dark"] header{background:linear-gradient(115deg,#1c382b,#203e31)!important;border-color:#385444}
+html[data-theme="dark"] .brand h1,html[data-theme="dark"] h2{color:#e3f3e8}
+html[data-theme="dark"] .sub,html[data-theme="dark"] .eyebrow{color:#b1d2bd}
+html[data-theme="dark"] section,html[data-theme="dark"] .kpi,html[data-theme="dark"] .forecast-card,html[data-theme="dark"] .saving-card,html[data-theme="dark"] .fix-total,html[data-theme="dark"] input,html[data-theme="dark"] select{background:var(--card);border-color:var(--line);color:var(--text)}
+html[data-theme="dark"] .kpi .value{color:#e3f3e8}
+html[data-theme="dark"] nav{background:var(--nav-bg);border-color:var(--line)}
+html[data-theme="dark"] nav button{background:#213b2d;border-color:#385343;color:#c4dccb}
+html[data-theme="dark"] nav button.active{background:#5a9971;color:#102219}
+html[data-theme="dark"] .secondary{background:#254231;color:#d4ecdb;border-color:#385444}
+@media(max-width:650px){
+ header{padding:max(12px,env(safe-area-inset-top)) 15px 12px}.headline{min-height:56px}.brand h1{font-size:22px}.eyebrow{font-size:9px}.sub{font-size:11px}
+ nav{position:fixed;top:auto!important;bottom:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding:8px 4px max(10px,env(safe-area-inset-bottom));background:rgba(251,253,251,.97);box-shadow:0 -6px 24px rgba(28,68,45,.09);overflow:visible;backdrop-filter:blur(18px)}
+ nav button{min-width:0;white-space:normal;border:0!important;border-radius:12px;padding:9px 2px 7px;font-size:10px;line-height:1.2;box-shadow:none!important;background:transparent}
+ nav button::before{display:block;font-size:19px;margin-bottom:5px;font-weight:400}
+ nav button[data-tab="uebersicht"]::before{content:"⌂"}
+ nav button[data-tab="budget"]::before{content:"◫"}
+ nav button[data-tab="verlauf"]::before{content:"↗"}
+ nav button[data-tab="prognose"]::before{content:"▥"}
+ nav button[data-tab="fixkosten"]::before{content:"▤"}
+ nav button[data-tab="einstellungen"]::before{content:"•••";letter-spacing:1px}
+ nav button.active{background:#e5f1e8!important;color:#275e48!important}
+ html[data-theme="dark"] nav{background:rgba(20,35,27,.97)}
+ html[data-theme="dark"] nav button.active{background:#315842!important;color:#d9f1df!important}
+ main{padding:10px 12px calc(112px + env(safe-area-inset-bottom))}
+ section{padding:17px;border-radius:21px;margin:11px 0}
+ .hero{border-radius:23px}.hero-grid{grid-template-columns:1fr 1fr}.hero-grid .wide{grid-column:1/-1}
+ .kpi-grid{grid-template-columns:1fr 1fr}
+ .kpi{padding:12px}.kpi .value{font-size:18px}
+ .primary{min-height:47px}
+}
+@media(max-width:390px){nav button{font-size:9px}nav button::before{font-size:17px}.hero .big{font-size:32px}}
