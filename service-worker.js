@@ -1,6 +1,6 @@
-var CACHE_NAME='mein-geldplan-design-v1';
+var CACHE_NAME='mein-geldplan-design-v3';
 var APP_SHELL=[
-  './','./index.html','./design-refresh.css?v=2','./app.js?v=0.99.2','./manifest.webmanifest','./icon.svg',
+  './','./index.html','./design-refresh.css?v=3','./app.js?v=0.99.2','./manifest.webmanifest','./icon.svg',
   './config/version.js','./config/salary-2026.js',
   './lib/ui.js','./lib/storage.js','./lib/theme-ui.js','./lib/cycle.js','./lib/budget.js','./lib/budget-ui.js',
   './lib/savings.js','./lib/savings-ui.js','./lib/fixed-costs.js','./lib/fixed-costs-ui.js','./lib/history-ui.js','./lib/statistics.js',
