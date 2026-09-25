@@ -112,3 +112,46 @@ test('Rückrechnung eines anderen Monats wird nicht fälschlich als Lernquelle v
   assert.equal(result.componentSource,'current');
   assert.equal(result.componentSourceMonth,'2026-08');
 });
+
+
+test('spätere Rückrechnung aus einer anderen Bezügemitteilung fließt in die Lernhistorie ein',()=>{
+  const f=forecast('2026-09');
+  f.reportMonth='2026-07';
+  const actual=payslip('2026-09');
+  actual.components={night:null,saturday:null,sunday:null,holiday:null,shift:null,springIn:null,hasVariableDetail:false};
+  const later={
+    month:'2026-10',
+    retroPeriods:[{
+      month:'2026-07',
+      totalGross:242.90,
+      components:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,springIn:null,hasVariableDetail:true}
+    }]
+  };
+  const result=buildPayrollLearningSnapshot({forecast:f,actual,payslips:[actual,later]});
+  assert.equal(result.componentSource,'retro');
+  assert.equal(result.componentSourceMonth,'2026-07');
+  assert.equal(result.rows.find(row=>row.key==='night').actual,98.01);
+  assert.equal(result.rows.find(row=>row.key==='night').confirmed,true);
+  assert.equal(result.rows.find(row=>row.key==='shift').actual,100);
+  assert.equal(result.rows.find(row=>row.key==='shift').confirmed,true);
+});
+
+test('Teilzahlung im Auszahlungsmonat plus spätere Rückrechnung wird für das Lernen addiert',()=>{
+  const f=forecast('2026-09');
+  f.reportMonth='2026-07';
+  const actual=payslip('2026-09');
+  actual.components={night:40,saturday:.77,sunday:20,holiday:0,shift:40,springIn:null,hasVariableDetail:true};
+  const later={
+    month:'2026-10',
+    retroPeriods:[{
+      month:'2026-07',
+      components:{night:58.01,saturday:0,sunday:24.12,holiday:0,shift:60,springIn:null,hasVariableDetail:true}
+    }]
+  };
+  const result=buildPayrollLearningSnapshot({forecast:f,actual,payslips:[actual,later]});
+  assert.equal(result.componentSource,'current+retro');
+  assert.equal(result.rows.find(row=>row.key==='night').actual,98.01);
+  assert.equal(result.rows.find(row=>row.key==='sunday').actual,44.12);
+  assert.equal(result.rows.find(row=>row.key==='shift').actual,100);
+  assert.equal(result.rows.find(row=>row.key==='shift').confirmed,true);
+});
