@@ -25,7 +25,7 @@ test('offene Rückstände werden netto getrennt',()=>{
   assert.equal(result.taxableNet,47.75);
   assert.equal(result.timeGross,142.90);
   assert.equal(result.timeNet,142.50);
-  assert.equal(result.shiftNet,47.38);
+  assert.equal(result.shiftNet,47.40);
   assert.equal(result.totalNet,189.88);
   assert.equal(result.correctedPayout,2847.82);
 });
@@ -152,10 +152,10 @@ test('alte September-Prognose zeigt ohne Neuberechnung keinen veralteten Netto-F
 
 test('September rekonstruiert Komponenten aus gespeichertem Zeitnachweis und zeigt Netto je Gruppe',()=>{
  const result=buildPayrollNetBreakdown({forecast:{totalGross:4723.33,components:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,shiftType:'schicht',unpriced:[],springInVblUnverified:false},netEffects:{complete:true,totalNet:189.88,timeNet:142.50,shiftAfterTimeNet:47.38,shiftStandaloneNet:47.40}},actual:{totalGross:4480.43,legalNet:2827.98,payout:2657.94,hasPriorAdjustment:false},variableRows:[],retro:[]});
- assert.equal(result.taxFreeNet,142.13);assert.equal(result.taxableGross,100.77);assert.equal(result.taxableNet,47.75);assert.equal(result.timeGross,142.90);assert.equal(result.timeNet,142.50);assert.equal(result.shiftGross,100);assert.equal(result.shiftNet,47.38);assert.equal(result.totalNet,189.88);assert.equal(result.correctedPayout,2847.82);
+ assert.equal(result.taxFreeNet,142.13);assert.equal(result.taxableGross,100.77);assert.equal(result.taxableNet,47.75);assert.equal(result.timeGross,142.90);assert.equal(result.timeNet,142.50);assert.equal(result.shiftGross,100);assert.equal(result.shiftNet,47.40);assert.equal(result.totalNet,189.88);assert.equal(result.correctedPayout,2847.82);
 });
 
-test('Ist-Abrechnung ist Basis für Nettoeffekt der 100-Euro-Schichtzulage',async()=>{
+test('Ist-Abrechnung ist Basis und Schichtzulage wird isoliert gegen diese Basis gerechnet',async()=>{
   const {calculateActualBasedForecastNetEffects}=await import('../lib/salary-net-effects.js');
   const forecast={
     payoutMonth:'2026-09',
@@ -168,12 +168,19 @@ test('Ist-Abrechnung ist Basis für Nettoeffekt der 100-Euro-Schichtzulage',asyn
     month:'2026-09',totalGross:4480.43,legalNet:2827.98,vbl:81.10,garnishment:88.94,payout:2657.94,
     hasPriorAdjustment:false,components:{hasVariableDetail:false}
   };
-  const effects=await calculateActualBasedForecastNetEffects(forecast,actual);
+  const calculator=async(report)=>{
+    const items=report?.items||[];
+    const hasShift=items.some(item=>item.code==='5212');
+    const hasTime=items.some(item=>['5010','5011','5014','5024'].includes(item.code));
+    if(!items.length)return {totalGross:4480.43,legalNet:2827.98,vbl:81.10,garnishment:88.94,payout:2657.94,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:0}}};
+    if(hasShift&&!hasTime)return {payout:2686.40,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:100}}};
+    if(hasTime&&!hasShift)return {payout:2800.00,components:{springIn:{total:0},unpriced:[],pay:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:0}}};
+    return {payout:2847.82,components:{springIn:{total:0},unpriced:[],pay:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100}}};
+  };
+  const effects=await calculateActualBasedForecastNetEffects(forecast,actual,undefined,calculator);
   assert.equal(effects?.basis,'actual-payslip');
-  assert.ok(Number.isFinite(effects?.shiftStandaloneNet));
-  assert.ok(effects.shiftStandaloneNet>0&&effects.shiftStandaloneNet<100);
+  assert.equal(effects.shiftStandaloneNet,28.46);
+  assert.equal(effects.totalNet,189.88);
   assert.equal(effects.actualPayout,2657.94);
-  console.log('ACTUAL_SHIFT_STANDALONE_NET='+effects.shiftStandaloneNet);
-  console.log('ACTUAL_FULL_CORRECTION_NET='+effects.totalNet);
-  console.log('ACTUAL_CORRECTED_PAYOUT='+effects.correctedPayout);
+  assert.equal(effects.correctedPayout,2847.82);
 });
