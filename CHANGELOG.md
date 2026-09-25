@@ -1,3 +1,10 @@
+# v0.99.28
+
+- Offene Netto-Nachzahlungen werden im nächsten noch nicht abgerechneten Auszahlungsmonat zusätzlich angezeigt.
+- Für September 2026 erscheint die offene Korrektur damit bereits im Oktober-Block als eigener Übertrag.
+- Die reguläre Oktober-Prognose bleibt unverändert; zusätzlich wird eine mögliche Auszahlung inklusive offener Nachzahlung gezeigt.
+- Sobald eine tatsächliche Rückrechnung erkannt wurde, verschwindet der offene Übertrag automatisch bzw. wandert bei weiter ausstehender Zahlung zum nächsten noch nicht abgerechneten Monat.
+
 # v0.99.27
 
 - Der Legacy-September-Fallback wurde aus dem synchronen Renderpfad entkoppelt und benötigt keine zusätzliche salary-net-effects-Modulverkettung mehr.
