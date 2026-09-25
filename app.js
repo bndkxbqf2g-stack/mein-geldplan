@@ -28,7 +28,7 @@ function init(){
   fixedCostsUi=createFixedCostsUi({refresh});
   historyUi=createHistoryUi({budgetUi});
   const maintenanceUi=createMaintenanceUi();
-  budgetUi.init();savingsUi.init();fixedCostsUi.init();historyUi.init();maintenanceUi.init();initSalaryUi();initTabs();
+  budgetUi.init();savingsUi.init();fixedCostsUi.init();historyUi.init();maintenanceUi.init();initSalaryUi({onForecastChange:refresh});initTabs();
   if($('resetBtn'))$('resetBtn').onclick=resetApp;
   document.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',refresh);el.addEventListener('change',refresh);});
   refresh();setInterval(refresh,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
