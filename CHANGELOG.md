@@ -1,3 +1,11 @@
+# v0.99.37
+
+- Gehaltskontrolle ordnet Rückrechnungsperioden jetzt dem ursprünglichen Zeitnachweismonat (reportMonth) zu, nicht dem späteren Auszahlungsmonat.
+- Reale LfF-Rückrechnungslogik wie Zeitnachweis Mai → Rückrechnung 05/2026 in einer späteren Bezügemitteilung wird damit korrekt erkannt.
+- Bestehende Regressionstests wurden auf die tatsächliche Periodenlogik korrigiert; zusätzlicher Test sichert Mai-Zeitnachweis → Juli-Auszahlung → Rückrechnung Mai.
+- Änderungen wurden ausschließlich auf dem Stabilitätsbranch entwickelt und erst nach grüner CI zur Veröffentlichung vorbereitet.
+- v0.99.36 bleibt als separater Release-Branch erhalten und kann jederzeit wiederhergestellt werden.
+
 # v0.99.36
 
 - Stabilisierung nach Datenverlust/PWA-Neuinstallation.
