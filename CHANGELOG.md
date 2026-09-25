@@ -1,3 +1,10 @@
+# v0.99.22
+
+- Legacy-Forecasts ohne Einzelkomponenten verwenden wieder die damalige Pfändungssemantik; die VBL wird nicht fälschlich ein zweites Mal aus dem steuerfreien Anteil herausgerechnet.
+- Alte Nettoeffekte werden mit der aktuellen BMF-/SV-/VBL-/Pfändungslogik neu berechnet, statt die veraltete Soll-Auszahlung weiterzuverwenden.
+- Der echte Juli-Zeitnachweis ist als Regression abgesichert: 21,40 Nachtstunden inklusive sieben Spätdienstanteilen à 0,70 h sowie der beiden Nachtdienste.
+- Juli 2026 ergibt 142,13 € steuerfreie Zuschläge und 100,77 € steuerpflichtige variable Bezüge; der Referenz-Nettoeffekt beträgt 189,88 €.
+
 # v0.99.21
 
 - Alte Gehaltsprognosen können die steuerfreie und steuerpflichtige Nachzahlung jetzt aus gespeicherten Brutto-, Netto- und Pfändungswerten rekonstruieren.
