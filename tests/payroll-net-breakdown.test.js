@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildPayrollNetBreakdown} from '../lib/payroll-net-breakdown.js';
+import {payrollNetEquation} from '../lib/payroll-net-ui.js';
 
 test('offene Rückstände werden netto getrennt',()=>{
   const variableRows=[
@@ -310,4 +311,42 @@ test('September-Legacy-Fallback berechnet steuerpflichtiges Netto ohne externen 
   assert.equal(result.shiftNet,30.64);
   assert.equal(result.totalNet,173.19);
   assert.equal(result.correctedPayout,2831.13);
+});
+
+
+test('Netto-Nachzahlung ist nachvollziehbar: steuerfrei plus steuerpflichtig ergibt Gesamtkorrektur',()=>{
+  const equation=payrollNetEquation({taxFreeNet:142.13,taxableNet:31.06,totalNet:173.19});
+  assert.deepEqual(equation,{taxFree:142.13,taxable:31.06,total:173.19,matches:true});
+});
+
+test('Schichtzulage ist Teil der steuerpflichtigen Summe und wird nicht doppelt addiert',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{
+      payoutMonth:'2026-09',
+      totalGross:4723.33,
+      legalNet:3026.99,
+      garnishableNet:2884.86,
+      needsReview:false,
+      springIn:0
+    },
+    actual:{
+      month:'2026-09',
+      totalGross:4480.43,
+      legalNet:2827.98,
+      vbl:81.10,
+      garnishment:88.94,
+      payout:2657.94,
+      hasPriorAdjustment:false,
+      components:{hasVariableDetail:false}
+    },
+    variableRows:[],
+    retro:[],
+    estimatedNetImpact:157.88
+  });
+  assert.equal(result.taxFreeNet,142.13);
+  assert.equal(result.taxableNet,31.06);
+  assert.equal(result.shiftNet,30.64);
+  assert.equal(Math.round((result.taxFreeNet+result.taxableNet)*100)/100,result.totalNet);
+  assert.equal(result.totalNet,173.19);
+  assert.notEqual(Math.round((result.taxFreeNet+result.taxableNet+result.shiftNet)*100)/100,result.totalNet);
 });
