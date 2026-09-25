@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { salaryMonthLabel, comparisonLabel, restoreReportFromForecast, refreshStoredSalaryForecasts } from '../lib/salary-ui.js';
+import { salaryMonthLabel, comparisonLabel, restoreReportFromForecast, refreshStoredSalaryForecasts, salaryDisplayPayout } from '../lib/salary-ui.js';
 
 test('salary month label formatiert YYYY-MM als MM/YYYY',()=>assert.equal(salaryMonthLabel('2026-09'),'09/2026'));
 test('comparison label unterscheidet Treffer, Abweichung und Prüfung',()=>{
@@ -75,4 +75,24 @@ test('aktuelle Prognose wird nicht bei jedem App-Start erneut gespeichert',async
   assert.equal(result.changed,false);
   assert.equal(persisted,false);
   assert.equal(result.forecasts[0],current);
+});
+
+
+test('Gehaltsprognose kann stabile Lernhistorie auf zukünftige Auszahlung anwenden',()=>{
+  const learning=['2026-07','2026-08'].map((month,index)=>({
+    payoutMonth:month,
+    hasPriorAdjustment:false,
+    rows:[{key:'night',comparable:true,confirmed:true}],
+    totals:[
+      {key:'totalGross',comparable:true,confirmed:true,difference:0},
+      {key:'payout',comparable:true,confirmed:false,difference:index===0?-4:-6}
+    ]
+  }));
+  const result=salaryDisplayPayout({
+    payout:2808.94,
+    needsReview:false,
+    components:{unpriced:[],springInVblUnverified:false}
+  },learning);
+  assert.equal(result.applied,true);
+  assert.equal(result.payout,2803.94);
 });
