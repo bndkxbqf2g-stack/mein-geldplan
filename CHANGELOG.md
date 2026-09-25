@@ -1,3 +1,12 @@
+# v0.99.33
+
+- Zeitnachweise und Bezügemitteilungen bilden jetzt automatisch eine kontrollierte Payroll-Lernhistorie.
+- Soll- und Ist-Komponenten werden je Auszahlungsmonat abgeglichen; bestätigte und abweichende Zusammenhänge werden getrennt gespeichert.
+- Wiederholte Bestätigungen erhöhen die Vertrauensstufe bis „verifiziert“. Abweichungen werden nur als Warnsignal gelernt und überschreiben keine Tarif-, Steuer-, SV- oder Pfändungsregeln.
+- Bereits vorhandene Prognosen und Bezügemitteilungen werden beim Start rückwirkend in die Lernhistorie aufgenommen.
+- Die Lernhistorie wird lokal gespeichert, in Backups aufgenommen und beim vollständigen Reset entfernt.
+- Regressionstests sichern Monatsabgleich, Deduplizierung, Vertrauensstufen und Abweichungswarnungen ab.
+
 # v0.99.32
 
 - September und der Übertrag in Oktober verwenden jetzt ausschließlich die pfändungsbereinigte Netto-Nachzahlung von 173,19 € statt veralteter 189,88 €.
