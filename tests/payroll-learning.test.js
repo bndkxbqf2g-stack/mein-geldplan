@@ -85,3 +85,30 @@ test('Lernsnapshot prüft auch Steuer, SV, VBL, Pfändung und Auszahlung',()=>{
   assert.equal(result.totals.find(row=>row.key==='garnishment').confirmed,true);
   assert.equal(result.totals.find(row=>row.key==='payout').confirmed,true);
 });
+
+
+test('Lernlogik verwendet passende Rückrechnung für den ursprünglichen Zeitnachweismonat',()=>{
+  const f=forecast('2026-07');
+  f.reportMonth='2026-05';
+  f.components.shift=100;
+  const actual=payslip('2026-07');
+  actual.retroPeriods=[{
+    month:'2026-05',
+    components:{night:6.18,saturday:null,sunday:null,holiday:null,shift:60,springIn:null}
+  }];
+  const result=buildPayrollLearningSnapshot({forecast:f,actual});
+  assert.equal(result.componentSource,'retro');
+  assert.equal(result.componentSourceMonth,'2026-05');
+  assert.equal(result.rows.find(row=>row.key==='shift').actual,60);
+  assert.equal(result.rows.find(row=>row.key==='shift').confirmed,false);
+});
+
+test('Rückrechnung eines anderen Monats wird nicht fälschlich als Lernquelle verwendet',()=>{
+  const f=forecast('2026-08');
+  f.reportMonth='2026-06';
+  const actual=payslip('2026-08');
+  actual.retroPeriods=[{month:'2026-05',components:{night:6.18,shift:60}}];
+  const result=buildPayrollLearningSnapshot({forecast:f,actual});
+  assert.equal(result.componentSource,'current');
+  assert.equal(result.componentSourceMonth,'2026-08');
+});
