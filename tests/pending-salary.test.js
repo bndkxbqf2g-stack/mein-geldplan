@@ -71,3 +71,13 @@ test('Vorschau ist klar getrennt vom aktuellen Giro',()=>{
   assert.equal(projection.salaryAfterFixedCosts,700);
   assert.equal(projection.availableAfterPayout,850);
 });
+
+
+test('einmalige Fixkostenreduzierung wird nur beim vorgesehenen Auszahlungstag angewendet',()=>{
+  const pending=createPendingSalary({id:'p5',amount:2700,payoutDate:'2026-09-30',createdAt:new Date(2026,8,15)});
+  const overrides=[{id:'2026-09-30:f',fixedCostId:'f',payoutDate:'2026-09-30',amount:1500}];
+  const result=applyPendingSalary({pending,transactions:[],fixedCosts:fixed,fixedCostOverrides:overrides,today:new Date(2026,8,30,0,0)});
+  assert.equal(result.posted,true);
+  assert.equal(result.fixedCosts,1500);
+  assert.equal(getCurrentGiro(result.transactions,0),1200);
+});
