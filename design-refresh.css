@@ -240,3 +240,28 @@ html[data-theme="dark"] .fix-once-row{background:#223c2c;border-color:#395340}
  .fix-once-row{grid-template-columns:1fr}
  .fix-once-label,.fix-once-status{grid-column:auto}
 }
+
+
+/* v0.99.8 payroll control */
+.payroll-control-section{border-top:4px solid #8eb39a}
+.payroll-control-card{margin:14px 0;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--soft)}
+.payroll-control-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.payroll-control-head>div{display:flex;flex-direction:column;gap:2px}
+.payroll-control-head b{font-size:16px;color:var(--text);text-transform:capitalize}
+.payroll-control-head span{font-size:11px;color:var(--muted)}
+.payroll-control-group{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.payroll-control-line{display:grid;grid-template-columns:minmax(150px,1.2fr) .8fr .9fr .7fr;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}
+.payroll-control-line:last-child{border-bottom:0}
+.payroll-control-line>span:first-child{font-weight:700;color:var(--text)}
+.payroll-control-line small,.payroll-control-line em{display:block;margin-top:2px;color:var(--muted);font-size:10px;font-style:normal;font-weight:500}
+.payroll-control-line strong{text-align:right}
+.payroll-alert{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff8ea;border:1px solid #f0dfb9;color:#7f642b}
+.payroll-retro-note{margin-top:10px;padding:9px 11px;border-radius:11px;background:var(--card);border:1px solid var(--line)}
+html[data-theme="dark"] .payroll-control-card{background:#223c2c;border-color:#395340}
+html[data-theme="dark"] .payroll-alert{background:#3a3323;border-color:#655536;color:#ecd69e}
+html[data-theme="dark"] .payroll-retro-note{background:#1b3024;border-color:#395340}
+@media(max-width:650px){
+ .payroll-control-line{grid-template-columns:1fr 1fr;gap:5px 10px}
+ .payroll-control-line strong{text-align:left}
+ .payroll-control-head{align-items:center}
+}
