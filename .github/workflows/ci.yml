@@ -2,11 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -30,10 +26,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
-      - name: Install dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          find . -type f -name '*.js' -not -path './.git/*' -print0 |
+            xargs -0 -n1 node --check
 
       - name: Run tests
         run: npm test
