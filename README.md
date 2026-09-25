@@ -8,7 +8,7 @@ Lokale Budget-, Lohn- und Prognose-App. Alle eingegebenen Daten werden im Browse
 - Beim Buchen eines Lohns beginnt ein neuer Lohnzyklus. Die verwalteten Fixkosten werden innerhalb desselben Zyklus nur einmal automatisch abgezogen.
 - Die Pfändungsprognose verwendet die monatliche Tabelle der Pfändungsfreigrenzenbekanntmachung 2026 nach § 850c ZPO für null bis fünf Unterhaltspflichten. Sie ist nur eine Orientierung und ersetzt keine Lohnabrechnung oder Rechtsberatung.
 - Zeitnachweise bleiben lokal; die PDF-Bibliothek wird erst beim PDF-Import vom CDN geladen.
-- Die Gehaltsprognose wird aus dem hochgeladenen Zeitnachweis erzeugt. Feste Bezüge, Schicht-/Wechselschichtzulage und Zeitzuschläge werden getrennt ausgewiesen; der Auszahlungsmonat folgt Leistungsmonat + 2 Monate.
+- Die Gehaltsprognose wird aus dem hochgeladenen Zeitnachweis erzeugt. Feste Bezüge, Schicht-/Wechselschichtzulage und Zeitzuschläge werden getrennt ausgewiesen; der Auszahlungsmonat folgt Leistungsmonat + 2 Monate. Gespeicherte ältere Prognosen mit vorhandenem Zeitnachweis werden beim App-Start einmalig auf die aktuellen Rechenregeln aktualisiert, damit Übersicht und Gehaltskontrolle denselben Auszahlungswert verwenden.
 - Echte Bezügemitteilungen können anschließend hochgeladen werden. Die App vergleicht Soll und Ist, berechnet offene Netto-Nachzahlungen und führt spätere Rückrechnungen dem betroffenen Prognosemonat zu. Maximal die drei neuesten Prognosen/Checks bleiben gleichzeitig sichtbar.
 - Jeder passende Soll-/Ist-Abgleich aktualisiert zusätzlich die kontrollierte Payroll-Lernhistorie. Spätere Rückrechnungen aus Folgemonaten werden dem ursprünglichen Zeitnachweis-/Auszahlungsmonat zugerechnet; Teilzahlungen im aktuellen Monat und spätere Rückrechnungen werden für den Komponentenabgleich zusammengeführt. Fehlende, nicht auslesbare Einzelkomponenten gelten dabei nicht als 0,00 €, sondern bleiben unbekannt. Abweichungen werden als Prüfsignal gespeichert; feste Tarif-, Steuer-, SV- und Pfändungsregeln werden dadurch nicht automatisch verändert.
 
@@ -36,3 +36,5 @@ Beim Start werden lokale Alt-Daten defensiv auf Schema 3 migriert. Ungültige Da
 
 ## Datenintegrität aktuell
 Aktueller lokaler Datenschema-Stand: 7. Backups verwenden Sicherungsversion 7 und enthalten auch die Payroll-Lernhistorie.
+
+- Die Fixkostenansicht zeigt reguläre Monatsfixkosten, den nächsten Lohnzyklus und einmalige Anpassungen kompakt in Karten; Einzelanpassungen sind einklappbar.
