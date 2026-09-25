@@ -1,3 +1,12 @@
+# v0.99.12
+
+- Gehaltskontrolle trennt offene Rückstände zusätzlich in steuerfrei netto und steuerpflichtig netto.
+- Zeitzuschläge sowie Schicht-/Wechselschichtzulage erhalten nach erneutem Zeitnachweis-Import eigene Nettoeffekte.
+- Voraussichtliche Netto-Nachzahlung und korrigierte Auszahlung werden auf Basis der aktuellen Bezügemitteilung angezeigt.
+- VBL-Arbeitnehmeranteil wird vor Anwendung der Pfändungstabelle aus dem pfändbaren Netto herausgerechnet.
+- Festbezugs-Referenz 2026: 2.657,94 € Auszahlung, 88,94 € Pfändung, sofern keine Nachverrechnung vorliegt.
+- Alte Prognosen bleiben lesbar; für die exakte Detailaufteilung genügt ein erneutes Einlesen des betreffenden Zeitnachweises.
+
 # v0.99.11
 
 - VBL-SV-Hinzurechnungsbetrag 2026 nach der VBL-Systematik statt linearem Näherungsfaktor.
