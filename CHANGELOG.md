@@ -1,3 +1,11 @@
+# v0.99.26
+
+- Alte September-Prognosen können die Netto-Rückrechnung jetzt vollständig lokal aus gespeicherten Soll-Werten und der echten Bezügemitteilung berechnen.
+- Der Legacy-Fallback benötigt für diese Kontrolle keinen erneuten externen Steuerrechner-Import.
+- Für September 2026 werden 142,13 € steuerfreie Zuschläge und 100,77 € steuerpflichtige Rückstände rekonstruiert.
+- Der steuerpflichtige Nettoeffekt beträgt 31,06 €, davon entfallen 30,64 € auf die 100,00 € Schichtzulage und 0,42 € auf 0,77 € Samstagszuschlag.
+- Die erwartete Netto-Korrektur beträgt damit 173,19 €; ausgehend von 2.657,94 € tatsächlicher Auszahlung ergibt sich 2.831,13 €.
+
 # v0.99.25
 
 - Netto-Rückrechnungen werden als Differenzmodell auf die tatsächliche Auszahlung der eingelesenen Bezügemitteilung aufgesetzt.
