@@ -275,3 +275,39 @@ test('Ist-Auszahlung bleibt Sockel auch wenn Modell-Baseline netto abweicht',asy
   assert.equal(effects.actualPayout,2600);
   assert.equal(effects.correctedPayout,2790);
 });
+
+test('September-Legacy-Fallback berechnet steuerpflichtiges Netto ohne externen Steuerrechner',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{
+      payoutMonth:'2026-09',
+      totalGross:4723.33,
+      legalNet:3026.99,
+      garnishableNet:2884.86,
+      needsReview:false,
+      springIn:0
+    },
+    actual:{
+      month:'2026-09',
+      totalGross:4480.43,
+      legalNet:2827.98,
+      vbl:81.10,
+      garnishment:88.94,
+      payout:2657.94,
+      hasPriorAdjustment:false,
+      components:{hasVariableDetail:false}
+    },
+    variableRows:[],
+    retro:[],
+    estimatedNetImpact:157.88
+  });
+  assert.equal(result.source,'actual-payslip-summary');
+  assert.equal(result.taxFreeGross,142.13);
+  assert.equal(result.taxFreeNet,142.13);
+  assert.equal(result.taxableGross,100.77);
+  assert.equal(result.taxableNet,31.06);
+  assert.equal(result.shiftGross,100);
+  assert.equal(result.shiftType,'schicht');
+  assert.equal(result.shiftNet,30.64);
+  assert.equal(result.totalNet,173.19);
+  assert.equal(result.correctedPayout,2831.13);
+});
