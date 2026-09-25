@@ -149,3 +149,13 @@ test('Erklärungspräferenz ist standardmäßig aktiv und bleibt gespeichert', a
   assert.equal(saveShowExplanations(true,storage),true);
   assert.equal(getShowExplanations(storage),true);
 });
+
+
+test('Fixkosten-Ausnahmen werden getrennt gespeichert', async()=>{
+  const {getFixedCostOverrides,saveFixedCostOverrides}=await import('../lib/storage.js');
+  const storage=memoryStorage();
+  const value=[{id:'2026-09-30:miete',fixedCostId:'miete',payoutDate:'2026-09-30',amount:500}];
+  assert.equal(saveFixedCostOverrides(value,storage),true);
+  assert.deepEqual(getFixedCostOverrides(storage),value);
+  assert.equal(storage.getItem(storageKeys.fixedCosts),null);
+});
