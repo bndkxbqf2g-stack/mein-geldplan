@@ -1,3 +1,15 @@
+# v0.99.39
+
+- Private Cloud-Sicherung über ein eigenes Supabase-Projekt ergänzt.
+- Anmeldung erfolgt per E-Mail/Einmalcode; Cloud-Daten sind durch Auth und Row Level Security strikt an das jeweilige Benutzerkonto gebunden.
+- Budget-, Giro-/Bargeld-, Fixkosten-, Spar-, Gehaltsprognose-, Bezügemitteilungs- und Payroll-Lerndaten können automatisch versioniert in der Cloud gesichert werden.
+- Bei leerem lokalem Zustand und vorhandener Cloud-Sicherung wird nach erfolgreicher Anmeldung automatisch die letzte Sicherung wiederhergestellt.
+- Manuelles „Jetzt sichern“ und „Cloud-Sicherung wiederherstellen“ ergänzt.
+- Cloud-Snapshots werden per SHA-256 dedupliziert; reine Export-Zeitstempel erzeugen keine unnötigen neuen Versionen.
+- Die bestehende lokale IndexedDB-Recovery bleibt zusätzlich aktiv; Cloud-Backup ist damit die geräteunabhängige zweite Schutzebene.
+- Vollständiger lokaler Reset meldet auch die Cloud-Sitzung ab, löscht aber die geschützten Cloud-Backups nicht automatisch.
+- Cloud- und Recovery-Module sind in Offline-App-Shell und Regressionstests abgesichert.
+
 # v0.99.38
 
 - Zusätzliche lokale Recovery-Ebene über IndexedDB ergänzt. Sie liegt getrennt vom bisherigen localStorage und wird fortlaufend aus dem aktuellen App-Zustand aktualisiert.
