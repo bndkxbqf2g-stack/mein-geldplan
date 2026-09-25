@@ -1,3 +1,13 @@
+# v0.99.44
+
+- Bezügemitteilungs-Upload im neu aufgebauten Gehaltsbereich wieder ergänzt.
+- Neue Kontrollansicht stellt Prognose, tatsächliche Abrechnung und Differenz gegenüber; steuerfreie Zuschläge und steuerpflichtige Zulagen bleiben getrennt.
+- Rückrechnungsperioden werden weiterhin dem ursprünglichen Leistungsmonat zugeordnet; Vormonatskorrekturen werden separat sichtbar.
+- Offene Ansprüche werden auf Basis der echten Bezügemitteilung mit Steuer/SV/VBL/Pfändung als voraussichtlicher Nettoausstand zurückgerechnet, sofern die Zuordnung eindeutig ist.
+- Kontrolliertes Payroll-Learning wird beim Einlesen neuer Zeitnachweise und Bezügemitteilungen wieder aktualisiert, ohne feste Rechenregeln automatisch zu überschreiben.
+- Oberfläche begrenzt gespeicherte Prognosen und Gehaltskontrollen auf die drei neuesten sichtbaren Karten; ältere gespeicherte Monate bleiben für Rückrechnungen und Überträge erhalten.
+- Regressionstests sichern Bezügemitteilungs-UI, Kontrollansicht und Drei-Karten-Grenze ab.
+
 # v0.99.43
 
 - Offizielle UKW-Pflegetabelle 2026 für KR8 / Berechnungsstufe 3 ergänzt.
