@@ -138,3 +138,14 @@ test('vorgemerkter Lohn wird getrennt vom Giro gespeichert', async()=>{
   clearPendingSalary(storage);
   assert.equal(getPendingSalary(storage),null);
 });
+
+
+test('Erklärungspräferenz ist standardmäßig aktiv und bleibt gespeichert', async()=>{
+  const {getShowExplanations,saveShowExplanations}=await import('../lib/storage.js');
+  const storage=memoryStorage();
+  assert.equal(getShowExplanations(storage),true);
+  assert.equal(saveShowExplanations(false,storage),true);
+  assert.equal(getShowExplanations(storage),false);
+  assert.equal(saveShowExplanations(true,storage),true);
+  assert.equal(getShowExplanations(storage),true);
+});
