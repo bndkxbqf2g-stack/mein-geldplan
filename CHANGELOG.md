@@ -1,3 +1,12 @@
+# v0.99.11
+
+- VBL-SV-Hinzurechnungsbetrag 2026 nach der VBL-Systematik statt linearem Näherungsfaktor.
+- Eigene VBL-Bemessungsgrundlage: bekannte VBL-pflichtige Bestandteile werden getrennt vom steuer-/SV-pflichtigen Brutto geführt.
+- Einspringprämie bleibt steuer- und SV-pflichtig, wird bis zu einer echten Referenzabrechnung aber nicht ungeprüft in die VBL-Basis aufgenommen und als prüfpflichtig markiert.
+- §21-Durchschnittspositionen 5161/5162 werden nicht mehr nur still ignoriert, sondern als nicht automatisch berechenbare Bestandteile im Kontrolltool ausgewiesen.
+- Feiertagsbezüge werden auf Bezügemitteilungen separat erkannt; ohne eindeutig berechenbaren Zeitnachweis-Betrag wird nicht geraten.
+- Nacht/Sonntag bleiben steuer-/SV-frei, Samstag und Schicht-/Wechselschichtzulage steuer-/SV-pflichtig.
+
 # v0.99.10
 
 - Regressionen aus dem neuen Gehaltskontrolltool behoben.
