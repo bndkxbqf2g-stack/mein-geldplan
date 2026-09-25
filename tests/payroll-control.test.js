@@ -93,3 +93,18 @@ test('Forecast ohne Bezügemitteilung bleibt kontrollierbar',()=>{
   assert.equal(control.actualGross,null);
   assert.equal(control.remainingGross,null);
 });
+
+test('5211/5212 aus gespeichertem Zeitnachweis bestimmt Zulagenart',()=>{
+  const wechsel=buildPayrollControl({
+    forecast:{...forecast,components:{...forecast.components,shiftType:'none'},reportItems:[{code:'5211'}]},
+    actual:null,
+    payslips:[]
+  });
+  const schicht=buildPayrollControl({
+    forecast:{...forecast,components:{...forecast.components,shiftType:'none'},reportItems:[{code:'5212'}]},
+    actual:null,
+    payslips:[]
+  });
+  assert.equal(wechsel.variableRows.find(row=>row.key==='shift').label,'Wechselschichtzulage');
+  assert.equal(schicht.variableRows.find(row=>row.key==='shift').label,'Schichtzulage');
+});
