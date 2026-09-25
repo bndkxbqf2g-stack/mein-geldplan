@@ -1,3 +1,12 @@
+# v0.99.46
+
+- Payroll-Learning berücksichtigt jetzt auch passende Rückrechnungsperioden aus späteren Bezügemitteilungen.
+- Rückrechnungen können den ursprünglichen Leistungsmonat oder den ursprünglichen Auszahlungsmonat referenzieren und werden für den Lernabgleich zugeordnet.
+- Bereits im Auszahlungsmonat gezahlte Teilkomponenten und spätere Rückrechnungen werden komponentenweise addiert, bevor Soll und Ist bewertet werden.
+- Damit kann eine später vollständig nachgezahlte Lohnart als bestätigt gelernt werden, statt dauerhaft als Abweichung stehenzubleiben.
+- Doppelte Rückrechnungsperioden werden im Lernabgleich dedupliziert; feste Rechenregeln bleiben weiterhin unverändert.
+- Regressionstests sichern spätere Rückrechnung, Teilzahlung plus Rückrechnung und den vollständigen Workflow.
+
 # v0.99.45
 
 - Kontrollierte Payroll-Lernhistorie wieder an den aktuellen Bezügemitteilungs-Workflow angeschlossen.

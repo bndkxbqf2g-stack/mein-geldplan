@@ -10,7 +10,7 @@ Lokale Budget-, Lohn- und Prognose-App. Alle eingegebenen Daten werden im Browse
 - Zeitnachweise bleiben lokal; die PDF-Bibliothek wird erst beim PDF-Import vom CDN geladen.
 - Die Gehaltsprognose wird aus dem hochgeladenen Zeitnachweis erzeugt. Feste Bezüge, Schicht-/Wechselschichtzulage und Zeitzuschläge werden getrennt ausgewiesen; der Auszahlungsmonat folgt Leistungsmonat + 2 Monate.
 - Echte Bezügemitteilungen können anschließend hochgeladen werden. Die App vergleicht Soll und Ist, berechnet offene Netto-Nachzahlungen und führt spätere Rückrechnungen dem betroffenen Prognosemonat zu. Maximal die drei neuesten Prognosen/Checks bleiben gleichzeitig sichtbar.
-- Jeder passende Soll-/Ist-Abgleich aktualisiert zusätzlich die kontrollierte Payroll-Lernhistorie. Abweichungen werden als Prüfsignal gespeichert; feste Tarif-, Steuer-, SV- und Pfändungsregeln werden dadurch nicht automatisch verändert.
+- Jeder passende Soll-/Ist-Abgleich aktualisiert zusätzlich die kontrollierte Payroll-Lernhistorie. Spätere Rückrechnungen aus Folgemonaten werden dem ursprünglichen Zeitnachweis-/Auszahlungsmonat zugerechnet; Teilzahlungen im aktuellen Monat und spätere Rückrechnungen werden für den Komponentenabgleich zusammengeführt. Abweichungen werden als Prüfsignal gespeichert; feste Tarif-, Steuer-, SV- und Pfändungsregeln werden dadurch nicht automatisch verändert.
 
 ## Daten
 

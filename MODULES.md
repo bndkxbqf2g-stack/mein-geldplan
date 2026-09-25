@@ -46,7 +46,7 @@ Reine Statistikfunktionen für Monatswerte, Transaktionssummen und Sparentwicklu
 
 - `lib/storage.js`: Schema-7-Migration, defensive Normalisierung und Datumsvalidierung; speichert Budget, Prognosen, Bezügemitteilungen und Payroll-Lernhistorie lokal.
 - `lib/maintenance-ui.js`: Backup v7 inklusive Payroll-Lernhistorie, Validierung und rückrollbarer Restore.
-- `lib/payroll-learning.js`: kontrollierter Soll-/Ist-Lernabgleich. Beobachtungen erhöhen nur die Vertrauensstufe; Tarif-, Steuer-, SV- und Pfändungsregeln werden nicht automatisch überschrieben.
+- `lib/payroll-learning.js`: kontrollierter Soll-/Ist-Lernabgleich. Komponenten aus aktueller Abrechnung und passenden späteren Rückrechnungen werden zusammengeführt; Beobachtungen erhöhen nur die Vertrauensstufe. Tarif-, Steuer-, SV- und Pfändungsregeln werden nicht automatisch überschrieben.
 
 
 ### `lib/payroll-control.js` / `lib/payroll-control-ui.js`
