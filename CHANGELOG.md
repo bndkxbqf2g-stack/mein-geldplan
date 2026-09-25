@@ -1,3 +1,12 @@
+# v0.99.43
+
+- Offizielle UKW-Pflegetabelle 2026 für KR8 / Berechnungsstufe 3 ergänzt.
+- Feiertagsarbeit: 30,94 € je Stunde ohne Freizeitausgleich und 8,02 € je Stunde mit Freizeitausgleich.
+- 24. und 31. Dezember ab 6 Uhr sind mit 8,02 € je Stunde als Tarifgrundlage hinterlegt.
+- Feiertagszeilen mit ausdrücklich genanntem „ohne FA/FZA“ bzw. „mit FA/FZA“ können aus Zeitnachweisen berechnet werden, auch wenn der interne Lohnartcode noch nicht separat dokumentiert ist.
+- Unklare Feiertagszeilen werden weiterhin nicht geraten, sondern als „Bitte prüfen“ behandelt.
+- Regressionstests sichern beide Feiertagsvarianten und den Nicht-Raten-Fall ab.
+
 # v0.99.42
 
 - Gehaltsprognose im ersten Schritt komplett auf den Zeitnachweis zurückgeführt: Upload → erkannte Zeitlohnarten → Zulagen/Zuschläge → steuerpflichtiges Brutto → Netto/Pfändung → voraussichtliche Auszahlung.

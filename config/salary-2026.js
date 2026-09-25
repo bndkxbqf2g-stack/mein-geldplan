@@ -10,7 +10,10 @@ export const SALARY_2026 = Object.freeze({
     hourlyBase: 22.92,
     night: 4.58,
     saturday: 0.64,
-    sunday: 5.73
+    sunday: 5.73,
+    holidayWithoutTimeOff: 30.94,
+    holidayWithTimeOff: 8.02,
+    dec24And31: 8.02
   }),
   shift: Object.freeze({
     wechsel: 250,
