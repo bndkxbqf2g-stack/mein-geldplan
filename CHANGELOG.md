@@ -1,3 +1,13 @@
+# v0.99.7
+
+- Einzelne Fixkosten können für genau den nächsten Lohnzyklus einmalig pausiert oder reduziert werden.
+- Normale Fixkostenbeträge bleiben unverändert; die Ausnahme wird separat mit dem nächsten Auszahlungstag gespeichert.
+- Beim automatischen Lohneingang wird die einmalig angepasste Fixkostensumme verwendet und die Ausnahme anschließend verbraucht.
+- Im darauffolgenden Lohnzyklus gelten automatisch wieder die normalen Fixkosten.
+- Fixkosten-Seite zeigt normalen Monatsbetrag, nächsten Auszahlungstag und die einmalig wirksame Gesamtsumme.
+- Vorgemerkte-Lohn-Vorschau berücksichtigt die einmaligen Fixkostenänderungen sofort.
+- Einmalige Fixkosten-Ausnahmen sind Bestandteil von Backup/Restore.
+
 # v0.99.6
 
 - Sparziel-Schnellzugriff scrollt nur noch zur Sparsektion und fokussiert kein Eingabefeld mehr; die iPhone-Tastatur öffnet sich dadurch nicht automatisch.
