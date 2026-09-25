@@ -11,7 +11,7 @@ import {initTheme} from './lib/theme-ui.js';
 import {initPreferences} from './lib/preferences-ui.js';
 
 let budgetUi,savingsUi,fixedCostsUi,historyUi;
-const refresh=()=>{budgetUi.render();savingsUi.render();fixedCostsUi.render();historyUi.render();scheduleCurrentRecoverySnapshot();};
+const refresh=()=>{budgetUi.render();savingsUi.render();fixedCostsUi.render();historyUi.render();scheduleCurrentRecoverySnapshot();document.dispatchEvent(new Event('geldplan:data-changed'));};
 
 async function resetApp(){
   if(!confirm('Wirklich alle gespeicherten Eingaben und Buchungen löschen?'))return;
@@ -35,6 +35,7 @@ async function init(){
   if($('resetBtn'))$('resetBtn').onclick=resetApp;
   document.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',refresh);el.addEventListener('change',refresh);});
   refresh();
+  import('./lib/cloud-backup-ui.js').then(({initCloudBackupUi})=>initCloudBackupUi()).catch(error=>console.error('[cloud-backup-init]',error));
   import('./lib/salary-ui.js')
     .then(({initSalaryUi})=>{initSalaryUi({onForecastChange:refresh});refresh();})
     .catch(error=>{console.error('[salary-init]',error);notify('Gehaltsbereich konnte nicht geladen werden. Budget und Übersicht bleiben verfügbar.',{type:'error',timeout:6000});});
