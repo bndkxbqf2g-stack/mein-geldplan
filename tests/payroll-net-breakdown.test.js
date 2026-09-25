@@ -76,6 +76,11 @@ test('Legacy-Summenforecast rekonstruiert 142,13 steuerfrei und 100,77 steuerpfl
     springIn:0
   });
   const c=reportComponents(report);
+  assert.equal(report.inferredShiftType,'schicht');
+  assert.equal(report.inferredShiftGross,100);
+  assert.equal(report.inferredSaturdayGross,.77);
+  assert.equal(c.pay.shift,100);
+  assert.equal(c.pay.saturday,.77);
   assert.equal(c.taxFreePay,142.13);
   assert.equal(c.taxableExtra,100.77);
 });
@@ -183,4 +188,58 @@ test('Ist-Abrechnung ist Basis und Schichtzulage wird isoliert gegen diese Basis
   assert.equal(effects.totalNet,189.88);
   assert.equal(effects.actualPayout,2657.94);
   assert.equal(effects.correctedPayout,2847.82);
+});
+
+test('Legacy-September nutzt Ist-Abrechnung und liefert isolierten Nettoeffekt der 100-Euro-Schichtzulage',async()=>{
+  const {calculateActualBasedForecastNetEffects}=await import('../lib/salary-net-effects.js');
+  const forecast={
+    payoutMonth:'2026-09',
+    totalGross:4723.33,
+    legalNet:3026.99,
+    garnishableNet:2884.86,
+    needsReview:false,
+    springIn:0
+  };
+  const actual={
+    month:'2026-09',
+    totalGross:4480.43,
+    legalNet:2827.98,
+    vbl:81.10,
+    garnishment:88.94,
+    payout:2657.94,
+    hasPriorAdjustment:false,
+    components:{hasVariableDetail:false}
+  };
+  const calculator=async(report)=>{
+    const items=report?.items||[];
+    const hasShift=items.some(item=>item.code==='5212');
+    const hasSaturday=items.some(item=>item.code==='5014');
+    const hasTaxFree=items.some(item=>item.type==='holiday');
+    if(!items.length)return {totalGross:4480.43,legalNet:2827.98,vbl:81.10,garnishment:88.94,payout:2657.94,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:0},shift:'none'}};
+    if(hasShift&&!hasSaturday&&!hasTaxFree)return {payout:2686.40,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:100},shift:'schicht'}};
+    if(!hasShift&&(hasSaturday||hasTaxFree))return {payout:2800.00,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:.77,sunday:0,holiday:142.13,shift:0},shift:'none'}};
+    return {payout:2847.82,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:.77,sunday:0,holiday:142.13,shift:100},shift:'schicht'}};
+  };
+  const effects=await calculateActualBasedForecastNetEffects(forecast,actual,undefined,calculator);
+  assert.equal(effects?.basis,'actual-payslip');
+  assert.equal(effects.shiftType,'schicht');
+  assert.equal(effects.shiftGross,100);
+  assert.equal(effects.shiftStandaloneNet,28.46);
+  assert.equal(effects.totalNet,189.88);
+
+  const result=buildPayrollNetBreakdown({
+    forecast:{...forecast,actualNetEffects:effects},
+    actual,
+    variableRows:[],
+    retro:[],
+    estimatedNetImpact:157.88
+  });
+  assert.equal(result.source,'actual-payslip-summary');
+  assert.equal(result.shiftType,'schicht');
+  assert.equal(result.shiftGross,100);
+  assert.equal(result.shiftNet,28.46);
+  assert.equal(result.taxFreeNet,142.13);
+  assert.equal(result.taxableGross,100.77);
+  assert.equal(result.totalNet,189.88);
+  assert.equal(result.correctedPayout,2847.82);
 });
