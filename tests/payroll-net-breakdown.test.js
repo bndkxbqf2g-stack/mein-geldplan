@@ -88,7 +88,7 @@ test('Legacy-Summenforecast rekonstruiert 142,13 steuerfrei und 100,77 steuerpfl
 
 test('tatsächliche Abrechnung wird als Basis der Nachzahlung markiert',()=>{
   const result=buildPayrollNetBreakdown({
-    forecast:{components:{unpriced:[],springInVblUnverified:false},netEffects:{complete:true,totalNet:173.19,timeNet:142.55,shiftAfterTimeNet:30.64}},
+    forecast:{components:{unpriced:[],springInVblUnverified:false},actualNetEffectsVersion:5,actualNetEffects:{complete:true,basis:'actual-payslip',totalNet:173.19,timeNet:142.55,shiftAfterTimeNet:30.64,shiftStandaloneNet:30.64}},
     actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98,hasPriorAdjustment:false},
     variableRows:[{key:'night',expected:98.01,open:98.01,tax:'steuerfrei'},{key:'saturday',expected:.77,open:.77,tax:'steuerpflichtig'},{key:'sunday',expected:44.12,open:44.12,tax:'steuerfrei'},{key:'shift',expected:100,open:100,tax:'steuerpflichtig'}],retro:[]
   });
@@ -98,21 +98,21 @@ test('tatsächliche Abrechnung wird als Basis der Nachzahlung markiert',()=>{
 });
 
 
-test('alte Prognose zeigt wenigstens gespeicherten Netto-Nachzahlungsbetrag',()=>{
+test('alte Prognose zeigt bei echter Abrechnung keinen veralteten Netto-Fallback',()=>{
   const result=buildPayrollNetBreakdown({forecast:{components:{}},actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98},variableRows:[],estimatedNetImpact:157.88});
-  assert.equal(result.totalNet,157.88);
-  assert.equal(result.correctedPayout,2815.82);
-  assert.equal(result.source,'legacy-total');
+  assert.equal(result.totalNet,null);
+  assert.equal(result.correctedPayout,null);
+  assert.equal(result.source,'unavailable');
 });
 
 
-test('sichtbarer Fallback aus Soll- und Ist-Auszahlung bei alten September-Daten',()=>{
+test('Soll-Ist-Auszahlungsdifferenz ersetzt bei echter Abrechnung keine aktuelle Nachberechnung',()=>{
   const expectedPayout=2815.82,actualPayout=2657.94;
   const fallback=Math.round((expectedPayout-actualPayout)*100)/100;
   const result=buildPayrollNetBreakdown({forecast:{components:{}},actual:{payout:actualPayout,totalGross:4480.43,legalNet:2827.98},variableRows:[],estimatedNetImpact:fallback});
-  assert.equal(result.totalNet,157.88);
-  assert.equal(result.correctedPayout,2815.82);
-  assert.equal(result.source,'legacy-total');
+  assert.equal(result.totalNet,null);
+  assert.equal(result.correctedPayout,null);
+  assert.equal(result.source,'unavailable');
 });
 
 test('alte September-Prognose nutzt alte Pfändungssemantik und aktuelle Nettoeffekte',()=>{
@@ -156,8 +156,8 @@ test('alte September-Prognose zeigt ohne Neuberechnung keinen veralteten Netto-F
 });
 
 
-test('September rekonstruiert Komponenten aus gespeichertem Zeitnachweis und zeigt Netto je Gruppe',()=>{
- const result=buildPayrollNetBreakdown({forecast:{totalGross:4723.33,components:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,shiftType:'schicht',unpriced:[],springInVblUnverified:false},netEffects:{complete:true,totalNet:173.19,timeNet:142.55,shiftAfterTimeNet:30.64,shiftStandaloneNet:30.64}},actual:{totalGross:4480.43,legalNet:2827.98,payout:2657.94,hasPriorAdjustment:false},variableRows:[],retro:[]});
+test('September nutzt bei vollständiger Abrechnung nur den aktuellen v5-Nettoeffekt',()=>{
+ const result=buildPayrollNetBreakdown({forecast:{totalGross:4723.33,components:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,shiftType:'schicht',unpriced:[],springInVblUnverified:false},actualNetEffectsVersion:5,actualNetEffects:{complete:true,basis:'actual-payslip',totalNet:173.19,timeNet:142.55,shiftAfterTimeNet:30.64,shiftStandaloneNet:30.64}},actual:{totalGross:4480.43,legalNet:2827.98,payout:2657.94,hasPriorAdjustment:false},variableRows:[],retro:[]});
  assert.equal(result.taxFreeNet,142.13);assert.equal(result.taxableGross,100.77);assert.equal(result.taxableNet,31.06);assert.equal(result.timeGross,142.90);assert.equal(result.timeNet,142.55);assert.equal(result.shiftGross,100);assert.equal(result.shiftNet,30.64);assert.equal(result.totalNet,173.19);assert.equal(result.correctedPayout,2831.13);
 });
 
