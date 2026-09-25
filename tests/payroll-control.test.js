@@ -39,7 +39,7 @@ test('fehlende Juli-Zuschläge sind in September rechnerisch nachvollziehbar',()
   assert.equal(control.inferredMissingVariablePay,true);
   assert.equal(control.initialShortfall,242.90);
   assert.equal(control.remainingGross,242.90);
-  assert.equal(control.variableRows.reduce((sum,row)=>sum+row.expected,0),242.90);
+  assert.equal(Math.round(control.variableRows.reduce((sum,row)=>sum+row.expected,0)*100)/100,242.90);
   assert.equal(control.variableRows.find(row=>row.key==='shift').tax,'steuerpflichtig');
   assert.equal(control.variableRows.find(row=>row.key==='night').tax,'steuerfrei');
   assert.equal(control.variableRows.find(row=>row.key==='saturday').tax,'steuerpflichtig');
