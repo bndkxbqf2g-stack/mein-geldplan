@@ -48,3 +48,19 @@ test('allein fehlende Schichtzulage nutzt den Einzel-Nettoeffekt',()=>{
   assert.equal(result.shiftNet,47.40);
   assert.equal(result.correctedPayout,2705.34);
 });
+
+
+test('gespeicherte Altprognose kann für Nettoeffekte rekonstruiert werden',async()=>{
+  const {storedForecastReport}=await import('../lib/salary-net-effects.js');
+  const {reportComponents}=await import('../lib/salary.js');
+  const report=storedForecastReport({components:{
+    night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,shiftType:'schicht',springIn:0,unpriced:[]
+  }});
+  const c=reportComponents(report);
+  assert.equal(c.pay.night,98.01);
+  assert.equal(c.pay.saturday,.77);
+  assert.equal(c.pay.sunday,44.12);
+  assert.equal(c.pay.shift,100);
+  assert.equal(c.taxFreePay,142.13);
+  assert.equal(c.taxableExtra,100.77);
+});

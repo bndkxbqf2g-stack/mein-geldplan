@@ -1,3 +1,9 @@
+# v0.99.13
+
+- Bereits gespeicherte Gehaltsprognosen ohne `netEffects` werden beim Start aus ihren vorhandenen Einzelbestandteilen nachberechnet.
+- Für den September-Fall ist damit kein erneuter Import des Juli-Zeitnachweises mehr nötig, sofern die Einzelbestandteile bereits gespeichert sind.
+- Die Nachberechnung verwendet dieselbe BMF-/SV-/VBL-/Pfändungslogik wie ein neuer Zeitnachweis und erfindet bei unvollständigen oder ungeklärten Bestandteilen keine Werte.
+
 # v0.99.12
 
 - Gehaltskontrolle trennt offene Rückstände zusätzlich in steuerfrei netto und steuerpflichtig netto.
