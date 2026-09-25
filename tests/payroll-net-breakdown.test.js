@@ -367,3 +367,33 @@ test('Schichtzulage ist Teil der steuerpflichtigen Summe und wird nicht doppelt 
   assert.equal(result.totalNet,173.19);
   assert.notEqual(Math.round((result.taxFreeNet+result.taxableNet+result.shiftNet)*100)/100,result.totalNet);
 });
+
+
+test('Legacy-Teilrückrechnung verwendet nicht erneut die volle Netto-Nachzahlung',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{
+      payoutMonth:'2026-09',
+      totalGross:4723.33,
+      legalNet:3026.99,
+      garnishableNet:2884.86,
+      payout:2815.82,
+      needsReview:false,
+      springIn:0,
+      netEffects:{complete:true,totalNet:189.88}
+    },
+    actual:{
+      payout:2657.94,
+      totalGross:4480.43,
+      legalNet:2827.98,
+      vbl:81.10,
+      garnishment:88.94,
+      hasPriorAdjustment:false,
+      components:{hasVariableDetail:false}
+    },
+    variableRows:[],
+    retro:[{month:'2026-09',totalGross:100,components:{}}],
+    estimatedNetImpact:157.88
+  });
+  assert.equal(result.totalNet,null);
+  assert.equal(result.correctedPayout,null);
+});
