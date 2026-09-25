@@ -46,3 +46,7 @@ Reine Statistikfunktionen für Monatswerte, Transaktionssummen und Sparentwicklu
 
 - `lib/storage.js`: Schema-3-Migration, defensive Normalisierung und Datumsvalidierung.
 - `lib/maintenance-ui.js`: Backup v3, Validierung und rückrollbarer Restore.
+
+
+### `lib/payroll-control.js` / `lib/payroll-control-ui.js`
+Periodenbezogene Gehaltskontrolle. Verknüpft gespeicherte Zeitnachweis-Prognosen mit tatsächlichen Bezügemitteilungen und späteren Rückrechnungsperioden. Offene Ansprüche bleiben dem ursprünglichen Abrechnungsmonat zugeordnet. Keine Budgetwirkung.
