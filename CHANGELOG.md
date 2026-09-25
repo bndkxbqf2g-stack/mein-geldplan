@@ -1,3 +1,9 @@
+# v0.99.20
+
+- Neu eingelesene Zeitnachweise speichern jetzt die erkannten Lohnarten-Codes dauerhaft im Forecast.
+- 5211/5212 bestimmt damit auch in der späteren Gehaltskontrolle eindeutig Wechsel-/Schichtzulage.
+- Die komponentengenaue Nettoaufteilung bleibt nach Reload erhalten, statt wieder auf Soll-minus-Ist zurückzufallen.
+
 # v0.99.19
 
 - Gehaltskontrolle rekonstruiert bei älteren Kontrollkarten die gespeicherten Zeitnachweis-Komponenten, statt nur Soll minus Ist als Gesamtfallback zu zeigen.
