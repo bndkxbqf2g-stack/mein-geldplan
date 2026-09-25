@@ -1,3 +1,11 @@
+# v0.99.45
+
+- Kontrollierte Payroll-Lernhistorie wieder an den aktuellen Bezügemitteilungs-Workflow angeschlossen.
+- Jeder passende Soll-/Ist-Abgleich aus Zeitnachweis-Prognose und echter Bezügemitteilung aktualisiert die vorhandenen Lern-Snapshots.
+- Unveränderte Soll-/Ist-Daten erzeugen keine unnötigen neuen Lernstände oder Speicher-Schreibvorgänge.
+- Die Lernhistorie bleibt rein prüfend: Tarif-, Steuer-, SV- und Pfändungsregeln werden nicht automatisch überschrieben.
+- Neue Regressionstests sichern Erzeugung, Aktualisierung ohne Duplikat und Verhalten ohne passende Prognose.
+
 # v0.99.44
 
 - Bezügemitteilungs-Upload wieder in den neu aufgebauten Gehaltsbereich integriert.
