@@ -12,9 +12,9 @@ test('sichtbare Aktionsbuttons sind im JavaScript verdrahtet',()=>{
 
 test('PWA Service Worker wird wieder registriert',()=>assert.match(allJs,/serviceWorker\.register/));
 
-test('Lohnbuchung nutzt verwaltete Fixkosten statt alten 2156-Hardcode',()=>{
+test('automatische Lohnbuchung nutzt verwaltete Fixkosten statt Hardcode',()=>{
   const source=fs.readFileSync(path.join(root,'lib/budget-ui.js'),'utf8');
-  assert.match(source,/totalFixedCosts\(getFixedCosts\(\)\)/);
+  assert.match(source,/fixedCosts:getFixedCosts\(\)/);
   assert.doesNotMatch(source,/\|\|2156/);
 });
 
