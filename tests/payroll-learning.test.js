@@ -155,3 +155,30 @@ test('Teilzahlung im Auszahlungsmonat plus spätere Rückrechnung wird für das 
   assert.equal(result.rows.find(row=>row.key==='shift').actual,100);
   assert.equal(result.rows.find(row=>row.key==='shift').confirmed,true);
 });
+
+
+test('fehlende Komponentenwerte werden nicht als echte Nullzahlung gelernt',()=>{
+  const f=forecast('2026-09');
+  const actual=payslip('2026-09');
+  actual.components={night:null,saturday:null,sunday:null,holiday:null,shift:null,springIn:null,hasVariableDetail:false};
+  const result=buildPayrollLearningSnapshot({forecast:f,actual});
+  const night=result.rows.find(row=>row.key==='night');
+  const shift=result.rows.find(row=>row.key==='shift');
+  assert.equal(night.actual,null);
+  assert.equal(night.comparable,false);
+  assert.equal(night.confirmed,false);
+  assert.equal(shift.actual,null);
+  assert.equal(shift.comparable,false);
+  assert.equal(shift.confirmed,false);
+});
+
+test('explizit ausgewiesene 0 bleibt eine echte vergleichbare Null',()=>{
+  const f=forecast('2026-09');
+  const actual=payslip('2026-09');
+  actual.components={night:0,saturday:0,sunday:0,holiday:0,shift:0,springIn:null,hasVariableDetail:true};
+  const result=buildPayrollLearningSnapshot({forecast:f,actual});
+  const shift=result.rows.find(row=>row.key==='shift');
+  assert.equal(shift.actual,0);
+  assert.equal(shift.comparable,true);
+  assert.equal(shift.confirmed,false);
+});
