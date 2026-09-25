@@ -9,7 +9,6 @@ import {recoverLocalDataIfNeeded,scheduleCurrentRecoverySnapshot,saveCurrentReco
 import {$,initTabs,notify} from './lib/ui.js';
 import {initTheme} from './lib/theme-ui.js';
 import {initPreferences} from './lib/preferences-ui.js';
-
 let budgetUi,savingsUi,fixedCostsUi,historyUi;
 const refresh=()=>{budgetUi.render();savingsUi.render();fixedCostsUi.render();historyUi.render();scheduleCurrentRecoverySnapshot();document.dispatchEvent(new Event('geldplan:data-changed'));};
 
@@ -34,8 +33,6 @@ async function init(){
   budgetUi.init();savingsUi.init();fixedCostsUi.init();historyUi.init();maintenanceUi.init();initTabs();
   if($('resetBtn'))$('resetBtn').onclick=resetApp;
   document.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',refresh);el.addEventListener('change',refresh);});
-  // A Home-Screen PWA may be removed/recreated without giving the debounced
-  // recovery writer enough time. Flush the latest state on lifecycle changes.
   window.addEventListener('pagehide',()=>{void saveCurrentRecoverySnapshot();},{capture:true});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')void saveCurrentRecoverySnapshot();});
   refresh();
