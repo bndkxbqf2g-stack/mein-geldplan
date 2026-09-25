@@ -1,3 +1,11 @@
+# v0.99.35
+
+- Payroll-Learning nutzt für variable Bezüge jetzt die passende Rückrechnungsperiode des ursprünglichen Zeitnachweismonats, statt nur die aktuelle Abrechnungsperiode zu betrachten.
+- Dadurch können spätere Nachzahlungen aus Bezügemitteilungen tatsächlich zum zugehörigen Zeitnachweis zurücklernen.
+- Rückrechnungen eines anderen Monats werden ausdrücklich nicht als Lernquelle verwendet.
+- Reale August- und September-2026-Abrechnungswerte sind als Regressionstests hinterlegt; August prüft zusätzlich die Juni-Rückrechnung.
+- Die Lernlogik bleibt kontrolliert: Abweichende historische Werte erzeugen Prüfsignale und überschreiben keine festen Tarif-/Steuer-/SV-/Pfändungsregeln.
+
 # v0.99.34
 
 - Tagesaudit aller Änderungen vom 25.09.2026 gegen den aktuellen Main-Stand durchgeführt und Versions-/Dokumentationsdrift bereinigt.
