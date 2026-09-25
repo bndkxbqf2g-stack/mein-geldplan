@@ -5,7 +5,7 @@ import {createSavingsUi} from './lib/savings-ui.js';
 import {createFixedCostsUi} from './lib/fixed-costs-ui.js';
 import {createHistoryUi} from './lib/history-ui.js';
 import {createMaintenanceUi} from './lib/maintenance-ui.js';
-import {recoverLocalDataIfNeeded,scheduleCurrentRecoverySnapshot,clearRecoveryForReset} from './lib/recovery-bootstrap.js';
+import {recoverLocalDataIfNeeded,scheduleCurrentRecoverySnapshot,saveCurrentRecoverySnapshot,clearRecoveryForReset} from './lib/recovery-bootstrap.js';
 import {$,initTabs,notify} from './lib/ui.js';
 import {initTheme} from './lib/theme-ui.js';
 import {initPreferences} from './lib/preferences-ui.js';
@@ -34,6 +34,10 @@ async function init(){
   budgetUi.init();savingsUi.init();fixedCostsUi.init();historyUi.init();maintenanceUi.init();initTabs();
   if($('resetBtn'))$('resetBtn').onclick=resetApp;
   document.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',refresh);el.addEventListener('change',refresh);});
+  // A Home-Screen PWA may be removed/recreated without giving the debounced
+  // recovery writer enough time. Flush the latest state on lifecycle changes.
+  window.addEventListener('pagehide',()=>{void saveCurrentRecoverySnapshot();},{capture:true});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')void saveCurrentRecoverySnapshot();});
   refresh();
   import('./lib/cloud-backup-ui.js').then(({initCloudBackupUi})=>initCloudBackupUi()).catch(error=>console.error('[cloud-backup-init]',error));
   import('./lib/salary-ui.js')
