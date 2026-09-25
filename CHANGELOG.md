@@ -1,3 +1,8 @@
+# v0.99.14
+
+- Gehaltskontrolle benennt die offene Netto-Korrektur sichtbar als erwartete Nachzahlung.
+- Die erwartete Auszahlung nach Korrektur zeigt klar, dass sie aus aktueller Auszahlung plus Netto-Nachzahlung entsteht.
+
 # v0.99.13
 
 - Bereits gespeicherte Gehaltsprognosen ohne `netEffects` werden beim Start aus ihren vorhandenen Einzelbestandteilen nachberechnet.
