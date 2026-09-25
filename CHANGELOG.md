@@ -1,3 +1,11 @@
+# v0.99.30
+
+- Netto-Nachzahlung zeigt die Addition jetzt ausdrücklich als „steuerfrei netto + steuerpflichtig netto = gesamte Korrektur netto“.
+- Schicht-/Wechselschichtzulage wird als „davon“-Position gekennzeichnet, weil ihr Nettoeffekt bereits in den steuerpflichtigen Rückständen enthalten ist und nicht ein zweites Mal addiert werden darf.
+- Der verbleibende steuerpflichtige Rest wird separat innerhalb derselben Gesamtsumme gezeigt, wenn er eindeutig berechenbar ist.
+- Zeitzuschläge werden als Kontrollwert gekennzeichnet, weil diese Quersumme sich mit den bereits dargestellten Steuergruppen überschneidet.
+- Regressionstest sichert für September 2026: 142,13 € steuerfrei + 31,06 € steuerpflichtig = 173,19 € Netto-Nachzahlung; 30,64 € Schichtzulage sind Bestandteil der 31,06 €.
+
 # v0.99.29
 
 - Nachzahlungsüberträge verwenden im Hinweis jetzt den tatsächlichen Zielmonat statt eines fest codierten Oktober-Texts.
