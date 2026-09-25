@@ -1,3 +1,10 @@
+# v0.99.19
+
+- Gehaltskontrolle rekonstruiert bei älteren Kontrollkarten die gespeicherten Zeitnachweis-Komponenten, statt nur Soll minus Ist als Gesamtfallback zu zeigen.
+- Steuerfreie Rückstände werden netto separat gezeigt; steuerpflichtige Rückstände brutto mit Nettoeffekt.
+- Zeitzuschläge werden brutto und netto zusammengefasst; 5211/5212 bestimmt weiterhin ausschließlich die im Zeitnachweis gespeicherte Wechsel-/Schichtzulage.
+- September-Beispiel mit 142,13 € steuerfrei, 100,77 € steuerpflichtig, 142,90 € Zeitzuschlägen und 100 € Schichtzulage ist als Regressionstest abgesichert.
+
 # v0.99.18
 
 - Erwartete Nachzahlung wird bei alten Datensätzen notfalls direkt aus Soll-Auszahlung minus tatsächlicher Ist-Auszahlung abgeleitet.
