@@ -159,3 +159,15 @@ test('Fixkosten-Ausnahmen werden getrennt gespeichert', async()=>{
   assert.deepEqual(getFixedCostOverrides(storage),value);
   assert.equal(storage.getItem(storageKeys.fixedCosts),null);
 });
+
+
+test('Payroll-Lernhistorie wird getrennt gespeichert und bei Komplettreset gelöscht', async()=>{
+  const {getPayrollLearning,savePayrollLearning,clearAllStorage}=await import('../lib/storage.js');
+  const storage=memoryStorage();
+  const history=[{id:'2026-09:2026-07',payoutMonth:'2026-09',rows:[{key:'shift',confirmed:true}]}];
+  assert.equal(savePayrollLearning(history,storage),true);
+  assert.deepEqual(getPayrollLearning(storage),history);
+  assert.notEqual(storage.getItem(storageKeys.payrollLearning),null);
+  clearAllStorage(storage);
+  assert.deepEqual(getPayrollLearning(storage),[]);
+});
