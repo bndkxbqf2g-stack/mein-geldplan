@@ -85,3 +85,11 @@ test('Historie bleibt nach Auszahlungsmonat sortiert',()=>{
   });
   assert.deepEqual(list.map(x=>x.payoutMonth),['2026-10','2026-09']);
 });
+
+
+test('Forecast ohne Bezügemitteilung bleibt kontrollierbar',()=>{
+  const control=buildPayrollControl({forecast:{...forecast,payoutMonth:'2026-10'},actual:null,payslips:[]});
+  assert.equal(control.status,'waiting');
+  assert.equal(control.actualGross,null);
+  assert.equal(control.remainingGross,null);
+});
