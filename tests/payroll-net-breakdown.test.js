@@ -65,6 +65,20 @@ test('gespeicherte Altprognose kann für Nettoeffekte rekonstruiert werden',asyn
   assert.equal(c.taxableExtra,100.77);
 });
 
+test('Legacy-Summenforecast rekonstruiert 142,13 steuerfrei und 100,77 steuerpflichtig',async()=>{
+  const {storedLegacySummaryReport}=await import('../lib/salary-net-effects.js');
+  const {reportComponents}=await import('../lib/salary.js');
+  const report=storedLegacySummaryReport({
+    totalGross:4723.33,
+    legalNet:3026.99,
+    garnishableNet:2884.86,
+    needsReview:false,
+    springIn:0
+  });
+  const c=reportComponents(report);
+  assert.equal(c.taxFreePay,142.13);
+  assert.equal(c.taxableExtra,100.77);
+});
 
 test('tatsächliche Abrechnung wird als Basis der Nachzahlung markiert',()=>{
   const result=buildPayrollNetBreakdown({
@@ -95,15 +109,16 @@ test('sichtbarer Fallback aus Soll- und Ist-Auszahlung bei alten September-Daten
   assert.equal(result.source,'legacy-total');
 });
 
-test('alte September-Prognose rekonstruiert steuerfrei und steuerpflichtig aus Netto- und Pfändungswerten',()=>{
+test('alte September-Prognose nutzt alte Pfändungssemantik und aktuelle Nettoeffekte',()=>{
   const result=buildPayrollNetBreakdown({
     forecast:{
       totalGross:4723.33,
       legalNet:3026.99,
-      garnishableNet:2801.94,
+      garnishableNet:2884.86,
       payout:2815.82,
       needsReview:false,
-      springIn:0
+      springIn:0,
+      netEffects:{complete:true,totalNet:189.88}
     },
     actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98,hasPriorAdjustment:false},
     variableRows:[],
@@ -113,10 +128,25 @@ test('alte September-Prognose rekonstruiert steuerfrei und steuerpflichtig aus N
   assert.equal(result.taxFreeGross,142.13);
   assert.equal(result.taxFreeNet,142.13);
   assert.equal(result.taxableGross,100.77);
-  assert.equal(result.taxableNet,15.75);
-  assert.equal(result.totalNet,157.88);
-  assert.equal(result.correctedPayout,2815.82);
-  assert.equal(result.source,'legacy-summary-split');
+  assert.equal(result.taxableNet,47.75);
+  assert.equal(result.totalNet,189.88);
+  assert.equal(result.correctedPayout,2847.82);
+  assert.equal(result.source,'legacy-summary-recalculated');
+});
+
+test('alte September-Prognose zeigt ohne Neuberechnung keinen veralteten Netto-Fallback',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{totalGross:4723.33,legalNet:3026.99,garnishableNet:2884.86,needsReview:false,springIn:0},
+    actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98,hasPriorAdjustment:false},
+    variableRows:[],
+    retro:[],
+    estimatedNetImpact:157.88
+  });
+  assert.equal(result.taxFreeGross,142.13);
+  assert.equal(result.taxableGross,100.77);
+  assert.equal(result.totalNet,null);
+  assert.equal(result.correctedPayout,null);
+  assert.equal(result.source,'legacy-summary-awaiting');
 });
 
 
