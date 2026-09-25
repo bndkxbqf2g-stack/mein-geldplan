@@ -309,8 +309,25 @@ test('September-Legacy-Fallback berechnet steuerpflichtiges Netto ohne externen 
   assert.equal(result.shiftGross,100);
   assert.equal(result.shiftType,'schicht');
   assert.equal(result.shiftNet,30.64);
+  assert.equal(result.actualLegalNet,2827.98);
+  assert.equal(result.correctedLegalNet,3026.99);
+  assert.equal(result.legalNetDelta,199.01);
+  assert.equal(result.taxableLegalNetDelta,56.88);
+  assert.equal(result.taxAndSvReduction,43.89);
+  assert.equal(result.actualVbl,81.10);
+  assert.equal(result.correctedVbl,82.92);
+  assert.equal(result.vblDelta,1.82);
+  assert.equal(result.actualGarnishableNet,2746.88);
+  assert.equal(result.correctedGarnishableNet,2801.94);
+  assert.equal(result.actualGarnishment,88.94);
+  assert.equal(result.correctedGarnishment,112.94);
+  assert.equal(result.garnishmentDelta,24);
   assert.equal(result.totalNet,173.19);
   assert.equal(result.correctedPayout,2831.13);
+  assert.equal(
+    Math.round((result.taxableGross-result.taxAndSvReduction-result.vblDelta-result.garnishmentDelta)*100)/100,
+    result.taxableNet
+  );
 });
 
 
