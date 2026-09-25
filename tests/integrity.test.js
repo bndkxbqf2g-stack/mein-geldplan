@@ -68,3 +68,9 @@ test('Fixkostenansicht nutzt die kompakte Kartenstruktur und mobile Hinzufügen-
   assert.match(fixedUi,/Nächsten Lohn anpassen/);
   assert.match(css,/v0\.99\.48 — compact modern fixed-costs/);
 });
+
+
+test('Payroll-Lernkalibrierung ist Bestandteil des Offline-App-Shells',()=>{
+  const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+  assert.match(sw,/payroll-learning-calibration\.js/);
+});

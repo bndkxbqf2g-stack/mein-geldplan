@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,retroForForecast,visiblePayrollControls} from '../lib/payroll-control.js';
+import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,payrollDisplayedNetDifference,retroForForecast,visiblePayrollControls} from '../lib/payroll-control.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -275,4 +275,19 @@ test('mehrere gleiche §21-Prüfpositionen werden zu einer übersichtlichen Zeil
   });
   assert.equal(control.reviewRows.length,1);
   assert.equal(control.reviewRows[0].quantity,3);
+});
+
+
+test('Netto-Differenz verwendet bei offenem Monat den berechneten offenen Nettoanspruch',()=>{
+  assert.equal(
+    payrollDisplayedNetDifference({status:'open',payoutDifference:-189.56},{totalNet:168.57}),
+    -168.57
+  );
+});
+
+test('Netto-Differenz fällt ohne sichere Nachberechnung auf die reine Auszahlungsdifferenz zurück',()=>{
+  assert.equal(
+    payrollDisplayedNetDifference({status:'open',payoutDifference:-189.56},null),
+    -189.56
+  );
 });

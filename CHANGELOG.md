@@ -1,3 +1,14 @@
+# v0.99.49
+
+- Die Soll-/Ist-Karte verwendet bei offenen Monaten für „Netto-Differenz“ jetzt denselben aktuell berechneten offenen Nettoanspruch wie der Bereich „Nachzahlung netto“. Ein alter reiner Forecast-minus-Ist-Wert (z. B. −189,56 €) kann damit nicht mehr parallel zu einem abweichenden offenen Nettoanspruch (z. B. 168,57 €) stehen.
+- Der Nachzahlungsübertrag in den Folgemonat verwendet weiterhin exakt denselben offenen Nettoanspruch; obere Differenz, Nachzahlung netto und Übertrag bleiben dadurch konsistent.
+- Übersicht „Erwartete Löhne“: Sobald eine echte Bezügemitteilung für den Monat vorliegt, wird die tatsächliche Auszahlung gezeigt statt der alten Prognose.
+- Automatische Payroll-Lernkalibrierung ergänzt: Nach mindestens zwei sauberen, brutto-stimmigen Soll-/Ist-Monaten wird ein stabiler beobachteter Netto-Prognosefehler auf zukünftige Auszahlungen angewandt.
+- Monate mit Rückrechnungen, Bruttoabweichungen oder abweichenden variablen Lohnarten werden nicht als Kalibrierungsbasis verwendet.
+- Steuer-, SV-, VBL-, Pfändungs- und Auszahlungsabweichungen werden weiterhin im Lernsnapshot gegengeprüft; die festen Tarif-/Rechenregeln werden nicht still überschrieben.
+- Gehaltsprognose, Payroll-Karte und Übersicht verwenden die Lernkalibrierung für zukünftige Monate konsistent; nach Bezügemitteilungs-Upload aktualisiert sich die Übersicht sofort.
+- Regressionstests sichern den 168,57-€-Anzeige-Fall, tatsächliche Auszahlung in der Übersicht, stabile Zwei-Monats-Kalibrierung und Ausschluss fehlerhafter/Rückrechnungsmonate.
+
 # v0.99.48
 
 - Alte gespeicherte Gehaltsprognosen werden bei vorhandenem Zeitnachweis einmalig mit den aktuellen Rechenregeln neu aufgebaut. Dadurch bleibt z. B. ein alter September-Wert wie 2.847,50 € nicht mehr in Übersicht und Soll-/Ist-Karte stehen, wenn die aktuelle Berechnung 2.831,13 € ergibt.
