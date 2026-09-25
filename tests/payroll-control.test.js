@@ -114,16 +114,16 @@ test('offene September-Nachzahlung wird dem nächsten ausstehenden Monat Oktober
     {payoutMonth:'2026-10',label:'Oktober 2026',status:'waiting',remainingGross:null},
     {payoutMonth:'2026-09',label:'September 2026',status:'open',remainingGross:242.90}
   ];
-  const carry=buildPayrollCarryovers({controls,netByMonth:{'2026-09':189.88}});
+  const carry=buildPayrollCarryovers({controls,netByMonth:{'2026-09':173.19}});
   assert.deepEqual(carry,{
     '2026-10':[{
       sourceMonth:'2026-09',
       sourceLabel:'September 2026',
-      net:189.88,
+      net:173.19,
       gross:242.90
     }]
   });
-  assert.equal(Math.round((2773.72+carry['2026-10'][0].net)*100)/100,2963.60);
+  assert.equal(Math.round((2773.72+carry['2026-10'][0].net)*100)/100,2946.91);
 });
 
 test('erledigte Nachzahlung wird nicht mehr in einen Folgemonat übertragen',()=>{
@@ -131,7 +131,7 @@ test('erledigte Nachzahlung wird nicht mehr in einen Folgemonat übertragen',()=
     {payoutMonth:'2026-10',label:'Oktober 2026',status:'waiting',remainingGross:null},
     {payoutMonth:'2026-09',label:'September 2026',status:'settled',remainingGross:0}
   ];
-  assert.deepEqual(buildPayrollCarryovers({controls,netByMonth:{'2026-09':189.88}}),{});
+  assert.deepEqual(buildPayrollCarryovers({controls,netByMonth:{'2026-09':173.19}}),{});
 });
 
 test('offener Anspruch wandert zum nächsten noch nicht abgerechneten Monat',()=>{
@@ -140,7 +140,7 @@ test('offener Anspruch wandert zum nächsten noch nicht abgerechneten Monat',()=
     {payoutMonth:'2026-10',label:'Oktober 2026',status:'ok',remainingGross:0},
     {payoutMonth:'2026-09',label:'September 2026',status:'open',remainingGross:242.90}
   ];
-  const carry=buildPayrollCarryovers({controls,netByMonth:{'2026-09':189.88}});
+  const carry=buildPayrollCarryovers({controls,netByMonth:{'2026-09':173.19}});
   assert.equal(carry['2026-11'][0].sourceMonth,'2026-09');
   assert.equal(carry['2026-10'],undefined);
 });
