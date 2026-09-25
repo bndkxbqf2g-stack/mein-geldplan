@@ -3,7 +3,7 @@
 - Stabilisierung nach Datenverlust/PWA-Neuinstallation.
 - Backup-Import unterscheidet jetzt korrekt zwischen „Fixkosten unbekannt/nicht enthalten“ und „Fixkosten absichtlich leer“. Ein Recovery-Backup mit `fixedCosts: null` leert die vorhandenen Fixkosten nicht mehr.
 - Gehaltsprognosen, Bezügemitteilungen und Payroll-Lernhistorie dürfen Speicherfehler nicht mehr still verschlucken. Ein fehlgeschlagener Local-Storage-Schreibvorgang wird nun als Fehler sichtbar.
-- Die Stabilisierung wurde zuerst auf einem separaten Branch mit grüner CI geprüft und anschließend als eigener Release-Stand gesichert.
+- Die Stabilisierung wurde zuerst auf einem separaten Branch geprüft und anschließend als eigener Release-Kandidat gesichert.
 
 # v0.99.35
 
