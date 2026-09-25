@@ -1,3 +1,13 @@
+# v0.99.34
+
+- Tagesaudit aller Änderungen vom 25.09.2026 gegen den aktuellen Main-Stand durchgeführt und Versions-/Dokumentationsdrift bereinigt.
+- MODULES und README auf Datenschema 7, Backup-Version 7 und die kontrollierte Payroll-Lernhistorie aktualisiert.
+- Die App warnt im Bereich „Daten sichern“ jetzt ausdrücklich davor, die iPhone-Home-Bildschirm-App/PWA ohne vorherige Sicherung zu löschen oder neu anzulegen.
+- Der Bezügemitteilungs-Import erklärt jetzt sichtbar, dass passende Soll-/Ist-Werte in die kontrollierte Lernprüfung einfließen, ohne feste Tarif-, Steuer-, SV- oder Pfändungsregeln zu überschreiben.
+- payroll-learning.js ist jetzt ausdrücklich Bestandteil des Offline-App-Shell-Regressionstests.
+- Das neue apple-touch-icon.png wird vom Service Worker mit gecacht, damit die neue iPhone-Verknüpfung konsistent mit dem aktuellen App-Stand ausgeliefert wird.
+- Die bereits in v0.99.33 eingeführte Payroll-Lernlogik bleibt unverändert: Bestätigungen erhöhen Vertrauen, Abweichungen erzeugen Prüfsignale und ändern keine Rechenregeln automatisch.
+
 # v0.99.33
 
 - Zeitnachweise und Bezügemitteilungen bilden jetzt automatisch eine kontrollierte Payroll-Lernhistorie.
