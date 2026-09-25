@@ -23,7 +23,11 @@ export const SALARY_2026 = Object.freeze({
   social: Object.freeze({
     healthEmployee: 0.0839, careEmployee: 0.0155, pensionEmployee: 0.093, unemploymentEmployee: 0.013,
     healthCareCap: 5812.50, pensionUnemploymentCap: 8450,
-    vblEmployeeRate: 0.0181, zvSvAddonRate: 178.22 / 4480.43
+    vblEmployeeRate: 0.0181,
+    vblEmployerRate: 0.0549,
+    vblSvThreshold: 100,
+    vblSvPercent: 0.025,
+    vblSvAllowance: 13.30
   }),
   wageTypes: Object.freeze({
     5010: "night",
