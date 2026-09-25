@@ -5,7 +5,6 @@ import {createSavingsUi} from './lib/savings-ui.js';
 import {createFixedCostsUi} from './lib/fixed-costs-ui.js';
 import {createHistoryUi} from './lib/history-ui.js';
 import {createMaintenanceUi} from './lib/maintenance-ui.js';
-import {initSalaryUi} from './lib/salary-ui.js';
 import {$,initTabs,notify} from './lib/ui.js';
 import {initTheme} from './lib/theme-ui.js';
 import {initPreferences} from './lib/preferences-ui.js';
@@ -28,9 +27,13 @@ function init(){
   fixedCostsUi=createFixedCostsUi({refresh});
   historyUi=createHistoryUi({budgetUi});
   const maintenanceUi=createMaintenanceUi();
-  budgetUi.init();savingsUi.init();fixedCostsUi.init();historyUi.init();maintenanceUi.init();initSalaryUi({onForecastChange:refresh});initTabs();
+  budgetUi.init();savingsUi.init();fixedCostsUi.init();historyUi.init();maintenanceUi.init();initTabs();
   if($('resetBtn'))$('resetBtn').onclick=resetApp;
   document.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',refresh);el.addEventListener('change',refresh);});
-  refresh();setInterval(refresh,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+  refresh();
+  import('./lib/salary-ui.js')
+    .then(({initSalaryUi})=>{initSalaryUi({onForecastChange:refresh});refresh();})
+    .catch(error=>{console.error('[salary-init]',error);notify('Gehaltsbereich konnte nicht geladen werden. Budget und Übersicht bleiben verfügbar.',{type:'error',timeout:6000});});
+  setInterval(refresh,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
