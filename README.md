@@ -8,7 +8,8 @@ Lokale Budget-, Lohn- und Prognose-App. Alle eingegebenen Daten werden im Browse
 - Beim Buchen eines Lohns beginnt ein neuer Lohnzyklus. Die verwalteten Fixkosten werden innerhalb desselben Zyklus nur einmal automatisch abgezogen.
 - Die Pfändungsprognose verwendet die monatliche Tabelle der Pfändungsfreigrenzenbekanntmachung 2026 nach § 850c ZPO für null bis fünf Unterhaltspflichten. Sie ist nur eine Orientierung und ersetzt keine Lohnabrechnung oder Rechtsberatung.
 - Zeitnachweise bleiben lokal; die PDF-Bibliothek wird erst beim PDF-Import vom CDN geladen.
-- Die Gehaltsprognose wird im aktuellen Neuaufbau ausschließlich aus dem hochgeladenen Zeitnachweis erzeugt. Feste Bezüge, Schicht-/Wechselschichtzulage und Zeitzuschläge werden getrennt ausgewiesen; der Auszahlungsmonat folgt aktuell Leistungsmonat + 2 Monate.
+- Die Gehaltsprognose wird aus dem hochgeladenen Zeitnachweis erzeugt. Feste Bezüge, Schicht-/Wechselschichtzulage und Zeitzuschläge werden getrennt ausgewiesen; der Auszahlungsmonat folgt aktuell Leistungsmonat + 2 Monate.
+- Bezügemitteilungen werden separat zur Kontrolle eingelesen. Prognose, Ist, Differenz, Rückrechnungen und der voraussichtliche Nettoausstand werden gegenübergestellt, ohne Budget oder feste Tarif-/Steuer-/SV-/Pfändungsregeln zu verändern. In der Oberfläche bleiben die drei neuesten Prognosen und Kontrollkarten sichtbar.
 
 ## Daten
 
