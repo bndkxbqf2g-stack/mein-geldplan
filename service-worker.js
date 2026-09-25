@@ -4,7 +4,7 @@ var APP_SHELL=[
   './config/version.js','./config/salary-2026.js',
   './lib/ui.js','./lib/storage.js','./lib/theme-ui.js','./lib/cycle.js','./lib/budget.js','./lib/budget-ui.js',
   './lib/savings.js','./lib/savings-ui.js','./lib/fixed-costs.js','./lib/fixed-cost-overrides.js','./lib/fixed-costs-ui.js','./lib/history-ui.js','./lib/statistics.js',
-  './lib/maintenance-ui.js','./lib/recovery-store.js','./lib/preferences-ui.js','./lib/pending-salary.js','./lib/payroll-control.js','./lib/payroll-control-ui.js','./lib/payroll-control-ui-v2.js','./lib/payroll-net-breakdown.js','./lib/payroll-net-ui.js','./lib/payroll-learning.js','./lib/salary.js','./lib/salary-net-effects.js','./lib/salary-ui.js','./lib/pdf.js','./lib/payslip.js'
+  './lib/maintenance-ui.js','./lib/recovery-store.js','./lib/recovery-bootstrap.js','./lib/preferences-ui.js','./lib/pending-salary.js','./lib/payroll-control.js','./lib/payroll-control-ui.js','./lib/payroll-control-ui-v2.js','./lib/payroll-net-breakdown.js','./lib/payroll-net-ui.js','./lib/payroll-learning.js','./lib/salary.js','./lib/salary-net-effects.js','./lib/salary-ui.js','./lib/pdf.js','./lib/payslip.js'
 ];
 
 self.addEventListener('install',function(event){
