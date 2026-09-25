@@ -14,11 +14,17 @@ test('zukünftige unbekannte Backup-Version wird abgewiesen',()=>{
 
 test('Backup-Metadaten enthalten Schema- und App-Version',()=>{
   const snap=createBackupSnapshot();
-  assert.equal(snap.version,4);assert.equal(snap.appVersion,APP_VERSION);assert.ok(Number.isInteger(snap.schemaVersion));
+  assert.equal(snap.version,5);assert.equal(snap.appVersion,APP_VERSION);assert.ok(Number.isInteger(snap.schemaVersion));
 });
 
 
 test('Backup enthält vorgemerkten Lohn getrennt von Transaktionen',()=>{
   const snap=createBackupSnapshot();
   assert.ok(Object.prototype.hasOwnProperty.call(snap,'pendingSalary'));
+});
+
+
+test('Backup enthält Darstellungspräferenz für Erklärungen',()=>{
+  const snap=createBackupSnapshot();
+  assert.equal(typeof snap.showExplanations,'boolean');
 });
