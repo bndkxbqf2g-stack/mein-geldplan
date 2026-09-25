@@ -1,3 +1,11 @@
+# v0.99.6
+
+- Sparziel-Schnellzugriff scrollt nur noch zur Sparsektion und fokussiert kein Eingabefeld mehr; die iPhone-Tastatur öffnet sich dadurch nicht automatisch.
+- Refresh-/Update-Button frei oben rechts in die Seite integriert.
+- Separate weiße Kopfzeile vollständig entfernt.
+- Update-Status erscheint bei Bedarf als kleine schwebende Statusfläche neben dem Refresh-Button.
+- Navigation und Seiteninhalt an die fehlende Kopfzeile angepasst.
+
 # v0.99.5
 
 - Übersicht vereinfacht: „Dein aktueller Plan“, „Diese Lohnperiode“ und „Letzte Bewegungen“ entfernt.
