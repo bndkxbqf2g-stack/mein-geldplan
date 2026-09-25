@@ -1,3 +1,11 @@
+# v0.99.4
+
+- Kopfzeile auf den Refresh-Button reduziert.
+- Versionsanzeige und Darstellungsumschalter nach „Mehr“ verschoben.
+- Neuer persistenter Schalter „Erklärungen anzeigen“ unter „Mehr“.
+- Erklärende Hinweise unter den Kacheln lassen sich global ausblenden; Status- und Fehlermeldungen bleiben sichtbar.
+- Darstellungspräferenz wird in Datensicherungen aufgenommen.
+
 # v0.99.3
 
 - Bekannten Auszahlungsbetrag aus der Lohnabrechnung vor dem Lohntag vormerken.
