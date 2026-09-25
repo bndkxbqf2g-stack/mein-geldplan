@@ -53,7 +53,7 @@ test('spätere Rückrechnung gleicht den alten Abrechnungsmonat aus',()=>{
     priorAdjustment:155.20,
     hasPriorAdjustment:true,
     retroPeriods:[{
-      month:'2026-09',
+      month:'2026-07',
       totalGross:242.90,
       components:{night:98.01,saturday:0.77,sunday:44.12,shift:100,springIn:null}
     }]
@@ -70,7 +70,7 @@ test('aggregierte Rückrechnung kann Gesamtanspruch ausgleichen ohne Komponenten
   const october={
     month:'2026-10',
     priorAdjustment:150,
-    retroPeriods:[{month:'2026-09',totalGross:242.90,components:{night:null,saturday:null,sunday:null,shift:null,springIn:null}}]
+    retroPeriods:[{month:'2026-07',totalGross:242.90,components:{night:null,saturday:null,sunday:null,shift:null,springIn:null}}]
   };
   const control=buildPayrollControl({forecast,actual:september,payslips:[september,october]});
   assert.equal(control.status,'settled');
