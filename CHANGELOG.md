@@ -1,3 +1,13 @@
+# v0.99.42
+
+- Gehaltsprognose im ersten Schritt komplett auf den Zeitnachweis zurückgeführt: Upload → erkannte Zeitlohnarten → Zulagen/Zuschläge → steuerpflichtiges Brutto → Netto/Pfändung → voraussichtliche Auszahlung.
+- 5211 setzt einmalig 250,00 € Wechselschichtzulage, 5212 einmalig 100,00 € Schichtzulage; ohne Code wird keine Zulage ergänzt. Doppelte gleiche Codes werden nicht doppelt bezahlt, 5211+5212 gleichzeitig wird als Konflikt markiert.
+- Feste Bezüge bleiben separat sichtbar: 4.226,92 € Grundentgelt + 90,00 € Pflegezulage + 163,51 € Universitätszulage = 4.480,43 € festes steuerpflichtiges Brutto.
+- Nacht-, Samstag-, Sonntag- und Feiertagspositionen werden getrennt dargestellt; steuerfreie und steuerpflichtige Zusatzbestandteile bleiben getrennt.
+- Leistungsmonat und Auszahlungsmonat werden klar getrennt; aktuell gilt weiterhin Leistungsmonat + 2 Monate.
+- Alte Bezügemitteilungs-/Gehaltskontroll- und Einspring-Bedienelemente sind aus der Gehaltsprognose entfernt, damit der Neuaufbau zunächst nur die gewünschte Prognose abbildet.
+- Regressionstests sichern Juli sowie die realen März-/April-/Mai-Zeitnachweisstrukturen ab.
+
 # v0.99.40
 
 - Cloud-Anmeldung fordert Supabase jetzt mit der produktiven GitHub-Pages-URL als Redirect an, statt den Projektstandard localhost:3000 zu verwenden.

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildBmfInputs,socialContributions,reportComponents,garnishment2026,springInHourlyRate,springInPay,vblSvAddon,vblEmployeeContribution,calculateSalaryForecastCore} from '../lib/salary.js';
+import {buildBmfInputs,socialContributions,reportComponents,garnishment2026,springInHourlyRate,springInPay,vblSvAddon,vblEmployeeContribution,calculateSalaryForecastCore,salaryForecastBreakdown} from '../lib/salary.js';
 import {SALARY_2026} from '../config/salary-2026.js';
 
 test('BMF-Profil entspricht der Bezügemitteilung',()=>{
@@ -75,4 +75,17 @@ test('§21-Durchschnitt wird sichtbar als nicht automatisch berechenbar geführt
   assert.equal(c.average21Days,2);
   assert.equal(c.unpriced.length,1);
   assert.equal(c.needsReview,true);
+});
+
+test('Schichtzulage wird pro Monat nur einmal angesetzt, auch wenn der Code doppelt vorkommt',()=>{
+  const c=reportComponents({items:[{code:'5212',hours:0},{code:'5212',hours:0}]});
+  assert.equal(c.pay.shift,100);assert.equal(c.shift,'schicht');
+});
+test('gleichzeitige Codes 5211 und 5212 werden nicht zusammengerechnet',()=>{
+  const c=reportComponents({items:[{code:'5211',hours:0},{code:'5212',hours:0}],needsReview:true});
+  assert.equal(c.pay.shift,0);assert.equal(c.shift,'conflict');assert.equal(c.needsReview,true);
+});
+test('Forecast-Breakdown trennt feste Bezüge, steuerpflichtige Zulage und steuerfreie Zuschläge',()=>{
+  const b=salaryForecastBreakdown({month:{year:2026,month:7},payoutMonth:'2026-09',items:[{code:'5010',hours:21.4},{code:'5014',hours:1.2},{code:'5024',hours:7.7},{code:'5212',hours:0}]});
+  assert.equal(b.reportMonth,'2026-07');assert.equal(b.payoutMonth,'2026-09');assert.equal(b.fixed.gross,4480.43);assert.equal(b.shiftAllowance.amount,100);assert.equal(b.taxableAdditions,100.77);assert.equal(b.taxFreeSurcharges,142.13);assert.equal(b.taxableGross,4581.20);assert.equal(b.totalGross,4723.33);
 });

@@ -18,12 +18,13 @@ test('Sparen ist auf Zweck + Betrag + Verlauf reduziert',()=>{
   assert.match(savingsUi,/Freigeben/);
 });
 
-test('Gehaltsansicht nutzt mobile Vergleichs- und Chart-Komponenten',()=>{
-  assert.match(html,/\.comparison-row/);
-  assert.match(html,/\.forecast-chart-row/);
+test('Gehaltsansicht zeigt die neue Zeitnachweis-Prognose kompakt und ohne Lohnkontroll-Altlasten',()=>{
   assert.match(html,/#prognose \.row \.v/);
-  assert.match(salaryUi,/Prognose \$\{eur\(r\.predicted/);
-  assert.match(salaryUi,/Abrechnung \$\{eur\(r\.actual/);
+  assert.match(html,/id="pTaxableGross"/);
+  assert.match(html,/id="pShiftAllowance"/);
+  assert.match(html,/id="pPayoutDetail"/);
+  assert.doesNotMatch(html,/id="payslipBtn"/);
+  assert.doesNotMatch(html,/id="payrollControlList"/);
 });
 
 test('Zeitlohnarten werden deutsch und Zulagen ohne Stundenwert dargestellt',()=>{

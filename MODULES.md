@@ -4,7 +4,7 @@ Budget, Cycle, Salary, UI, Insolvenz.
 - `lib/payslip.js`: Parser und Prognose-vs.-Ist-Vergleich für Bezügemitteilungen.
 
 ### `lib/salary-ui.js`
-Verantwortlich für UI-Rendering und Benutzeraktionen rund um Gehaltsprognose, Zeitnachweis und Bezügemitteilungsvergleich. Berechnungen bleiben in `salary.js`, PDF-Parsing in `pdf.js`/`payslip.js`.
+Verantwortlich für den neu aufgebauten Gehaltsprognose-Fluss Zeitnachweis → erkannte Zeitlohnarten → Brutto/Netto → Auszahlungsmonat. Die UI importiert aktuell bewusst nur Zeitnachweise; Berechnungen bleiben in `salary.js`, PDF-Parsing in `pdf.js`.
 
 ### `lib/budget-ui.js`
 Budget-, Bargeld- und Buchungs-UI; Fachlogik bleibt in Budget/Cycle/Storage.

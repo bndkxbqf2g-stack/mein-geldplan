@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseTimeReportText} from '../lib/pdf.js';
+import {salaryForecastBreakdown} from '../lib/salary.js';
 
 const report=(header,rows)=>parseTimeReportText([
   `Z E I T N A C H W E I S 80030991 Martin Eitner ${header}`,
@@ -77,4 +78,18 @@ test('echter Mai-2026-Zeitnachweis wird Mai zugeordnet und nach Juli ausgezahlt'
   assert.equal(count(r,'5212'),1);
   assert.equal(r.schicht,true);
   assert.equal(r.wechsel,false);
+});
+
+test('März, April und Mai ergeben aus den echten Zeitlohnarten jeweils 100 Euro Schichtzulage',()=>{
+  const cases=[
+    {header:'Mrz 26',month:3,night:[.45,.45,.45,.45,.45,.45],avg:['5161','5161'],taxFree:12.37,payout:'2026-05'},
+    {header:'Apr 26',month:4,night:[.45,.45,.45],avg:['5162','5162'],taxFree:6.18,payout:'2026-06'},
+    {header:'Mai 26',month:5,night:[.45,.45,.45],avg:['5161','5161','5161','5161'],taxFree:6.18,payout:'2026-07'}
+  ];
+  for(const c of cases){
+    const mm=String(c.month).padStart(2,'0');
+    const rows=[...c.night.map((h,i)=>`${String(i+1).padStart(2,'0')}.${mm}.2026 21:00 21:27 3A10 5010: Nachtarbeit ${String(h).replace('.',',')}`),...c.avg.map((code,i)=>`${String(i+20).padStart(2,'0')}.${mm}.2026 3B61 ${code}: Durchschnitt §21 TV 1,00`),`28.${mm}.2026 3C12 5212: SchiZ§43 1,00`];
+    const r=report(c.header,rows),b=salaryForecastBreakdown(r);
+    assert.equal(r.payoutMonth,c.payout);assert.equal(b.shiftAllowance.amount,100);assert.equal(b.taxableGross,4580.43);assert.equal(b.taxFreeSurcharges,c.taxFree);assert.equal(b.needsReview,true);
+  }
 });
