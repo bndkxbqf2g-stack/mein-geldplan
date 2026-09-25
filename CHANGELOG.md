@@ -1,3 +1,10 @@
+# v0.99.24
+
+- Alte September-Prognosen ohne Einzelkomponenten werden aus den gespeicherten Summen in steuerfreie Zuschläge und steuerpflichtige Bestandteile migriert.
+- Bei 100,77 € steuerpflichtigem Rückstand wird unter der damaligen Modelllogik 5212 Schichtzulage 100,00 € plus 0,77 € Samstag rekonstruiert; eine 250-Euro-Wechselschichtzulage ist dabei ausgeschlossen.
+- Der Nettoeffekt der Schichtzulage wird separat gegen die tatsächlich eingelesene aktuelle Bezügemitteilung berechnet.
+- Bereits gespeicherte v0.99.23-Ist-Effekte werden neu aufgebaut; die veraltete Aufforderung zum erneuten Einlesen entfällt, wenn die Legacy-Daten eindeutig rekonstruierbar sind.
+
 # v0.99.23
 
 - Rückrechnungen verwenden die tatsächlich eingelesene Bezügemitteilung als verifizierte Netto-Basis, sofern diese der Kernabrechnung entspricht.
