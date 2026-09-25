@@ -1,3 +1,12 @@
+# v0.99.38
+
+- Zusätzliche lokale Recovery-Ebene über IndexedDB ergänzt. Sie liegt getrennt vom bisherigen localStorage und wird fortlaufend aus dem aktuellen App-Zustand aktualisiert.
+- Wenn der primäre lokale Zustand leer ist, aber eine sinnvolle Recovery-Sicherung vorhanden ist, kann die App diese beim Start automatisch wiederherstellen.
+- Ein absichtlicher Komplett-Reset löscht auch die Recovery-Sicherung, damit gelöschte Daten nicht ungewollt zurückkehren.
+- Leere/frische Installationen überschreiben keine vorhandene sinnvolle Recovery-Sicherung.
+- Recovery-Module sind Teil des Offline-App-Shells und werden durch Regressionstests abgesichert.
+- Dies ist eine zusätzliche lokale Schutzschicht; eine geräteunabhängige Cloud-Sicherung bleibt als nächster Schritt vorgesehen.
+
 # v0.99.37
 
 - Gehaltskontrolle ordnet Rückrechnungsperioden jetzt dem ursprünglichen Zeitnachweismonat (reportMonth) zu, nicht dem späteren Auszahlungsmonat.
