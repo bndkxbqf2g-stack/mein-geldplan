@@ -1,3 +1,9 @@
+# v0.99.15
+
+- Gehaltskontrolle nutzt die tatsächlich eingelesene Monatsabrechnung als sichtbare Basis der erwarteten Nachzahlung.
+- Steuerpflichtige Rückstände werden ausdrücklich brutto → Nettoeffekt dargestellt; steuerfreie Zuschläge separat netto.
+- Schicht-/Wechselschicht bleibt aus dem im Zeitnachweis erkannten 5212-/5211-Code.
+
 # v0.99.14
 
 - Gehaltskontrolle benennt die offene Netto-Korrektur sichtbar als erwartete Nachzahlung.
