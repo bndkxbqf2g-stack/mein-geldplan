@@ -90,3 +90,61 @@ test('fehlende variable Lohnzeilen bleiben unbekannt statt erfunden',()=>{
   assert.equal(c.night,null);
   assert.equal(c.shift,null);
 });
+
+
+const AUGUST = `Aktuelle Abrechnungsperiode
+Abrechnungsmonat : 08/2026
+Bezüge: KR8 / 5
+Tabellenentgelt LSGZ 4.226,92
+Pflegezulage (AT Uni WÜ) LSGZ 90,00
+Universitätszulage Pflege LSGZ 163,51
+Gesamtbrutto 4.480,43
+Gesetzliches Netto 2.827,98
+ZV-Uml. Regelentg. AN 81,10-
+Nachverrechnung aus Vorm. 11,04
+Summe Pfändung/Abtretung 92,94-
+Überweisung 2.664,98
+Rückrechnungs-Periode
+für Abrechnungsmonat : 06/2026
+Nachtarbeit LSG 1,35 4,58 6,18
+Durchschnitt-VM § 21 LSGZ 7,00 1,44 10,08
+Steuerfrei §3b EStG 6,18
+Gesamtbrutto 16,26
+Gesetzliches Netto 11,22
+ZV-Uml. Regelentg. AN 0,18-`;
+
+const SEPTEMBER = `Aktuelle Abrechnungsperiode
+Abrechnungsmonat : 09/2026
+Bezüge: KR8 / 5
+Tabellenentgelt LSGZ 4.226,92
+Pflegezulage (AT Uni WÜ) LSGZ 90,00
+Universitätszulage Pflege LSGZ 163,51
+Gesamtbrutto 4.480,43
+Gesetzliches Netto 2.827,98
+ZV-Uml. Regelentg. AN 81,10-
+Summe Pfändung/Abtretung 88,94-
+Überweisung 2.657,94`;
+
+test('liest reale August-Abrechnung samt Juni-Rückrechnung',()=>{
+  const doc=parsePayslipDocument(AUGUST);
+  assert.equal(doc.month,'2026-08');
+  assert.equal(doc.payout,2664.98);
+  assert.equal(doc.priorAdjustment,11.04);
+  assert.equal(doc.garnishment,92.94);
+  assert.equal(doc.retroPeriods.length,1);
+  assert.equal(doc.retroPeriods[0].month,'2026-06');
+  assert.equal(doc.retroPeriods[0].totalGross,16.26);
+  assert.equal(doc.retroPeriods[0].legalNet,11.22);
+  assert.equal(doc.retroPeriods[0].components.night,6.18);
+});
+
+test('liest reale September-Abrechnung ohne erfundene Nachverrechnung',()=>{
+  const doc=parsePayslipDocument(SEPTEMBER);
+  assert.equal(doc.month,'2026-09');
+  assert.equal(doc.totalGross,4480.43);
+  assert.equal(doc.legalNet,2827.98);
+  assert.equal(doc.garnishment,88.94);
+  assert.equal(doc.payout,2657.94);
+  assert.equal(doc.priorAdjustment,0);
+  assert.equal(doc.retroPeriods.length,0);
+});
