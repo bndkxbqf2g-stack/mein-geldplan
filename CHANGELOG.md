@@ -1,3 +1,10 @@
+# v0.99.27
+
+- Der Legacy-September-Fallback wurde aus dem synchronen Renderpfad entkoppelt und benötigt keine zusätzliche salary-net-effects-Modulverkettung mehr.
+- Die Rückrechnung wird direkt aus Soll-Brutto, Soll-Netto, pfändbarem Soll-Netto und der echten Bezügemitteilung aufgebaut.
+- Die Gehaltskontrolle bleibt sichtbar, selbst wenn eine einzelne Netto-Rückrechnung mit alten Daten scheitert; statt einer leeren Karte erscheint ein konkreter Hinweis.
+- Der bestehende September-Regressionsfall für 142,13 € steuerfrei, 31,06 € steuerpflichtig netto und 30,64 € Nettoeffekt der 100-Euro-Schichtzulage bleibt grün.
+
 # v0.99.26
 
 - Alte September-Prognosen können die Netto-Rückrechnung jetzt vollständig lokal aus gespeicherten Soll-Werten und der echten Bezügemitteilung berechnen.
