@@ -4,7 +4,7 @@ Budget, Cycle, Salary, UI, Insolvenz.
 - `lib/payslip.js`: Parser und Prognose-vs.-Ist-Vergleich für Bezügemitteilungen.
 
 ### `lib/salary-ui.js`
-Verantwortlich für den Gehaltsprognose-Fluss Zeitnachweis → erkannte Zeitlohnarten → Brutto/Netto → Auszahlungsmonat. `salary-payslip-ui.js` ergänzt den Upload echter Bezügemitteilungen und stößt Soll-/Ist-, Rückrechnungs-, offenen Nettoabgleich sowie die kontrollierte Payroll-Lernhistorie an. Berechnungen bleiben in `salary.js` / `salary-net-effects.js`, PDF-Parsing in `pdf.js` / `payslip.js`.
+Verantwortlich für den Gehaltsprognose-Fluss Zeitnachweis → erkannte Zeitlohnarten → Brutto/Netto → Auszahlungsmonat. Ältere gespeicherte Forecast-Modelle werden aus ihren gespeicherten Zeitnachweispositionen einmalig mit den aktuellen Regeln neu aufgebaut, bevor Übersicht und Payroll-Check rendern. `salary-payslip-ui.js` ergänzt den Upload echter Bezügemitteilungen und stößt Soll-/Ist-, Rückrechnungs-, offenen Nettoabgleich sowie die kontrollierte Payroll-Lernhistorie an. Berechnungen bleiben in `salary.js` / `salary-net-effects.js`, PDF-Parsing in `pdf.js` / `payslip.js`.
 
 ### `lib/budget-ui.js`
 Budget-, Bargeld- und Buchungs-UI; Fachlogik bleibt in Budget/Cycle/Storage.
@@ -17,7 +17,7 @@ Kleine gemeinsame DOM-/Format-/Navigation-Helfer.
 
 
 ### `lib/fixed-costs.js` / `lib/fixed-costs-ui.js`
-Kleine, getrennte Fixkostenlogik und Verwaltung. Die Lohnbuchung liest ausschließlich die gespeicherte Summe.
+Kleine, getrennte Fixkostenlogik und Verwaltung. Die Lohnbuchung liest ausschließlich die gespeicherte Summe. Die UI verwendet kompakte Karten, eine dreiteilige Zusammenfassung und einklappbare einmalige Anpassungen für den nächsten Lohnzyklus.
 
 ### `lib/history-ui.js`
 Übersicht, Kontoverlauf, Monatsvergleich und Abhebungsanzeige. Keine eigene Fachberechnung.

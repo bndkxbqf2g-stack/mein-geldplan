@@ -252,3 +252,27 @@ test('Soll-Ist-Karte weist die Netto-Auszahlungsdifferenz aus',()=>{
   const control=buildPayrollControl({forecast:{...forecast,payout:2831.13},actual:{...september,payout:2657.94},payslips:[september]});
   assert.equal(control.payoutDifference,-173.19);
 });
+
+
+test('mehrere gleiche §21-Prüfpositionen werden zu einer übersichtlichen Zeile zusammengefasst',()=>{
+  const control=buildPayrollControl({
+    forecast:{
+      payoutMonth:'2026-10',
+      reportMonth:'2026-08',
+      totalGross:4480.43,
+      payout:2657.94,
+      components:{
+        fixed:{basePay:4226.92,careAllowance:90,universityAllowance:163.51},
+        unpriced:[
+          {code:'5161',label:'Durchschnitt §21 TV-L',quantity:1,reason:'Betrag hängt vom individuellen Durchschnittsentgelt ab'},
+          {code:'5161',label:'Durchschnitt §21 TV-L',quantity:1,reason:'Betrag hängt vom individuellen Durchschnittsentgelt ab'},
+          {code:'5161',label:'Durchschnitt §21 TV-L',quantity:1,reason:'Betrag hängt vom individuellen Durchschnittsentgelt ab'}
+        ]
+      }
+    },
+    actual:null,
+    payslips:[]
+  });
+  assert.equal(control.reviewRows.length,1);
+  assert.equal(control.reviewRows[0].quantity,3);
+});
