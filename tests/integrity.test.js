@@ -29,3 +29,16 @@ test('Übersicht enthält nur noch vereinfachte Kernkarten und erwartete Löhne'
   assert.doesNotMatch(html,/Lohn sofort buchen/);
   assert.doesNotMatch(html,/id="salaryBtn"/);
 });
+
+
+test('Fixkosten-Ausnahmen sind an den nächsten Lohntag gebunden und werden nach Lohnbuchung entfernt',()=>{
+  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const fixedUi=fs.readFileSync(path.join(root,'lib/fixed-costs-ui.js'),'utf8');
+  const budgetUi=fs.readFileSync(path.join(root,'lib/budget-ui.js'),'utf8');
+  assert.match(html,/id="fixNextDate"/);
+  assert.match(html,/id="fixNextTotal"/);
+  assert.match(fixedUi,/nextFixedCostPayoutDate/);
+  assert.match(fixedUi,/Pausieren/);
+  assert.match(fixedUi,/Reduzieren/);
+  assert.match(budgetUi,/removeFixedCostOverridesForPayout/);
+});
