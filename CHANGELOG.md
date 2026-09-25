@@ -1,3 +1,11 @@
+# v0.99.47
+
+- Fehlende bzw. nicht auslesbare Einzelkomponenten einer Bezügemitteilung werden im Payroll-Learning nicht mehr still als 0,00 € interpretiert.
+- Nur tatsächlich vorhandene Zahlenwerte werden als Beobachtung in den Soll-/Ist-Lernabgleich aufgenommen.
+- Eine ausdrücklich ausgewiesene 0 bleibt weiterhin ein echter vergleichbarer Wert.
+- Dadurch erzeugen unvollständig aufgeschlüsselte Bezügemitteilungen keine falschen Abweichungswarnungen für Nacht-, Wochenend- oder Schichtbestandteile.
+- Regressionstests sichern den Unterschied zwischen „unbekannt“ und „explizit 0“ ab.
+
 # v0.99.46
 
 - Payroll-Learning berücksichtigt jetzt auch passende Rückrechnungsperioden aus späteren Bezügemitteilungen.
