@@ -64,3 +64,21 @@ test('gespeicherte Altprognose kann für Nettoeffekte rekonstruiert werden',asyn
   assert.equal(c.taxFreePay,142.13);
   assert.equal(c.taxableExtra,100.77);
 });
+
+
+test('teilweise bezahlte variable Bezüge erfinden keinen Nettoeffekt',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{components:{unpriced:[],springInVblUnverified:false},netEffects:{complete:true,totalNet:189.88,timeNet:142.50,shiftAfterTimeNet:47.38}},
+    actual:{payout:2700,hasPriorAdjustment:false},
+    variableRows:[
+      {key:'night',expected:98.01,open:0,tax:'steuerfrei'},
+      {key:'saturday',expected:.77,open:.77,tax:'steuerpflichtig'},
+      {key:'sunday',expected:44.12,open:44.12,tax:'steuerfrei'},
+      {key:'shift',expected:100,open:100,tax:'steuerpflichtig'}
+    ],
+    retro:[]
+  });
+  assert.equal(result.totalNet,null);
+  assert.equal(result.taxableNet,null);
+  assert.equal(result.correctedPayout,null);
+});
