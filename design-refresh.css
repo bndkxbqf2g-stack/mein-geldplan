@@ -160,3 +160,56 @@ nav{top:57px}
  .expected-salary-row{align-items:flex-start}
  .expected-salary-value{font-size:18px}
 }
+
+
+/* v0.99.6 floating refresh + non-focusing savings shortcut */
+.page-refresh{
+  position:fixed;
+  top:max(12px,env(safe-area-inset-top));
+  right:14px;
+  z-index:40;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  pointer-events:none;
+}
+.page-refresh .update-button,
+.page-refresh .update-status-float{pointer-events:auto}
+.page-refresh .update-button{
+  width:38px;
+  height:38px;
+  border:1px solid rgba(220,232,223,.9);
+  border-radius:14px;
+  background:rgba(255,255,255,.88);
+  color:#2e6a53;
+  box-shadow:0 5px 18px rgba(28,59,43,.10);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.update-status-float{
+  max-width:min(70vw,320px);
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(220,232,223,.9);
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+  box-shadow:0 5px 18px rgba(28,59,43,.08);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+html[data-theme="dark"] .page-refresh .update-button,
+html[data-theme="dark"] .update-status-float{
+  background:rgba(27,48,36,.9);
+  border-color:#395340;
+  color:#d8ecdc;
+}
+nav{top:0}
+#savingsSection{scroll-margin-top:18px}
+@media(max-width:650px){
+  main{padding-top:52px}
+  .page-refresh{top:max(9px,env(safe-area-inset-top));right:12px}
+  .page-refresh .update-button{width:36px;height:36px}
+  #savingsSection{scroll-margin-top:12px}
+}
