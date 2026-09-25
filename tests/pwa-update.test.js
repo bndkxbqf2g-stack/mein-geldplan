@@ -13,3 +13,11 @@ test('Service Worker unterstützt sofortige Aktivierung und Offline-Fallback',()
 
 
 test('iPhone-Home-Screen-Icon ist verlinkt und offline im App-Shell enthalten',()=>{const html=fs.readFileSync(path.join(root,'index.html'),'utf8');const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');assert.match(html,/apple-touch-icon\.png/);assert.match(sw,/apple-touch-icon\.png/);});
+
+
+test('Cloud- und Recovery-Module sind Teil des Offline-App-Shells',()=>{
+  const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+  for(const file of ['config/supabase.js','lib/recovery-store.js','lib/recovery-bootstrap.js','lib/cloud-auth.js','lib/cloud-backup.js','lib/cloud-backup-ui.js']){
+    assert.match(sw,new RegExp(file.replaceAll('.','\\.')));
+  }
+});
