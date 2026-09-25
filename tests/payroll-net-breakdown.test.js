@@ -64,3 +64,15 @@ test('gespeicherte Altprognose kann für Nettoeffekte rekonstruiert werden',asyn
   assert.equal(c.taxFreePay,142.13);
   assert.equal(c.taxableExtra,100.77);
 });
+
+
+test('tatsächliche Abrechnung wird als Basis der Nachzahlung markiert',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{components:{unpriced:[],springInVblUnverified:false},netEffects:{complete:true,totalNet:189.88,timeNet:142.50,shiftAfterTimeNet:47.38}},
+    actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98,hasPriorAdjustment:false},
+    variableRows:[{key:'night',expected:98.01,open:98.01,tax:'steuerfrei'},{key:'saturday',expected:.77,open:.77,tax:'steuerpflichtig'},{key:'sunday',expected:44.12,open:44.12,tax:'steuerfrei'},{key:'shift',expected:100,open:100,tax:'steuerpflichtig'}],retro:[]
+  });
+  assert.equal(result.actualBased,true);
+  assert.equal(result.actualTaxableBase,4480.43);
+  assert.equal(result.correctedPayout,2847.82);
+});
