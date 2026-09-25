@@ -1,3 +1,10 @@
+# v0.99.25
+
+- Netto-Rückrechnungen werden als Differenzmodell auf die tatsächliche Auszahlung der eingelesenen Bezügemitteilung aufgesetzt.
+- Ein Cent-genauer Gleichlauf zwischen Modell-Netto/VBL/Pfändung und echter Abrechnung ist nicht mehr Voraussetzung für die Berechnung.
+- Für die Aktivierung reichen nun reine Festbezüge ohne Nachverrechnung bzw. bereits ausgewiesene variable Bezüge sowie ein zum Festbrutto passendes Ist-Brutto.
+- Alte September-Datensätze werden erneut migriert, damit 100,00 € Schichtzulage und 0,77 € Samstag aus den 100,77 € steuerpflichtigem Rückstand auch tatsächlich netto berechnet werden.
+
 # v0.99.24
 
 - Alte September-Prognosen ohne Einzelkomponenten werden aus den gespeicherten Summen in steuerfreie Zuschläge und steuerpflichtige Bestandteile migriert.
