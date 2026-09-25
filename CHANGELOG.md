@@ -1,3 +1,9 @@
+# v0.99.29
+
+- Nachzahlungsüberträge verwenden im Hinweis jetzt den tatsächlichen Zielmonat statt eines fest codierten Oktober-Texts.
+- Wandert ein offener Anspruch z. B. nach November, lautet der Hinweis entsprechend „Reguläres Soll für November 2026 bleibt unverändert“.
+- Regressionstest sichert Oktober und November als unterschiedliche Zielmonate ab.
+
 # v0.99.28
 
 - Offene Netto-Nachzahlungen werden im nächsten noch nicht abgerechneten Auszahlungsmonat zusätzlich angezeigt.
