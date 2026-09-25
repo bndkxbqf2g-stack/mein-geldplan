@@ -213,3 +213,30 @@ nav{top:0}
   .page-refresh .update-button{width:36px;height:36px}
   #savingsSection{scroll-margin-top:12px}
 }
+
+
+/* v0.99.7 one-cycle fixed cost adjustments */
+.fix-next-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.fix-next-summary>div{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px}
+.fix-next-summary .label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.fix-next-summary strong{font-size:16px;color:var(--text)}
+.fix-item-card{padding:10px 0;border-bottom:1px solid var(--line)}
+.fix-item-card:last-child{border-bottom:0}
+.fix-item-card .fix-item{border-bottom:0;padding:0}
+.fix-once-row{display:grid;grid-template-columns:minmax(120px,1fr) 128px 130px minmax(120px,1fr);gap:8px;align-items:center;margin-top:8px;padding:9px 10px;background:var(--soft);border:1px solid var(--line);border-radius:12px}
+.fix-once-label{font-size:11px;color:var(--muted);font-weight:700}
+.fix-once-select,.fix-once-amount{min-height:38px;padding:8px 9px;font-size:13px;border-radius:10px}
+.fix-once-status{font-size:11px;color:var(--muted);text-align:right}
+html[data-theme="dark"] .fix-next-summary>div,
+html[data-theme="dark"] .fix-once-row{background:#223c2c;border-color:#395340}
+@media(max-width:650px){
+ .fix-next-summary{grid-template-columns:1fr}
+ .fix-item-card .fix-item{grid-template-columns:1fr 105px 42px}
+ .fix-once-row{grid-template-columns:1fr 1fr;gap:7px}
+ .fix-once-label{grid-column:1/-1}
+ .fix-once-status{text-align:left;grid-column:1/-1}
+}
+@media(max-width:390px){
+ .fix-once-row{grid-template-columns:1fr}
+ .fix-once-label,.fix-once-status{grid-column:auto}
+}
