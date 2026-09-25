@@ -1,3 +1,10 @@
+# v0.99.23
+
+- Rückrechnungen verwenden die tatsächlich eingelesene Bezügemitteilung als verifizierte Netto-Basis, sofern diese der Kernabrechnung entspricht.
+- Die 100-Euro-Schichtzulage wird separat als Szenario „aktuelle Abrechnung + nur Schichtzulage“ berechnet, statt als marginaler Effekt nach anderen Zuschlägen.
+- Schicht-/Wechselschicht-Nettoeffekte werden nicht mehr als „nicht berechenbar“ ausgegeben, wenn die aktuelle Abrechnung und der Zeitnachweis eine eindeutige Berechnung erlauben.
+- Gesamtnachzahlung und Einzelkomponenten bleiben getrennt: Gesamtkorrektur = alle fehlenden Bezüge; Schichtzulage netto = isolierter Differenzbetrag zur aktuellen Abrechnung.
+
 # v0.99.22
 
 - Legacy-Forecasts ohne Einzelkomponenten verwenden wieder die damalige Pfändungssemantik; die VBL wird nicht fälschlich ein zweites Mal aus dem steuerfreien Anteil herausgerechnet.
