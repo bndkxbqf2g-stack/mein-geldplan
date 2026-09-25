@@ -1,3 +1,9 @@
+# v0.99.16
+
+- Alte Gehaltsprognosen zeigen die erwartete Netto-Nachzahlung jetzt sichtbar, auch wenn gespeicherte Einzelbestandteile fehlen.
+- Die korrigierte Auszahlung wird aus tatsächlicher Auszahlung plus gespeichertem Nettoeffekt angezeigt.
+- Eine fehlende Detailaufteilung wird ausdrücklich als Alt-Daten-Grenze gekennzeichnet statt den gesamten Nachzahlungsblock auszublenden.
+
 # v0.99.15
 
 - Gehaltskontrolle nutzt die tatsächlich eingelesene Monatsabrechnung als sichtbare Basis der erwarteten Nachzahlung.
