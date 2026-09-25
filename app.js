@@ -4,21 +4,37 @@ import {createBudgetUi} from './lib/budget-ui.js';
 import {createSavingsUi} from './lib/savings-ui.js';
 import {createFixedCostsUi} from './lib/fixed-costs-ui.js';
 import {createHistoryUi} from './lib/history-ui.js';
-import {createMaintenanceUi} from './lib/maintenance-ui.js';
+import {createMaintenanceUi,createBackupSnapshot,restoreBackupSnapshot} from './lib/maintenance-ui.js';
+import {loadRecoverySnapshot,shouldRecoverPrimary,scheduleRecoverySnapshot,clearRecoverySnapshot} from './lib/recovery-store.js';
 import {$,initTabs,notify} from './lib/ui.js';
 import {initTheme} from './lib/theme-ui.js';
 import {initPreferences} from './lib/preferences-ui.js';
 
 let budgetUi,savingsUi,fixedCostsUi,historyUi;
-const refresh=()=>{budgetUi.render();savingsUi.render();fixedCostsUi.render();historyUi.render();};
+const refresh=()=>{budgetUi.render();savingsUi.render();fixedCostsUi.render();historyUi.render();scheduleRecoverySnapshot(createBackupSnapshot());};
 
-function resetApp(){
+async function resetApp(){
   if(!confirm('Wirklich alle gespeicherten Eingaben und Buchungen löschen?'))return;
+  await clearRecoverySnapshot().catch(()=>false);
   clearAllStorage();location.reload();
 }
-function init(){
+async function recoverLocalDataIfNeeded(){
+  try{
+    const primary=createBackupSnapshot();
+    const recovery=await loadRecoverySnapshot();
+    if(!shouldRecoverPrimary(primary,recovery))return false;
+    restoreBackupSnapshot(recovery);
+    return true;
+  }catch(error){
+    console.warn('[recovery-restore]',error);
+    return false;
+  }
+}
+async function init(){
   const migration=migrateStorage();
+  const recovered=await recoverLocalDataIfNeeded();
   if(migration.error){console.warn('[storage] Datenmigration konnte nicht vollständig ausgeführt werden.');setTimeout(()=>notify('Einige ältere Daten konnten nicht vollständig übernommen werden.',{type:'error',timeout:5000}),150);}
+  if(recovered)setTimeout(()=>notify('Lokale Recovery-Sicherung wurde automatisch wiederhergestellt.',{type:'success',timeout:6000}),180);
   if($('appVersion'))$('appVersion').textContent=`v${APP_VERSION}`;
   initTheme();
   initPreferences();
