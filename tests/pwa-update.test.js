@@ -21,3 +21,11 @@ test('Cloud- und Recovery-Module sind Teil des Offline-App-Shells',()=>{
     assert.match(sw,new RegExp(file.replaceAll('.','\\.')));
   }
 });
+
+test('PWA sichert den aktuellen Stand beim Verlassen sofort in Recovery',()=>{
+  const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+  const recovery=fs.readFileSync(path.join(root,'lib/recovery-bootstrap.js'),'utf8');
+  assert.match(app,/pagehide/);
+  assert.match(app,/saveCurrentRecoverySnapshot/);
+  assert.match(recovery,/delay:0/);
+});
