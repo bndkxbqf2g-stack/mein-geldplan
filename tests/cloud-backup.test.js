@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeCloudSession} from '../lib/cloud-auth.js';
+import {normalizeCloudSession,cloudRedirectUrl,sessionFromAuthRedirect} from '../lib/cloud-auth.js';
 import {snapshotHash,canonicalCloudSnapshot} from '../lib/cloud-backup.js';
 
 test('Cloud-Sitzung akzeptiert nur vollständige Zugangsdaten',()=>{
@@ -24,4 +24,22 @@ test('volatile Exportzeit ändert den Cloud-Deduplizierungs-Hash nicht',async()=
   const b=await snapshotHash({cash:85,exportedAt:'2026-09-25T19:00:00Z'});
   assert.equal(a,b);
   assert.deepEqual(canonicalCloudSnapshot({cash:85,exportedAt:'x'}),{cash:85});
+});
+
+
+test('Cloud-Redirect verwendet die produktive GitHub-Pages-URL statt localhost',()=>{
+  assert.equal(
+    cloudRedirectUrl({origin:'https://bndkxbqf2g-stack.github.io',pathname:'/mein-geldplan/'}),
+    'https://bndkxbqf2g-stack.github.io/mein-geldplan/'
+  );
+});
+
+test('Magic-Link-Redirect kann Supabase-Sitzung aus URL-Fragment übernehmen',()=>{
+  const header=Buffer.from(JSON.stringify({alg:'none'})).toString('base64url');
+  const payload=Buffer.from(JSON.stringify({sub:'user-1',email:'m@example.de',exp:2000000000})).toString('base64url');
+  const accessToken=`${header}.${payload}.`;
+  const session=sessionFromAuthRedirect({hash:`#access_token=${accessToken}&refresh_token=refresh-1&expires_in=3600`});
+  assert.equal(session.userId,'user-1');
+  assert.equal(session.email,'m@example.de');
+  assert.equal(session.refreshToken,'refresh-1');
 });
