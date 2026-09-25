@@ -1,16 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {migrateStorage,getFixedCosts,storageKeys} from '../lib/storage.js';
+import {migrateStorage,getFixedCosts,storageKeys,DATA_SCHEMA_VERSION} from '../lib/storage.js';
 
 function memory(){const m=new Map();return {getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>m.set(k,String(v)),removeItem:k=>m.delete(k)};}
 
-test('v0.99.2 ersetzt alte persönliche Fixkosten einmalig',()=>{
+test('persönliche Fixkosten werden aus altem Schema einmalig migriert',()=>{
   const store=memory();
   store.setItem(storageKeys.schemaVersion,'3');
   store.setItem(storageKeys.fixedCosts,JSON.stringify([{id:'old',name:'Alt',amount:2156}]));
   const result=migrateStorage(store);
   const items=getFixedCosts(store);
-  assert.equal(result.version,4);
+  assert.equal(result.version,DATA_SCHEMA_VERSION);
   assert.equal(items.length,10);
   assert.equal(items.reduce((s,x)=>s+x.amount,0),2160.31);
 });
