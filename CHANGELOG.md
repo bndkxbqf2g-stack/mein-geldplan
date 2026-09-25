@@ -1,3 +1,15 @@
+# v0.99.31
+
+- September-Nachberechnung berücksichtigt jetzt ausdrücklich das höhere pfändbare Netto des korrigierten Monats und berechnet die Pfändung neu.
+- Referenz September 2026: pfändbares Netto 2.746,88 € → 2.801,94 €, Pfändung 88,94 € → 112,94 € (+24,00 €).
+- Korrigiertes gesetzliches Netto 3.026,99 €, VBL 82,92 € und Auszahlung 2.831,13 €; Netto-Nachzahlung gegenüber 2.657,94 € beträgt 173,19 €.
+- Steuerpflichtiger Rückstand: 100,77 € brutto − 43,89 € Steuer/SV − 1,82 € zusätzliche VBL − 24,00 € zusätzliche Pfändung = 31,06 € netto.
+- Zusammen mit 142,13 € steuerfreien Zuschlägen ergibt sich 173,19 € Netto-Nachzahlung; die Schichtzulage ist darin bereits enthalten.
+- Gehaltskontrolle benennt die Felder nun eindeutig als Soll-Brutto, Abgerechnet-Brutto und Brutto fehlt; veraltete parallele Netto-Schätzwerte werden unterdrückt.
+- Teilrückrechnungen können die ursprüngliche volle Netto-Nachzahlung nicht mehr erneut als offenen Übertrag verwenden.
+- Gespeicherte Ist-Nettoeffekte werden auf Berechnungsstand 4 neu aufgebaut; Pfändungs-, VBL- und Netto-Abhängigkeiten sind sichtbar nachvollziehbar.
+- Release-Test verwendet die zentrale App-Version statt eigener fest codierter Versionswerte.
+
 # v0.99.30
 
 - Netto-Nachzahlung zeigt die Addition jetzt ausdrücklich als „steuerfrei netto + steuerpflichtig netto = gesamte Korrektur netto“.
