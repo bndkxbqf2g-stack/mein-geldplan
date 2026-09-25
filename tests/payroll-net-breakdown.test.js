@@ -243,3 +243,35 @@ test('Legacy-September nutzt Ist-Abrechnung und liefert isolierten Nettoeffekt d
   assert.equal(result.totalNet,189.88);
   assert.equal(result.correctedPayout,2847.82);
 });
+
+test('Ist-Auszahlung bleibt Sockel auch wenn Modell-Baseline netto abweicht',async()=>{
+  const {calculateActualBasedForecastNetEffects}=await import('../lib/salary-net-effects.js');
+  const forecast={
+    totalGross:4723.33,
+    legalNet:3026.99,
+    garnishableNet:2884.86,
+    needsReview:false,
+    springIn:0
+  };
+  const actual={
+    totalGross:4480.43,
+    payout:2600,
+    hasPriorAdjustment:false,
+    components:{hasVariableDetail:false}
+  };
+  const calculator=async(report)=>{
+    const items=report?.items||[];
+    const baseline=!items.length;
+    const hasShift=items.some(item=>item.code==='5212');
+    if(baseline)return {totalGross:4480.43,payout:2700,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:0},shift:'none'}};
+    if(hasShift&&items.length===1)return {payout:2730,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:100},shift:'schicht'}};
+    return {payout:2890,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:.77,sunday:0,holiday:142.13,shift:100},shift:'schicht'}};
+  };
+  const effects=await calculateActualBasedForecastNetEffects(forecast,actual,undefined,calculator);
+  assert.equal(effects.basis,'actual-payslip');
+  assert.equal(effects.modelBaselinePayout,2700);
+  assert.equal(effects.shiftStandaloneNet,30);
+  assert.equal(effects.totalNet,190);
+  assert.equal(effects.actualPayout,2600);
+  assert.equal(effects.correctedPayout,2790);
+});
