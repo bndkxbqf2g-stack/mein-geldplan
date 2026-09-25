@@ -1,3 +1,8 @@
+# v0.99.17
+
+- Behebt den Renderfehler, durch den die berechnete Netto-Nachzahlung nicht in der Gehaltskontrollkarte erschien.
+- Der Netto-Breakdown wird jetzt direkt beim Erzeugen jeder Karte berechnet und angehängt.
+
 # v0.99.16
 
 - Alte Gehaltsprognosen zeigen die erwartete Netto-Nachzahlung jetzt sichtbar, auch wenn gespeicherte Einzelbestandteile fehlen.
