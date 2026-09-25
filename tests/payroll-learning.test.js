@@ -61,3 +61,27 @@ test('Abweichungen werden als Warnung gelernt und nicht still als neue Wahrheit 
   assert.equal(check.needsReview,true);
   assert.equal(check.warnings.find(w=>w.code==='5212').mismatches,1);
 });
+
+
+test('Lernsnapshot prüft auch Steuer, SV, VBL, Pfändung und Auszahlung',()=>{
+  const f=forecast();
+  Object.assign(f,{
+    taxableGross:4581.20,wageTax:683.58,solidarity:0,churchTax:34.04,
+    health:384.56,care:71.01,pension:426.05,unemployment:59.56,
+    vbl:82.92,protectedPay:142.13,garnishableNet:2801.94
+  });
+  f.components.fixed={basePay:4226.92,careAllowance:90,universityAllowance:163.51};
+  const a=payslip();
+  Object.assign(a,{
+    basePay:4226.92,careAllowance:90,universityAllowance:163.51,
+    wageTax:683.58,solidarity:0,churchTax:34.04,
+    health:384.56,care:71.01,pension:426.05,unemployment:59.56
+  });
+  const result=buildPayrollLearningSnapshot({forecast:f,actual:a});
+  assert.equal(result.rows.find(row=>row.key==='basePay').confirmed,true);
+  assert.equal(result.totals.find(row=>row.key==='taxTotal').confirmed,true);
+  assert.equal(result.totals.find(row=>row.key==='socialTotal').confirmed,true);
+  assert.equal(result.totals.find(row=>row.key==='garnishableNet').actual,2801.94);
+  assert.equal(result.totals.find(row=>row.key==='garnishment').confirmed,true);
+  assert.equal(result.totals.find(row=>row.key==='payout').confirmed,true);
+});
