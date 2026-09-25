@@ -44,8 +44,9 @@ Reine Statistikfunktionen für Monatswerte, Transaktionssummen und Sparentwicklu
 
 - `lib/theme-ui.js` – Theme-Modus (System/Hell/Dunkel), Meta-Theme-Color und Header-Schalter.
 
-- `lib/storage.js`: Schema-3-Migration, defensive Normalisierung und Datumsvalidierung.
-- `lib/maintenance-ui.js`: Backup v3, Validierung und rückrollbarer Restore.
+- `lib/storage.js`: Schema-7-Migration, defensive Normalisierung und Datumsvalidierung; speichert Budget, Prognosen, Bezügemitteilungen und Payroll-Lernhistorie lokal.
+- `lib/maintenance-ui.js`: Backup v7 inklusive Payroll-Lernhistorie, Validierung und rückrollbarer Restore.
+- `lib/payroll-learning.js`: kontrollierter Soll-/Ist-Lernabgleich. Beobachtungen erhöhen nur die Vertrauensstufe; Tarif-, Steuer-, SV- und Pfändungsregeln werden nicht automatisch überschrieben.
 
 
 ### `lib/payroll-control.js` / `lib/payroll-control-ui.js`
