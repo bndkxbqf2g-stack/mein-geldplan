@@ -4,31 +4,19 @@ import {createBudgetUi} from './lib/budget-ui.js';
 import {createSavingsUi} from './lib/savings-ui.js';
 import {createFixedCostsUi} from './lib/fixed-costs-ui.js';
 import {createHistoryUi} from './lib/history-ui.js';
-import {createMaintenanceUi,createBackupSnapshot,restoreBackupSnapshot} from './lib/maintenance-ui.js';
-import {loadRecoverySnapshot,shouldRecoverPrimary,scheduleRecoverySnapshot,clearRecoverySnapshot} from './lib/recovery-store.js';
+import {createMaintenanceUi} from './lib/maintenance-ui.js';
+import {recoverLocalDataIfNeeded,scheduleCurrentRecoverySnapshot,clearRecoveryForReset} from './lib/recovery-bootstrap.js';
 import {$,initTabs,notify} from './lib/ui.js';
 import {initTheme} from './lib/theme-ui.js';
 import {initPreferences} from './lib/preferences-ui.js';
 
 let budgetUi,savingsUi,fixedCostsUi,historyUi;
-const refresh=()=>{budgetUi.render();savingsUi.render();fixedCostsUi.render();historyUi.render();scheduleRecoverySnapshot(createBackupSnapshot());};
+const refresh=()=>{budgetUi.render();savingsUi.render();fixedCostsUi.render();historyUi.render();scheduleCurrentRecoverySnapshot();};
 
 async function resetApp(){
   if(!confirm('Wirklich alle gespeicherten Eingaben und Buchungen löschen?'))return;
-  await clearRecoverySnapshot().catch(()=>false);
+  await clearRecoveryForReset();
   clearAllStorage();location.reload();
-}
-async function recoverLocalDataIfNeeded(){
-  try{
-    const primary=createBackupSnapshot();
-    const recovery=await loadRecoverySnapshot();
-    if(!shouldRecoverPrimary(primary,recovery))return false;
-    restoreBackupSnapshot(recovery);
-    return true;
-  }catch(error){
-    console.warn('[recovery-restore]',error);
-    return false;
-  }
 }
 async function init(){
   const migration=migrateStorage();
