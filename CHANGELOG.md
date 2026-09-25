@@ -1,3 +1,13 @@
+# v0.99.5
+
+- Übersicht vereinfacht: „Dein aktueller Plan“, „Diese Lohnperiode“ und „Letzte Bewegungen“ entfernt.
+- Schnellzugriff direkt unter die erste Übersichtskachel verschoben.
+- Neue Kachel „Erwartete Löhne“ für die nächsten zwei anstehenden Auszahlungsmonate.
+- Fehlt der zugehörige Zeitnachweis, zeigt die Übersicht statt eines Betrags „Ausstehend“.
+- Nach dem Einlesen eines Zeitnachweises aktualisiert sich die Übersicht sofort mit dem berechneten Auszahlungsbetrag.
+- Bereits gebuchter aktueller Lohntag wird aus der Zwei-Monats-Vorschau herausgeschoben; angezeigt werden dann die beiden folgenden Auszahlungsmonate.
+- „Lohn sofort buchen“ vollständig entfernt; Lohn läuft nur noch über die Vormerkung und automatische Buchung am Auszahlungstag.
+
 # v0.99.4
 
 - Kopfzeile auf den Refresh-Button reduziert.
