@@ -18,13 +18,14 @@ test('Sparen ist auf Zweck + Betrag + Verlauf reduziert',()=>{
   assert.match(savingsUi,/Freigeben/);
 });
 
-test('Gehaltsansicht zeigt die neue Zeitnachweis-Prognose kompakt und ohne Lohnkontroll-Altlasten',()=>{
+test('Gehaltsansicht verbindet Prognose, Bezügemitteilung und die letzten drei Checks',()=>{
   assert.match(html,/#prognose \.row \.v/);
   assert.match(html,/id="pTaxableGross"/);
   assert.match(html,/id="pShiftAllowance"/);
   assert.match(html,/id="pPayoutDetail"/);
-  assert.doesNotMatch(html,/id="payslipBtn"/);
-  assert.doesNotMatch(html,/id="payrollControlList"/);
+  assert.match(html,/id="payslipBtn"/);
+  assert.match(html,/id="payrollControlList"/);
+  assert.match(html,/Letzte 3 Prognosen \/ Checks/);
 });
 
 test('Zeitlohnarten werden deutsch und Zulagen ohne Stundenwert dargestellt',()=>{

@@ -429,3 +429,30 @@ test('veralteter Ist-Nettoeffekt v4 mit 189,88 wird bei vorhandener September-Ab
   assert.equal(result.correctedPayout,2831.13);
   assert.equal(result.garnishmentDelta,24);
 });
+
+
+test('offener Rest wird nach komponentengenauer Teilzahlung netto neu berechnet',async()=>{
+  const {calculateOutstandingNetEffects}=await import('../lib/salary-net-effects.js');
+  const forecast={
+    payoutMonth:'2026-09',reportMonth:'2026-07',
+    components:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,shiftType:'schicht'},
+    reportItems:[{code:'5010',hours:18.9},{code:'5011',hours:2.5},{code:'5014',hours:1.2},{code:'5024',hours:7.7},{code:'5212',hours:0}]
+  };
+  const actual={totalGross:4480.43,legalNet:2827.98,vbl:81.10,garnishment:88.94,payout:2657.94,components:{hasVariableDetail:false}};
+  const calculator=async report=>{
+    const items=report.items||[];
+    const hasNight=items.some(i=>i.code==='5010'||i.code==='5011');
+    const hasSat=items.some(i=>i.code==='5014');
+    const hasSun=items.some(i=>i.code==='5024');
+    const shiftItem=items.find(i=>i.code==='5212');
+    const shiftRatio=shiftItem?Number(shiftItem.amountOverride??1):0;
+    const taxFree=(hasNight?98.01:0)+(hasSun?44.12:0);
+    const payout=2657.94+taxFree+(hasSat?0.42:0)+30.64*shiftRatio;
+    return {payout,totalGross:4480.43+taxFree+(hasSat?0.77:0)+100*shiftRatio,legalNet:2827.98+taxFree+(hasSat?0.60:0)+56.88*shiftRatio,vbl:81.10+1.82*shiftRatio,garnishment:88.94+24*shiftRatio,components:{shift:shiftRatio?'schicht':'none'}};
+  };
+  const retro=[{totalGross:100,components:{shift:100,hasVariableDetail:true}}];
+  const effects=await calculateOutstandingNetEffects(forecast,actual,retro,undefined,calculator);
+  assert.equal(effects.shiftGross,0);
+  assert.equal(effects.taxFreeNet,142.13);
+  assert.equal(effects.totalNet,142.55);
+});

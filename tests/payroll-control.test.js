@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout} from '../lib/payroll-control.js';
+import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,retroForForecast,visiblePayrollControls} from '../lib/payroll-control.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -231,4 +231,24 @@ test('Rückrechnungen werden dem ursprünglichen Zeitnachweismonat statt dem Aus
   assert.equal(result.retroGross,71.94);
   assert.equal(result.variableRows.find(row=>row.key==='night').retro,6.18);
   assert.equal(result.variableRows.find(row=>row.key==='shift').retro,60);
+});
+
+
+test('Rückrechnung darf Leistungsmonat oder ursprünglichen Auszahlungsmonat referenzieren',()=>{
+  const payslips=[
+    {month:'2026-10',retroPeriods:[{month:'2026-09',totalGross:100,components:{shift:100}}]},
+    {month:'2026-11',retroPeriods:[{month:'2026-07',totalGross:142.90,components:{night:98.01,saturday:.77,sunday:44.12}}]}
+  ];
+  const hits=retroForForecast(payslips,{reportMonth:'2026-07',payoutMonth:'2026-09'});
+  assert.deepEqual(hits.map(x=>x.month),['2026-09','2026-07']);
+});
+
+test('sichtbar bleiben maximal die drei neuesten Prognosen oder Checks',()=>{
+  const controls=[{payoutMonth:'2026-12'},{payoutMonth:'2026-11'},{payoutMonth:'2026-10'},{payoutMonth:'2026-09'}];
+  assert.deepEqual(visiblePayrollControls(controls,3).map(x=>x.payoutMonth),['2026-12','2026-11','2026-10']);
+});
+
+test('Soll-Ist-Karte weist die Netto-Auszahlungsdifferenz aus',()=>{
+  const control=buildPayrollControl({forecast:{...forecast,payout:2831.13},actual:{...september,payout:2657.94},payslips:[september]});
+  assert.equal(control.payoutDifference,-173.19);
 });

@@ -148,3 +148,17 @@ test('liest reale September-Abrechnung ohne erfundene Nachverrechnung',()=>{
   assert.equal(doc.priorAdjustment,0);
   assert.equal(doc.retroPeriods.length,0);
 });
+
+
+test('reale LfF-Schreibweise Schichtzul.mtl. wird als Schichtzulage erkannt',()=>{
+  const c=parsePayslipComponents('Schichtzul.mtl. §43TV-L LSGZ 1,00 60,00 60,00');
+  assert.equal(c.schicht,60);
+  assert.equal(c.shift,60);
+  assert.equal(c.hasVariableDetail,true);
+});
+
+test('reale LfF-Schreibweise Wechselschichtzul. wird erkannt',()=>{
+  const c=parsePayslipComponents('Wechselschichtzul.mtl. §43TV-L LSGZ 1,00 250,00 250,00');
+  assert.equal(c.wechsel,250);
+  assert.equal(c.shift,250);
+});

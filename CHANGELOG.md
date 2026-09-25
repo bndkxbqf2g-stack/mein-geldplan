@@ -1,3 +1,14 @@
+# v0.99.44
+
+- Bezügemitteilungs-Upload wieder in den neu aufgebauten Gehaltsbereich integriert.
+- Jede echte Abrechnung wird automatisch mit der passenden Zeitnachweis-Prognose gegengerechnet: Prognose-Auszahlung, tatsächliche Auszahlung, Netto-Differenz, Soll-/Ist-Brutto und offener Anspruch.
+- Fehlende Zuschläge werden netto getrennt: steuerfreie Nacht-/Sonntag-/Feiertagsanteile sowie steuerpflichtige Samstag- und Schicht-/Wechselschichtzulagen inklusive Steuer/SV/VBL/Pfändung.
+- Offene Netto-Nachzahlungen werden beim nächsten noch nicht abgerechneten Prognosemonat als „Nachzahlung aus Vormonat“ zusätzlich zur regulären Prognose ausgewiesen.
+- Spätere Rückrechnungen können sowohl den ursprünglichen Leistungsmonat als auch den ursprünglichen Auszahlungsmonat referenzieren; beide Varianten werden erkannt und nicht doppelt gezählt.
+- Teilnachzahlungen mit eindeutig aufgeschlüsselten Komponenten reduzieren den noch offenen Nettoanspruch; unklare Sammelrückrechnungen werden weiterhin nicht geraten.
+- Die Gehaltsansicht zeigt maximal die drei neuesten Prognosen/Checks gleichzeitig.
+- Reale LfF-Bezeichnungen „Schichtzul.mtl.“ und „Wechselschichtzul.“ werden erkannt.
+
 # v0.99.43
 
 - Offizielle UKW-Pflegetabelle 2026 für KR8 / Berechnungsstufe 3 ergänzt.
