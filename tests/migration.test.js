@@ -14,7 +14,7 @@ test('zukünftige unbekannte Backup-Version wird abgewiesen',()=>{
 
 test('Backup-Metadaten enthalten Schema- und App-Version',()=>{
   const snap=createBackupSnapshot();
-  assert.equal(snap.version,6);assert.equal(snap.appVersion,APP_VERSION);assert.ok(Number.isInteger(snap.schemaVersion));
+  assert.equal(snap.version,7);assert.equal(snap.appVersion,APP_VERSION);assert.ok(Number.isInteger(snap.schemaVersion));
 });
 
 
@@ -33,4 +33,10 @@ test('Backup enthält Darstellungspräferenz für Erklärungen',()=>{
 test('Backup enthält einmalige Fixkosten-Ausnahmen',()=>{
   const snap=createBackupSnapshot();
   assert.ok(Array.isArray(snap.fixedCostOverrides));
+});
+
+
+test('Backup enthält die Payroll-Lernhistorie',()=>{
+  const snap=createBackupSnapshot();
+  assert.ok(Array.isArray(snap.payrollLearning));
 });
