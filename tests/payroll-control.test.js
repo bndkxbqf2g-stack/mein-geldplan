@@ -197,3 +197,38 @@ test('Teilrückrechnung ohne sicher berechneten Rest-Nettoeffekt wird nicht gera
   ];
   assert.deepEqual(buildPayrollCarryovers({controls,netByMonth:{}}),{});
 });
+
+
+test('Rückrechnungen werden dem ursprünglichen Zeitnachweismonat statt dem Auszahlungsmonat zugeordnet',()=>{
+  const forecast={
+    payoutMonth:'2026-07',
+    reportMonth:'2026-05',
+    totalGross:4552.37,
+    payout:2735,
+    components:{
+      fixed:{basePay:4226.92,careAllowance:90,universityAllowance:163.51},
+      night:6.18,saturday:0,sunday:0,holiday:0,shift:60,shiftType:'schicht',springIn:0,
+      average21Days:4,unpriced:[]
+    },
+    reportItems:[{code:'5010'},{code:'5212'}]
+  };
+  const actual={
+    month:'2026-07',
+    totalGross:4480.43,
+    payout:2700.70,
+    basePay:4226.92,careAllowance:90,universityAllowance:163.51,
+    components:{}
+  };
+  const payslips=[{
+    ...actual,
+    retroPeriods:[{
+      month:'2026-05',
+      totalGross:71.94,
+      components:{night:6.18,shift:60}
+    }]
+  }];
+  const result=buildPayrollControl({forecast,actual,payslips});
+  assert.equal(result.retroGross,71.94);
+  assert.equal(result.variableRows.find(row=>row.key==='night').retro,6.18);
+  assert.equal(result.variableRows.find(row=>row.key==='shift').retro,60);
+});
