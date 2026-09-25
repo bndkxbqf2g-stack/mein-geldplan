@@ -95,6 +95,30 @@ test('sichtbarer Fallback aus Soll- und Ist-Auszahlung bei alten September-Daten
   assert.equal(result.source,'legacy-total');
 });
 
+test('alte September-Prognose rekonstruiert steuerfrei und steuerpflichtig aus Netto- und Pfändungswerten',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{
+      totalGross:4723.33,
+      legalNet:3026.99,
+      garnishableNet:2801.94,
+      payout:2815.82,
+      needsReview:false,
+      springIn:0
+    },
+    actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98,hasPriorAdjustment:false},
+    variableRows:[],
+    retro:[],
+    estimatedNetImpact:157.88
+  });
+  assert.equal(result.taxFreeGross,142.13);
+  assert.equal(result.taxFreeNet,142.13);
+  assert.equal(result.taxableGross,100.77);
+  assert.equal(result.taxableNet,15.75);
+  assert.equal(result.totalNet,157.88);
+  assert.equal(result.correctedPayout,2815.82);
+  assert.equal(result.source,'legacy-summary-split');
+});
+
 
 test('September rekonstruiert Komponenten aus gespeichertem Zeitnachweis und zeigt Netto je Gruppe',()=>{
  const result=buildPayrollNetBreakdown({forecast:{totalGross:4723.33,components:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,shiftType:'schicht',unpriced:[],springInVblUnverified:false},netEffects:{complete:true,totalNet:189.88,timeNet:142.50,shiftAfterTimeNet:47.38,shiftStandaloneNet:47.40}},actual:{totalGross:4480.43,legalNet:2827.98,payout:2657.94,hasPriorAdjustment:false},variableRows:[],retro:[]});
