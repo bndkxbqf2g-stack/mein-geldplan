@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel} from '../lib/payroll-control.js';
+import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout} from '../lib/payroll-control.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -155,4 +155,45 @@ test('Hinweis zum Nachzahlungsübertrag nennt den tatsächlichen Zielmonat',()=>
     payrollCarryoverRegularSollLabel({payoutMonth:'2026-11',label:'November 2026'}),
     'Reguläres Soll für November 2026 bleibt unverändert'
   );
+});
+
+
+test('Monatskacheln zeigen nur bei offenen oder zu prüfenden Monaten Details',()=>{
+  assert.deepEqual(payrollCardDisplay({status:'waiting'}),{waiting:true,detailed:false});
+  assert.deepEqual(payrollCardDisplay({status:'ok'}),{waiting:false,detailed:false});
+  assert.deepEqual(payrollCardDisplay({status:'settled'}),{waiting:false,detailed:false});
+  assert.deepEqual(payrollCardDisplay({status:'open'}),{waiting:false,detailed:true});
+  assert.deepEqual(payrollCardDisplay({status:'partial'}),{waiting:false,detailed:true});
+  assert.deepEqual(payrollCardDisplay({status:'review'}),{waiting:false,detailed:true});
+});
+
+test('Oktober-Auszahlung addiert die korrigierte September-Nachzahlung genau einmal',()=>{
+  const october={payoutMonth:'2026-10',status:'waiting',expectedPayout:2773.72,actualPayout:null};
+  const incoming=[{sourceMonth:'2026-09',sourceLabel:'September 2026',gross:242.90,net:173.19}];
+  assert.equal(payrollProjectedPayout(october,incoming),2946.91);
+});
+
+test('Vorhandene Oktober-Abrechnung wird nicht mit einem offenen Übertrag überschrieben',()=>{
+  const october={payoutMonth:'2026-10',status:'ok',expectedPayout:2773.72,actualPayout:2760};
+  const incoming=[{sourceMonth:'2026-09',net:173.19}];
+  assert.equal(payrollProjectedPayout(october,incoming),null);
+});
+
+test('mehrere offene Vormonate werden im nächsten ausstehenden Monat netto summiert',()=>{
+  const controls=[
+    {payoutMonth:'2026-11',label:'November 2026',status:'waiting',remainingGross:null},
+    {payoutMonth:'2026-10',label:'Oktober 2026',status:'open',remainingGross:50},
+    {payoutMonth:'2026-09',label:'September 2026',status:'open',remainingGross:242.90}
+  ];
+  const carry=buildPayrollCarryovers({controls,netByMonth:{'2026-09':173.19,'2026-10':25}});
+  assert.equal(carry['2026-11'].length,2);
+  assert.equal(Math.round(carry['2026-11'].reduce((sum,item)=>sum+item.net,0)*100)/100,198.19);
+});
+
+test('Teilrückrechnung ohne sicher berechneten Rest-Nettoeffekt wird nicht geraten übertragen',()=>{
+  const controls=[
+    {payoutMonth:'2026-10',label:'Oktober 2026',status:'waiting',remainingGross:null},
+    {payoutMonth:'2026-09',label:'September 2026',status:'partial',remainingGross:100}
+  ];
+  assert.deepEqual(buildPayrollCarryovers({controls,netByMonth:{}}),{});
 });
