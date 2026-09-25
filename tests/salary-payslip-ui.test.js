@@ -45,3 +45,19 @@ test('Bezügemitteilung ohne passende Prognose verändert die Lernhistorie nicht
   const history=[{id:'existing',payoutMonth:'2026-08'}];
   assert.deepEqual(buildUpdatedPayrollLearning([],[payslip()],history),history);
 });
+
+
+test('Workflow übernimmt spätere Rückrechnung in den passenden Lernsnapshot',()=>{
+  const f=forecast();
+  const base=payslip();
+  base.components={night:null,saturday:null,sunday:null,holiday:null,shift:null,springIn:null,hasVariableDetail:false};
+  const later={
+    month:'2026-10',
+    retroPeriods:[{month:'2026-07',components:{night:98.01,saturday:0,sunday:44.12,holiday:0,shift:100,springIn:null,hasVariableDetail:true}}]
+  };
+  const history=buildUpdatedPayrollLearning([f],[base,later],[]);
+  assert.equal(history.length,1);
+  assert.equal(history[0].componentSource,'retro');
+  assert.equal(history[0].rows.find(row=>row.key==='night').confirmed,true);
+  assert.equal(history[0].rows.find(row=>row.key==='shift').confirmed,true);
+});
