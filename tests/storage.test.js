@@ -126,3 +126,15 @@ test('Migration repariert alte Spar-IDs und defekte Speicherwerte', async()=>{
   assert.equal(store.getItem(storageKeys.budgetAnchor),null);
   assert.equal(store.getItem(storageKeys.schemaVersion),String(DATA_SCHEMA_VERSION));
 });
+
+
+test('vorgemerkter Lohn wird getrennt vom Giro gespeichert', async()=>{
+  const {getPendingSalary,savePendingSalary,clearPendingSalary}=await import('../lib/storage.js');
+  const storage=memoryStorage();
+  const pending={id:'p1',amount:2700.70,text:'Lohn September',payoutDate:'2026-09-30',createdAt:'2026-09-15T10:00:00.000Z',status:'pending'};
+  assert.equal(savePendingSalary(pending,storage),true);
+  assert.deepEqual(getPendingSalary(storage),pending);
+  assert.equal(storage.getItem(storageKeys.transactions),null);
+  clearPendingSalary(storage);
+  assert.equal(getPendingSalary(storage),null);
+});
