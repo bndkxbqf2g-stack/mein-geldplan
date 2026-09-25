@@ -223,7 +223,23 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 <!-- FIXKOSTEN -->
 <div id="fixkosten" class="view hidden">
 <div class="page-intro"><div class="intro-kicker">MEIN GELDPLAN <span class="intro-dot">✦</span></div><h2>Alles fest im Blick.</h2><p>Deine regelmäßigen Ausgaben an einem Ort.</p></div>
-<section class="fixkosten-section"><h2>Meine Fixkosten</h2><div class="fixkosten-intro"><div class="note">Hier verwaltest du deine normalen monatlichen Fixkosten. Für den nächsten Lohnzyklus kannst du einzelne Positionen einmalig pausieren oder reduzieren. Danach gilt automatisch wieder der normale Betrag.</div></div><div class="fix-next-summary"><div><span class="label">Nächster Lohnzyklus</span><strong id="fixNextDate">–</strong></div><div><span class="label">Einmalige Fixkosten</span><strong id="fixNextTotal">–</strong></div></div><div id="fixItems" class="fix-list"></div><button class="primary secondary" style="margin-top:14px" id="addFixBtn">+ Fixkosten hinzufügen</button><div class="fix-total"><span class="label">Normale monatliche Fixkosten</span><span class="value" id="fixTotal">–</span></div></section>
+<section class="fixkosten-section">
+  <div class="fix-section-head">
+    <div>
+      <h2>Meine Fixkosten</h2>
+      <p class="fix-section-copy">Monatliche Ausgaben kompakt verwalten. Einmalige Änderungen gelten nur für den nächsten Lohnzyklus.</p>
+    </div>
+    <button class="primary secondary fix-add-button" id="addFixBtn">+ Neu</button>
+  </div>
+  <div class="fix-next-summary">
+    <div class="fix-summary-card fix-summary-primary"><span class="label">Monatlich</span><strong id="fixTotal">–</strong><small>reguläre Fixkosten</small></div>
+    <div class="fix-summary-card"><span class="label">Nächster Lohn</span><strong id="fixNextDate">–</strong><small>Start des nächsten Zyklus</small></div>
+    <div class="fix-summary-card"><span class="label">Nächster Zyklus</span><strong id="fixNextTotal">–</strong><small id="fixNextHint">inkl. einmaliger Anpassungen</small></div>
+  </div>
+  <div class="fix-list-head"><span>Position</span><span>Monatlich</span></div>
+  <div id="fixItems" class="fix-list"></div>
+  <button class="primary secondary fix-add-mobile" id="addFixMobileBtn">+ Fixkosten hinzufügen</button>
+</section>
 </div>
 
 <!-- PROGNOSE -->
