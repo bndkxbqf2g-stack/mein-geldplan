@@ -397,3 +397,35 @@ test('Legacy-Teilrückrechnung verwendet nicht erneut die volle Netto-Nachzahlun
   assert.equal(result.totalNet,null);
   assert.equal(result.correctedPayout,null);
 });
+
+
+test('veralteter Ist-Nettoeffekt v4 mit 189,88 wird bei vorhandener September-Abrechnung ignoriert',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{
+      payoutMonth:'2026-09',
+      totalGross:4723.33,
+      legalNet:3026.99,
+      garnishableNet:2884.86,
+      actualNetEffectsVersion:4,
+      actualNetEffects:{complete:true,basis:'actual-payslip',totalNet:189.88},
+      needsReview:false,
+      springIn:0
+    },
+    actual:{
+      month:'2026-09',
+      totalGross:4480.43,
+      legalNet:2827.98,
+      vbl:81.10,
+      garnishment:88.94,
+      payout:2657.94,
+      hasPriorAdjustment:false,
+      components:{hasVariableDetail:false}
+    },
+    variableRows:[],
+    retro:[]
+  });
+  assert.equal(result.source,'actual-payslip-summary');
+  assert.equal(result.totalNet,173.19);
+  assert.equal(result.correctedPayout,2831.13);
+  assert.equal(result.garnishmentDelta,24);
+});
