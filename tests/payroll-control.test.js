@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers} from '../lib/payroll-control.js';
+import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel} from '../lib/payroll-control.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -143,4 +143,16 @@ test('offener Anspruch wandert zum nächsten noch nicht abgerechneten Monat',()=
   const carry=buildPayrollCarryovers({controls,netByMonth:{'2026-09':189.88}});
   assert.equal(carry['2026-11'][0].sourceMonth,'2026-09');
   assert.equal(carry['2026-10'],undefined);
+});
+
+
+test('Hinweis zum Nachzahlungsübertrag nennt den tatsächlichen Zielmonat',()=>{
+  assert.equal(
+    payrollCarryoverRegularSollLabel({payoutMonth:'2026-10',label:'Oktober 2026'}),
+    'Reguläres Soll für Oktober 2026 bleibt unverändert'
+  );
+  assert.equal(
+    payrollCarryoverRegularSollLabel({payoutMonth:'2026-11',label:'November 2026'}),
+    'Reguläres Soll für November 2026 bleibt unverändert'
+  );
 });
