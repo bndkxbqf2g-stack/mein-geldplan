@@ -20,10 +20,10 @@ test('Release Candidate hat keine zusätzliche Projektwurzel',()=>{
   assert.equal(fs.existsSync(path.join(root,'mein-geldplan')),false);
 });
 
-test('Release Candidate verwendet überall v0.99.11 für App und Cache',()=>{
-  assert.equal(APP_VERSION,'0.99.11');
-  assert.match(read('index.html'),/id="appVersion">v0\.99\.11/);
-  assert.match(read('index.html'),/app\.js\?v=0\.99\.11/);
-  assert.match(read('service-worker.js'),/mein-geldplan-v0\.99\.11/);
-  assert.match(read('service-worker.js'),/app\.js\?v=0\.99\.11/);
+test('Release Candidate verwendet überall v0.99.12 für App und Cache',()=>{
+  assert.equal(APP_VERSION,'0.99.12');
+  assert.match(read('index.html'),/id="appVersion">v0\.99\.12/);
+  assert.match(read('index.html'),/app\.js\?v=0\.99\.12/);
+  assert.match(read('service-worker.js'),/mein-geldplan-v0\.99\.12/);
+  assert.match(read('service-worker.js'),/app\.js\?v=0\.99\.12/);
 });
