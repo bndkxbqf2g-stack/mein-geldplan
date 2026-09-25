@@ -12,29 +12,29 @@ test('offene Rückstände werden netto getrennt',()=>{
   ];
   const forecast={
     components:{unpriced:[],springInVblUnverified:false},
-    netEffects:{complete:true,totalNet:189.88,timeNet:142.50,shiftAfterTimeNet:47.38,shiftStandaloneNet:47.40}
+    netEffects:{complete:true,totalNet:173.19,timeNet:142.55,shiftAfterTimeNet:30.64,shiftStandaloneNet:30.64}
   };
   const result=buildPayrollNetBreakdown({
     forecast,
     actual:{payout:2657.94,hasPriorAdjustment:false},
     variableRows,
     retro:[],
-    estimatedNetImpact:189.88
+    estimatedNetImpact:173.19
   });
   assert.equal(result.taxFreeNet,142.13);
   assert.equal(result.taxableGross,100.77);
-  assert.equal(result.taxableNet,47.75);
+  assert.equal(result.taxableNet,31.06);
   assert.equal(result.timeGross,142.90);
-  assert.equal(result.timeNet,142.50);
-  assert.equal(result.shiftNet,47.40);
-  assert.equal(result.totalNet,189.88);
-  assert.equal(result.correctedPayout,2847.82);
+  assert.equal(result.timeNet,142.55);
+  assert.equal(result.shiftNet,30.64);
+  assert.equal(result.totalNet,173.19);
+  assert.equal(result.correctedPayout,2831.13);
 });
 
 
 test('allein fehlende Schichtzulage nutzt den Einzel-Nettoeffekt',()=>{
   const result=buildPayrollNetBreakdown({
-    forecast:{components:{unpriced:[],springInVblUnverified:false},netEffects:{complete:true,shiftStandaloneNet:47.40}},
+    forecast:{components:{unpriced:[],springInVblUnverified:false},netEffects:{complete:true,shiftStandaloneNet:30.64}},
     actual:{payout:2657.94,hasPriorAdjustment:false},
     variableRows:[
       {key:'night',expected:98.01,open:0,tax:'steuerfrei'},
@@ -45,9 +45,9 @@ test('allein fehlende Schichtzulage nutzt den Einzel-Nettoeffekt',()=>{
     retro:[]
   });
   assert.equal(result.taxableGross,100);
-  assert.equal(result.taxableNet,47.40);
-  assert.equal(result.shiftNet,47.40);
-  assert.equal(result.correctedPayout,2705.34);
+  assert.equal(result.taxableNet,30.64);
+  assert.equal(result.shiftNet,30.64);
+  assert.equal(result.correctedPayout,2688.58);
 });
 
 
@@ -94,7 +94,7 @@ test('tatsächliche Abrechnung wird als Basis der Nachzahlung markiert',()=>{
   });
   assert.equal(result.actualBased,true);
   assert.equal(result.actualTaxableBase,4480.43);
-  assert.equal(result.correctedPayout,2847.82);
+  assert.equal(result.correctedPayout,2831.13);
 });
 
 
@@ -126,7 +126,7 @@ test('alte September-Prognose nutzt alte Pfändungssemantik und aktuelle Nettoef
       springIn:0,
       netEffects:{complete:true,totalNet:189.88}
     },
-    actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98,hasPriorAdjustment:false},
+    actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98,vbl:81.10,garnishment:88.94,hasPriorAdjustment:false,components:{hasVariableDetail:false}},
     variableRows:[],
     retro:[],
     estimatedNetImpact:157.88
@@ -134,10 +134,10 @@ test('alte September-Prognose nutzt alte Pfändungssemantik und aktuelle Nettoef
   assert.equal(result.taxFreeGross,142.13);
   assert.equal(result.taxFreeNet,142.13);
   assert.equal(result.taxableGross,100.77);
-  assert.equal(result.taxableNet,47.75);
-  assert.equal(result.totalNet,189.88);
-  assert.equal(result.correctedPayout,2847.82);
-  assert.equal(result.source,'legacy-summary-recalculated');
+  assert.equal(result.taxableNet,31.06);
+  assert.equal(result.totalNet,173.19);
+  assert.equal(result.correctedPayout,2831.13);
+  assert.equal(result.source,'actual-payslip-summary');
 });
 
 test('alte September-Prognose zeigt ohne Neuberechnung keinen veralteten Netto-Fallback',()=>{
@@ -157,8 +157,8 @@ test('alte September-Prognose zeigt ohne Neuberechnung keinen veralteten Netto-F
 
 
 test('September rekonstruiert Komponenten aus gespeichertem Zeitnachweis und zeigt Netto je Gruppe',()=>{
- const result=buildPayrollNetBreakdown({forecast:{totalGross:4723.33,components:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,shiftType:'schicht',unpriced:[],springInVblUnverified:false},netEffects:{complete:true,totalNet:189.88,timeNet:142.50,shiftAfterTimeNet:47.38,shiftStandaloneNet:47.40}},actual:{totalGross:4480.43,legalNet:2827.98,payout:2657.94,hasPriorAdjustment:false},variableRows:[],retro:[]});
- assert.equal(result.taxFreeNet,142.13);assert.equal(result.taxableGross,100.77);assert.equal(result.taxableNet,47.75);assert.equal(result.timeGross,142.90);assert.equal(result.timeNet,142.50);assert.equal(result.shiftGross,100);assert.equal(result.shiftNet,47.40);assert.equal(result.totalNet,189.88);assert.equal(result.correctedPayout,2847.82);
+ const result=buildPayrollNetBreakdown({forecast:{totalGross:4723.33,components:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100,shiftType:'schicht',unpriced:[],springInVblUnverified:false},netEffects:{complete:true,totalNet:173.19,timeNet:142.55,shiftAfterTimeNet:30.64,shiftStandaloneNet:30.64}},actual:{totalGross:4480.43,legalNet:2827.98,payout:2657.94,hasPriorAdjustment:false},variableRows:[],retro:[]});
+ assert.equal(result.taxFreeNet,142.13);assert.equal(result.taxableGross,100.77);assert.equal(result.taxableNet,31.06);assert.equal(result.timeGross,142.90);assert.equal(result.timeNet,142.55);assert.equal(result.shiftGross,100);assert.equal(result.shiftNet,30.64);assert.equal(result.totalNet,173.19);assert.equal(result.correctedPayout,2831.13);
 });
 
 test('Ist-Abrechnung ist Basis und Schichtzulage wird isoliert gegen diese Basis gerechnet',async()=>{
@@ -179,16 +179,16 @@ test('Ist-Abrechnung ist Basis und Schichtzulage wird isoliert gegen diese Basis
     const hasShift=items.some(item=>item.code==='5212');
     const hasTime=items.some(item=>['5010','5011','5014','5024'].includes(item.code));
     if(!items.length)return {totalGross:4480.43,legalNet:2827.98,vbl:81.10,garnishment:88.94,payout:2657.94,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:0}}};
-    if(hasShift&&!hasTime)return {payout:2686.40,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:100}}};
-    if(hasTime&&!hasShift)return {payout:2800.00,components:{springIn:{total:0},unpriced:[],pay:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:0}}};
-    return {payout:2847.82,components:{springIn:{total:0},unpriced:[],pay:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100}}};
+    if(hasShift&&!hasTime)return {payout:2688.58,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:100}}};
+    if(hasTime&&!hasShift)return {payout:2800.49,components:{springIn:{total:0},unpriced:[],pay:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:0}}};
+    return {payout:2831.13,components:{springIn:{total:0},unpriced:[],pay:{night:98.01,saturday:.77,sunday:44.12,holiday:0,shift:100}}};
   };
   const effects=await calculateActualBasedForecastNetEffects(forecast,actual,undefined,calculator);
   assert.equal(effects?.basis,'actual-payslip');
-  assert.equal(effects.shiftStandaloneNet,28.46);
-  assert.equal(effects.totalNet,189.88);
+  assert.equal(effects.shiftStandaloneNet,30.64);
+  assert.equal(effects.totalNet,173.19);
   assert.equal(effects.actualPayout,2657.94);
-  assert.equal(effects.correctedPayout,2847.82);
+  assert.equal(effects.correctedPayout,2831.13);
 });
 
 test('Legacy-September nutzt Ist-Abrechnung und liefert isolierten Nettoeffekt der 100-Euro-Schichtzulage',async()=>{
@@ -217,16 +217,16 @@ test('Legacy-September nutzt Ist-Abrechnung und liefert isolierten Nettoeffekt d
     const hasSaturday=items.some(item=>item.code==='5014');
     const hasTaxFree=items.some(item=>item.type==='holiday');
     if(!items.length)return {totalGross:4480.43,legalNet:2827.98,vbl:81.10,garnishment:88.94,payout:2657.94,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:0},shift:'none'}};
-    if(hasShift&&!hasSaturday&&!hasTaxFree)return {payout:2686.40,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:100},shift:'schicht'}};
-    if(!hasShift&&(hasSaturday||hasTaxFree))return {payout:2800.00,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:.77,sunday:0,holiday:142.13,shift:0},shift:'none'}};
-    return {payout:2847.82,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:.77,sunday:0,holiday:142.13,shift:100},shift:'schicht'}};
+    if(hasShift&&!hasSaturday&&!hasTaxFree)return {payout:2688.58,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:0,sunday:0,holiday:0,shift:100},shift:'schicht'}};
+    if(!hasShift&&(hasSaturday||hasTaxFree))return {payout:2800.49,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:.77,sunday:0,holiday:142.13,shift:0},shift:'none'}};
+    return {payout:2831.13,components:{springIn:{total:0},unpriced:[],pay:{night:0,saturday:.77,sunday:0,holiday:142.13,shift:100},shift:'schicht'}};
   };
   const effects=await calculateActualBasedForecastNetEffects(forecast,actual,undefined,calculator);
   assert.equal(effects?.basis,'actual-payslip');
   assert.equal(effects.shiftType,'schicht');
   assert.equal(effects.shiftGross,100);
-  assert.equal(effects.shiftStandaloneNet,28.46);
-  assert.equal(effects.totalNet,189.88);
+  assert.equal(effects.shiftStandaloneNet,30.64);
+  assert.equal(effects.totalNet,173.19);
 
   const result=buildPayrollNetBreakdown({
     forecast:{...forecast,actualNetEffects:effects},
@@ -238,10 +238,10 @@ test('Legacy-September nutzt Ist-Abrechnung und liefert isolierten Nettoeffekt d
   assert.equal(result.source,'actual-payslip-summary');
   assert.equal(result.shiftType,'schicht');
   assert.equal(result.shiftGross,100);
-  assert.equal(result.shiftNet,28.46);
+  assert.equal(result.shiftNet,30.64);
   assert.equal(result.taxFreeNet,142.13);
   assert.equal(result.taxableGross,100.77);
-  assert.equal(result.totalNet,189.88);
+  assert.equal(result.totalNet,173.19);
   assert.equal(result.correctedPayout,2847.82);
 });
 
