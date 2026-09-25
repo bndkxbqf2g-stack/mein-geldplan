@@ -40,3 +40,14 @@ test('Backup enthält die Payroll-Lernhistorie',()=>{
   const snap=createBackupSnapshot();
   assert.ok(Array.isArray(snap.payrollLearning));
 });
+
+
+test('Recovery-Backup mit fixedCosts null überschreibt bestehende Fixkosten nicht mit leerer Liste',()=>{
+  const clean=normalizeBackupSnapshot({version:7,transactions:[],cash:71.31,fixedCosts:null});
+  assert.equal(clean.fixedCosts,null);
+});
+
+test('Explizit leere Fixkostenliste bleibt absichtliches Leeren',()=>{
+  const clean=normalizeBackupSnapshot({version:7,transactions:[],cash:0,fixedCosts:[]});
+  assert.deepEqual(clean.fixedCosts,[]);
+});
