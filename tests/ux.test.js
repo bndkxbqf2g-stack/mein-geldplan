@@ -14,12 +14,20 @@ test('update button has an accessible label',()=>{
 });
 
 
-test('header only keeps refresh control and settings contain preferences',()=>{
+test('refresh control is integrated without a separate header bar',()=>{
   const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  const header=html.match(/<header[\s\S]*?<\/header>/)?.[0]||'';
-  assert.match(header,/id="updateBtn"/);
-  assert.doesNotMatch(header,/id="themeBtn"/);
-  assert.doesNotMatch(header,/<h1>/);
+  assert.doesNotMatch(html,/<header[\s>]/);
+  assert.match(html,/class="page-refresh"/);
+  assert.match(html,/id="updateBtn"[^>]*aria-label="Auf neue Version prüfen"/);
   assert.match(html,/id="explanationsToggle"/);
   assert.match(html,/id="themeBtn"/);
+});
+
+
+test('Sparziel-Schnellzugriff öffnet keine Tastatur',()=>{
+  const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(html,/data-quick-target="savingsSection"/);
+  assert.match(html,/id="savingsSection"/);
+  assert.doesNotMatch(html,/data-quick-focus="sSavingPurpose"/);
+  assert.match(html,/button\.dataset\.quickTarget/);
 });
