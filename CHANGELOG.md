@@ -1,3 +1,8 @@
+# v0.99.18
+
+- Erwartete Nachzahlung wird bei alten Datensätzen notfalls direkt aus Soll-Auszahlung minus tatsächlicher Ist-Auszahlung abgeleitet.
+- Dadurch bleibt der Netto-Nachzahlungsblock sichtbar, auch wenn der alte Forecast weder Einzelkomponenten noch baselinePayout gespeichert hat.
+
 # v0.99.17
 
 - Behebt den Renderfehler, durch den die berechnete Netto-Nachzahlung nicht in der Gehaltskontrollkarte erschien.
