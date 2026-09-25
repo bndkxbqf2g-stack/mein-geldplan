@@ -29,3 +29,22 @@ test('offene Rückstände werden netto getrennt',()=>{
   assert.equal(result.totalNet,189.88);
   assert.equal(result.correctedPayout,2847.82);
 });
+
+
+test('allein fehlende Schichtzulage nutzt den Einzel-Nettoeffekt',()=>{
+  const result=buildPayrollNetBreakdown({
+    forecast:{components:{unpriced:[],springInVblUnverified:false},netEffects:{complete:true,shiftStandaloneNet:47.40}},
+    actual:{payout:2657.94,hasPriorAdjustment:false},
+    variableRows:[
+      {key:'night',expected:98.01,open:0,tax:'steuerfrei'},
+      {key:'saturday',expected:.77,open:0,tax:'steuerpflichtig'},
+      {key:'sunday',expected:44.12,open:0,tax:'steuerfrei'},
+      {key:'shift',expected:100,open:100,tax:'steuerpflichtig'}
+    ],
+    retro:[]
+  });
+  assert.equal(result.taxableGross,100);
+  assert.equal(result.taxableNet,47.40);
+  assert.equal(result.shiftNet,47.40);
+  assert.equal(result.correctedPayout,2705.34);
+});
