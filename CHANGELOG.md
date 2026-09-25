@@ -1,3 +1,10 @@
+# v0.99.10
+
+- Regressionen aus dem neuen Gehaltskontrolltool behoben.
+- Prognosemonate ohne vorhandene Bezügemitteilung führen nicht mehr zum Absturz.
+- Aggregierte Rückrechnungen gleichen auch kleine Einzelpositionen korrekt aus.
+- CI ist jetzt dauerhaft aktiv und prüft JavaScript-Syntax sowie die vollständige Node-Test-Suite nach jedem Push und Pull Request.
+
 # v0.99.9
 
 - Hotfix: Gehalts-/Kontrollmodule können den Start der Budget-App nicht mehr blockieren.
