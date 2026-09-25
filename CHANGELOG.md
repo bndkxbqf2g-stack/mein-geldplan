@@ -1,3 +1,12 @@
+# v0.99.48
+
+- Alte gespeicherte Gehaltsprognosen werden bei vorhandenem Zeitnachweis einmalig mit den aktuellen Rechenregeln neu aufgebaut. Dadurch bleibt z. B. ein alter September-Wert wie 2.847,50 € nicht mehr in Übersicht und Soll-/Ist-Karte stehen, wenn die aktuelle Berechnung 2.831,13 € ergibt.
+- Der Neuaufbau aktualisiert gleichzeitig Baseline, Nettoeffekte und gespeicherte Einzelkomponenten; die anschließende Bezügemitteilungsprüfung berechnet daraus den aktuellen offenen Nettoanspruch neu.
+- Die Übersicht „Erwartete Löhne“ liest damit denselben aktuellen gespeicherten Prognosewert wie der Gehaltsbereich.
+- Wiederholte identische §21-Prüfpositionen werden in der Gehaltskontrolle zu einer Zeile mit aufsummierter Menge zusammengefasst.
+- Fixkostenansicht neu gestaltet: kompakte Zusammenfassung für monatliche Fixkosten, nächsten Lohntag und nächsten Zyklus; modernere Einzelkarten; einmalige Pausen/Reduzierungen einklappbar; optimierte iPhone-Darstellung.
+- Regressionstests sichern die Migration einer alten September-Prognose auf 2.831,13 €, die Übersichtsanzeige, die §21-Zusammenfassung und die neue Fixkostenstruktur.
+
 # v0.99.47
 
 - Fehlende bzw. nicht auslesbare Einzelkomponenten einer Bezügemitteilung werden im Payroll-Learning nicht mehr still als 0,00 € interpretiert.
