@@ -77,13 +77,13 @@ input,select{background:var(--card);border-color:var(--line);color:var(--text)}i
 @media(max-width:650px){nav{top:85px}.privacy-badge{display:none}.headline{gap:8px}.header-actions{flex-shrink:0}h1{font-size:26px}.sub{font-size:12px}section{border-radius:24px;padding:18px}.hero{border-radius:28px}}
 
 
-/* v0.99.35 UX polish */
+/* v0.99.36 UX polish */
 button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:none!important;box-shadow:none!important}
 .app-notice{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translate(-50%,18px);z-index:50;max-width:min(92vw,560px);padding:11px 14px;border-radius:14px;background:rgba(15,23,42,.94);color:#fff;box-shadow:0 16px 40px rgba(15,23,42,.28);font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease}.app-notice.show{opacity:1;transform:translate(-50%,0)}.app-notice.error{background:rgba(153,27,27,.96)}.app-notice.success{background:rgba(22,101,52,.96)}
 .empty{border:1px dashed var(--line);border-radius:14px;background:var(--soft);margin-top:8px}.note[role="status"]{min-height:18px}
 @media(max-width:650px){main{padding-bottom:calc(72px + env(safe-area-inset-bottom))}nav{padding-left:12px;padding-right:12px}.primary{min-height:48px}.saving-action{min-height:38px}.update-button{min-width:38px;min-height:38px}}
 
-/* v0.99.35 mobile salary + simplified savings */
+/* v0.99.36 mobile salary + simplified savings */
 .saving-history-title{font-size:14px;margin:18px 0 8px;color:var(--muted)}
 .saving-history-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
 .saving-history-row:last-child{border-bottom:0}.saving-history-info{min-width:0;display:flex;flex-direction:column;gap:3px}.saving-history-info span{font-size:11px;color:var(--muted)}.saving-history-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.saving-history-actions strong{white-space:nowrap}
@@ -249,7 +249,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 <section><h2>Darstellung</h2>
 <div class="setting-row"><div><strong>Erklärungen anzeigen</strong><div class="setting-help">Blendet die erklärenden Hinweise unter den Kacheln ein oder aus.</div></div><label class="switch" aria-label="Erklärungen anzeigen"><input id="explanationsToggle" type="checkbox"><span class="switch-slider"></span></label></div>
 <div class="setting-row"><div><strong>Darstellung</strong><div class="setting-help">System, Hell oder Dunkel.</div></div><button class="update-button theme-button settings-theme-button" id="themeBtn" type="button" title="Darstellung: System" aria-label="Darstellung: System">◐</button></div>
-<div class="row"><span>App-Version</span><span class="v" id="appVersion">v0.99.35</span></div>
+<div class="row"><span>App-Version</span><span class="v" id="appVersion">v0.99.36</span></div>
 </section>
 <section><h2>Daten sichern</h2><p class="note">Sichere alle lokalen Daten inklusive Kontobewegungen, Bargeld, Fixkosten, Gehaltsprognosen, Bezügemitteilungen und Payroll-Lernhistorie als Datei.</p><div class="note payroll-alert"><b>Wichtig bei iPhone/PWA:</b> Vor dem Löschen oder Neuerstellen der Home-Bildschirm-App immer zuerst eine Sicherung erstellen. Die Daten liegen lokal in dieser Browser-/App-Instanz und können beim Entfernen verloren gehen.</div><button class="primary" id="exportBtn">Daten sichern</button><div style="margin-top:12px"><label>Gespeicherte Daten wiederherstellen</label><input id="importFile" type="file" accept="application/json,.json"></div><button class="primary secondary" style="margin-top:8px" id="importBtn">Daten wiederherstellen</button><div class="note" id="backupStatus">Die Sicherung bleibt auf deinem Gerät bzw. dort, wo du die Datei speicherst.</div></section>
 <section><h2>Testmodus</h2><p class="note">Damit andere die App mit eigenen Werten testen können, lassen sich alle gespeicherten Eingaben und Buchungen hier zurücksetzen.</p><button class="primary danger" id="resetBtn" style="margin-top:12px">Alle Eingaben & Buchungen löschen</button></section>
@@ -257,7 +257,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 
 <p class="note" style="text-align:center;margin:22px 8px 0">Alle Berechnungen laufen lokal im Browser. Die App speichert keine Kontodaten online.</p>
 </main>
-<script type="module" src="app.js?v=0.99.35"></script>
+<script type="module" src="app.js?v=0.99.36"></script>
 <script>document.querySelectorAll('[data-quick-tab]').forEach(button=>button.addEventListener('click',()=>{document.querySelector(`nav [data-tab="${button.dataset.quickTab}"]`)?.click();requestAnimationFrame(()=>{if(button.dataset.quickTarget){document.getElementById(button.dataset.quickTarget)?.scrollIntoView({behavior:'smooth',block:'start'});return;}if(button.dataset.quickFocus){const field=document.getElementById(button.dataset.quickFocus);field?.scrollIntoView({behavior:'smooth',block:'center'});field?.focus({preventScroll:true});}})}));</script>
 
 </body></html>
