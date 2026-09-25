@@ -84,3 +84,13 @@ test('alte Prognose zeigt wenigstens gespeicherten Netto-Nachzahlungsbetrag',()=
   assert.equal(result.correctedPayout,2815.82);
   assert.equal(result.source,'legacy-total');
 });
+
+
+test('sichtbarer Fallback aus Soll- und Ist-Auszahlung bei alten September-Daten',()=>{
+  const expectedPayout=2815.82,actualPayout=2657.94;
+  const fallback=Math.round((expectedPayout-actualPayout)*100)/100;
+  const result=buildPayrollNetBreakdown({forecast:{components:{}},actual:{payout:actualPayout,totalGross:4480.43,legalNet:2827.98},variableRows:[],estimatedNetImpact:fallback});
+  assert.equal(result.totalNet,157.88);
+  assert.equal(result.correctedPayout,2815.82);
+  assert.equal(result.source,'legacy-total');
+});
