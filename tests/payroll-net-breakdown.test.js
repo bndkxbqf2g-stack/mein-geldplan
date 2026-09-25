@@ -76,3 +76,11 @@ test('tatsächliche Abrechnung wird als Basis der Nachzahlung markiert',()=>{
   assert.equal(result.actualTaxableBase,4480.43);
   assert.equal(result.correctedPayout,2847.82);
 });
+
+
+test('alte Prognose zeigt wenigstens gespeicherten Netto-Nachzahlungsbetrag',()=>{
+  const result=buildPayrollNetBreakdown({forecast:{components:{}},actual:{payout:2657.94,totalGross:4480.43,legalNet:2827.98},variableRows:[],estimatedNetImpact:157.88});
+  assert.equal(result.totalNet,157.88);
+  assert.equal(result.correctedPayout,2815.82);
+  assert.equal(result.source,'legacy-total');
+});
