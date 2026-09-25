@@ -1,3 +1,13 @@
+# v0.99.32
+
+- September und der Übertrag in Oktober verwenden jetzt ausschließlich die pfändungsbereinigte Netto-Nachzahlung von 173,19 € statt veralteter 189,88 €.
+- Gespeicherte Nettoeffekte vor Berechnungsstand 5 werden bei vorhandener echter Bezügemitteilung nicht mehr angezeigt; die App baut sie automatisch neu auf.
+- Oktober addiert offene Nachzahlungen nur zur möglichen Auszahlung, nicht zum regulären Monats-Soll.
+- Monatskacheln wurden gestrafft: ausstehende Monate zeigen nur Soll-Brutto und reguläre Auszahlung, erledigte Monate keine unnötigen Einzelzeilen, offene/auffällige Monate nur relevante Details.
+- Nachzahlungsdarstellung zeigt kompakt steuerfrei, steuerpflichtig, Gesamt, zusätzliche Abzüge, Pfändungsänderung, Schichtzulage und korrigierte Auszahlung.
+- Teilrückrechnungen ohne sicher berechenbaren Rest-Nettoeffekt werden nicht als geratenes Netto in Folgemonate übertragen.
+- Tests decken Waiting/OK/Open/Partial/Review, September→Oktober-Übertrag, Mehrfachüberträge und Schutz vor alten 189,88-€-Werten ab.
+
 # v0.99.31
 
 - September-Nachberechnung berücksichtigt jetzt ausdrücklich das höhere pfändbare Netto des korrigierten Monats und berechnet die Pfändung neu.
