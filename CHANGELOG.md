@@ -1,3 +1,13 @@
+# v0.99.3
+
+- Bekannten Auszahlungsbetrag aus der Lohnabrechnung vor dem Lohntag vormerken.
+- Vormerkung beeinflusst Giro, Tagesbudget und Wochenbudget vor dem Auszahlungstag nicht.
+- Automatische Buchung ab 00:00 Uhr am letzten Arbeitstag des Monats; bei geschlossener App rückwirkend beim nächsten Öffnen mit korrektem Buchungsdatum.
+- Fixkosten werden beim automatischen Lohnstart genau einmal abgezogen.
+- Vormerkung kann bis zum Auszahlungstag geändert oder gelöscht werden.
+- Übersicht zeigt den vorgemerkten Betrag und eine klar gekennzeichnete Vorschau für den Auszahlungstag.
+- Doppelbuchungsschutz über eindeutige Vormerkungs-ID.
+
 # v0.99.2
 
 - Persönliche Fixkosten aktualisiert.
