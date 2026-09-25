@@ -1,3 +1,14 @@
+# v0.99.8
+
+- Neues Gehaltskontrolltool: Zeitnachweis-Soll gegen tatsächliche Bezügemitteilung.
+- Feste Bezüge, Zeit-/Wochenendzuschläge und Schicht-/Wechselschichtzulage werden komponentenweise geprüft.
+- Fehlende variable Bezüge werden bei stimmigen festen Bezügen rechnerisch als offener Anspruch ausgewiesen.
+- Rückrechnungs-Perioden aus späteren Bezügemitteilungen werden dem ursprünglichen Abrechnungsmonat zugeordnet.
+- Offene Bruttodifferenzen werden durch spätere Rückrechnungen reduziert bzw. als erledigt markiert.
+- Bei eindeutig zuordenbarer einzelner Rückrechnung wird auch deren tatsächlicher Nettoeffekt angezeigt; davor zeigt die App den prognostizierten Nettoeffekt.
+- Budgetlogik bleibt vollständig getrennt und unverändert.
+- Steuerlogik bleibt: Nacht/Sonntag steuerfrei, Samstag sowie Schicht-/Wechselschichtzulage steuerpflichtig.
+
 # v0.99.7
 
 - Einzelne Fixkosten können für genau den nächsten Lohnzyklus einmalig pausiert oder reduziert werden.
