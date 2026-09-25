@@ -76,13 +76,13 @@ input,select{background:var(--card);border-color:var(--line);color:var(--text)}i
 @media(max-width:650px){nav{top:85px}.privacy-badge{display:none}.headline{gap:8px}.header-actions{flex-shrink:0}h1{font-size:26px}.sub{font-size:12px}section{border-radius:24px;padding:18px}.hero{border-radius:28px}}
 
 
-/* v0.99.5 UX polish */
+/* v0.99.6 UX polish */
 button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:none!important;box-shadow:none!important}
 .app-notice{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translate(-50%,18px);z-index:50;max-width:min(92vw,560px);padding:11px 14px;border-radius:14px;background:rgba(15,23,42,.94);color:#fff;box-shadow:0 16px 40px rgba(15,23,42,.28);font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease}.app-notice.show{opacity:1;transform:translate(-50%,0)}.app-notice.error{background:rgba(153,27,27,.96)}.app-notice.success{background:rgba(22,101,52,.96)}
 .empty{border:1px dashed var(--line);border-radius:14px;background:var(--soft);margin-top:8px}.note[role="status"]{min-height:18px}
 @media(max-width:650px){main{padding-bottom:calc(72px + env(safe-area-inset-bottom))}nav{padding-left:12px;padding-right:12px}.primary{min-height:48px}.saving-action{min-height:38px}.update-button{min-width:38px;min-height:38px}}
 
-/* v0.99.5 mobile salary + simplified savings */
+/* v0.99.6 mobile salary + simplified savings */
 .saving-history-title{font-size:14px;margin:18px 0 8px;color:var(--muted)}
 .saving-history-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
 .saving-history-row:last-child{border-bottom:0}.saving-history-info{min-width:0;display:flex;flex-direction:column;gap:3px}.saving-history-info span{font-size:11px;color:var(--muted)}.saving-history-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.saving-history-actions strong{white-space:nowrap}
@@ -92,10 +92,13 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 @media(max-width:650px){nav{-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}nav button{scroll-snap-align:start;flex:0 0 auto}#prognose .row{align-items:flex-start}#prognose .row .v{max-width:58%;font-size:14px}.comparison-row{grid-template-columns:1fr}.comparison-values{text-align:left}.forecast-head{align-items:flex-start}.forecast-amount{font-size:19px}.saving-history-row{align-items:flex-start}.saving-history-actions{max-width:46%}}
 @media(max-width:430px){#prognose .row{display:grid;grid-template-columns:1fr;gap:5px}#prognose .row .v{max-width:none;text-align:left}.forecast-chart-row{grid-template-columns:58px minmax(0,1fr);}.forecast-chart-value{grid-column:2;text-align:right;margin-top:-3px}.saving-history-row{display:grid;grid-template-columns:1fr}.saving-history-actions{max-width:none;justify-content:space-between}}
 </style>
-<link rel="stylesheet" href="design-refresh.css?v=4">
+<link rel="stylesheet" href="design-refresh.css?v=5">
 </head>
 <body>
-<header class="refresh-header"><div class="headline refresh-only"><div class="header-actions"><button class="update-button" id="updateBtn" type="button" title="Auf neue Version prüfen" aria-label="Auf neue Version prüfen">↻</button></div></div><div class="note" id="updateStatus" style="display:none;text-align:right;max-width:980px;margin:4px auto 0"></div></header>
+<div class="page-refresh" aria-label="Seitenaktionen">
+  <button class="update-button" id="updateBtn" type="button" title="Auf neue Version prüfen" aria-label="Auf neue Version prüfen">↻</button>
+  <div class="update-status-float" id="updateStatus" style="display:none"></div>
+</div>
 <div id="appNotice" class="app-notice" role="status" aria-live="polite" aria-atomic="true"></div>
 <nav>
   <button class="tab active" data-tab="uebersicht">Übersicht</button>
@@ -117,7 +120,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
     <div class="subcard"><div class="hero-muted">Bargeld</div><div class="metric" id="ovCash">–</div></div>
   </div>
 </section>
-<div class="quick-access" aria-label="Schnellzugriff"><h2>Schnellzugriff</h2><div class="quick-grid"><button type="button" data-quick-tab="budget" data-quick-focus="giroExpense"><span aria-hidden="true">↗</span>Ausgabe erfassen</button><button type="button" data-quick-tab="budget"><span aria-hidden="true">◕</span>Budget prüfen</button><button type="button" data-quick-tab="budget" data-quick-focus="sSavingPurpose"><span aria-hidden="true">◎</span>Sparziel ansehen</button></div></div>
+<div class="quick-access" aria-label="Schnellzugriff"><h2>Schnellzugriff</h2><div class="quick-grid"><button type="button" data-quick-tab="budget" data-quick-focus="giroExpense"><span aria-hidden="true">↗</span>Ausgabe erfassen</button><button type="button" data-quick-tab="budget"><span aria-hidden="true">◕</span>Budget prüfen</button><button type="button" data-quick-tab="budget" data-quick-target="savingsSection"><span aria-hidden="true">◎</span>Sparziel ansehen</button></div></div>
 <section id="ovPendingSalaryCard" class="hidden">
   <h2>Nächster Lohn vorgemerkt</h2>
   <div class="row"><span>Auszahlungsbetrag</span><span class="v good" id="ovPendingAmount">–</span></div>
@@ -180,7 +183,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 <div class="note" id="withdrawalHint">Du entscheidest selbst, wie viel du abhebst.</div>
 </section>
 
-<section>
+<section id="savingsSection">
 <h2>Sparen</h2>
 <div class="row"><span>Aktuell reserviert</span><span class="v good" id="mainSaved">–</span></div>
 <div class="grid" style="margin-top:12px">
@@ -240,7 +243,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 <section><h2>Darstellung</h2>
 <div class="setting-row"><div><strong>Erklärungen anzeigen</strong><div class="setting-help">Blendet die erklärenden Hinweise unter den Kacheln ein oder aus.</div></div><label class="switch" aria-label="Erklärungen anzeigen"><input id="explanationsToggle" type="checkbox"><span class="switch-slider"></span></label></div>
 <div class="setting-row"><div><strong>Darstellung</strong><div class="setting-help">System, Hell oder Dunkel.</div></div><button class="update-button theme-button settings-theme-button" id="themeBtn" type="button" title="Darstellung: System" aria-label="Darstellung: System">◐</button></div>
-<div class="row"><span>App-Version</span><span class="v" id="appVersion">v0.99.5</span></div>
+<div class="row"><span>App-Version</span><span class="v" id="appVersion">v0.99.6</span></div>
 </section>
 <section><h2>Daten sichern</h2><p class="note">Sichere alle lokalen Daten inklusive Kontobewegungen, Bargeld, Fixkosten und eingelesener Zeitnachweise als Datei.</p><button class="primary" id="exportBtn">Daten sichern</button><div style="margin-top:12px"><label>Gespeicherte Daten wiederherstellen</label><input id="importFile" type="file" accept="application/json,.json"></div><button class="primary secondary" style="margin-top:8px" id="importBtn">Daten wiederherstellen</button><div class="note" id="backupStatus">Die Sicherung bleibt auf deinem Gerät bzw. dort, wo du die Datei speicherst.</div></section>
 <section><h2>Testmodus</h2><p class="note">Damit andere die App mit eigenen Werten testen können, lassen sich alle gespeicherten Eingaben und Buchungen hier zurücksetzen.</p><button class="primary danger" id="resetBtn" style="margin-top:12px">Alle Eingaben & Buchungen löschen</button></section>
@@ -248,7 +251,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 
 <p class="note" style="text-align:center;margin:22px 8px 0">Alle Berechnungen laufen lokal im Browser. Die App speichert keine Kontodaten online.</p>
 </main>
-<script type="module" src="app.js?v=0.99.5"></script>
-<script>document.querySelectorAll('[data-quick-tab]').forEach(button=>button.addEventListener('click',()=>{document.querySelector(`nav [data-tab="${button.dataset.quickTab}"]`)?.click();if(button.dataset.quickFocus){const field=document.getElementById(button.dataset.quickFocus);field?.scrollIntoView({behavior:'smooth',block:'center'});field?.focus({preventScroll:true})}}));</script>
+<script type="module" src="app.js?v=0.99.6"></script>
+<script>document.querySelectorAll('[data-quick-tab]').forEach(button=>button.addEventListener('click',()=>{document.querySelector(`nav [data-tab="${button.dataset.quickTab}"]`)?.click();requestAnimationFrame(()=>{if(button.dataset.quickTarget){document.getElementById(button.dataset.quickTarget)?.scrollIntoView({behavior:'smooth',block:'start'});return;}if(button.dataset.quickFocus){const field=document.getElementById(button.dataset.quickFocus);field?.scrollIntoView({behavior:'smooth',block:'center'});field?.focus({preventScroll:true});}})}));</script>
 
 </body></html>
