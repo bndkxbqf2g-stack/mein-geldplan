@@ -1,3 +1,9 @@
+# v0.99.21
+
+- Alte Gehaltsprognosen können die steuerfreie und steuerpflichtige Nachzahlung jetzt aus gespeicherten Brutto-, Netto- und Pfändungswerten rekonstruieren.
+- Bei vollständig fehlenden variablen Bezügen wird ein steuerfreier Anteil nicht mehr fälschlich als 0,00 € angezeigt.
+- Die Netto-Nachzahlung bleibt auf die tatsächlich eingelesene Auszahlung bezogen; einzelne Lohnarten benötigen nur dann einen erneuten Zeitnachweis, wenn deren Detailaufteilung angezeigt werden soll.
+
 # v0.99.20
 
 - Neu eingelesene Zeitnachweise speichern die erkannten Lohnarten-Codes dauerhaft im Forecast.
