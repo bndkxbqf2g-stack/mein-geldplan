@@ -109,7 +109,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 <main>
 <!-- ÜBERSICHT -->
 <div id="uebersicht" class="view">
-<div class="page-intro"><div class="intro-kicker">MEIN GELDPLAN <span class="intro-dot">✦</span></div><h2>Dein Geld. Dein Überblick.</h2><p>Alles Wichtige für deinen finanziellen Alltag auf einen Blick.</p></div>
+<div class="page-intro"><h2>Guten Morgen, Martin! 👋</h2><p>Hier ist dein aktueller Finanzüberblick.</p></div>
 <section class="hero">
   <div class="hero-grid">
     <div class="subcard wide"><div class="hero-muted" id="ovAvailableLabel">Verfügbar bis zum nächsten Lohn</div><div class="big" id="ovAvailable">–</div><div class="hero-muted" id="ovNextPay">–</div><div class="hero-muted">Dein Tagessatz wird unten angezeigt.</div></div>
@@ -117,6 +117,7 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
     <div class="subcard"><div class="hero-muted">Bargeld</div><div class="metric" id="ovCash">–</div></div>
   </div>
 </section>
+<div class="quick-access" aria-label="Schnellzugriff"><h2>Schnellzugriff</h2><div class="quick-grid"><button type="button" data-quick-tab="budget" data-quick-focus="giroExpense"><span aria-hidden="true">↗</span>Ausgabe erfassen</button><button type="button" data-quick-tab="budget"><span aria-hidden="true">◕</span>Budget prüfen</button><button type="button" data-quick-tab="budget" data-quick-focus="sSavingPurpose"><span aria-hidden="true">◎</span>Sparziel ansehen</button></div></div>
 <section>
   <h2>Dein aktueller Plan</h2>
   <div class="kpi-grid">
@@ -245,5 +246,6 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
 <p class="note" style="text-align:center;margin:22px 8px 0">Alle Berechnungen laufen lokal im Browser. Die App speichert keine Kontodaten online.</p>
 </main>
 <script type="module" src="app.js?v=0.99.2"></script>
+<script>document.querySelectorAll('[data-quick-tab]').forEach(button=>button.addEventListener('click',()=>{document.querySelector(`nav [data-tab="${button.dataset.quickTab}"]`)?.click();if(button.dataset.quickFocus){const field=document.getElementById(button.dataset.quickFocus);field?.scrollIntoView({behavior:'smooth',block:'center'});field?.focus({preventScroll:true})}}));</script>
 
 </body></html>
