@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildBmfInputs,socialContributions,reportComponents,garnishment2026,springInHourlyRate,springInPay} from '../lib/salary.js';
+import {buildBmfInputs,socialContributions,reportComponents,garnishment2026,springInHourlyRate,springInPay,vblSvAddon,vblEmployeeContribution,calculateSalaryForecastCore} from '../lib/salary.js';
 import {SALARY_2026} from '../config/salary-2026.js';
 
 test('BMF-Profil entspricht der Bezügemitteilung',()=>{
@@ -16,9 +16,11 @@ test('Zeitlohnarten werden getrennt berechnet',()=>{
 test('Pfändungstabelle 2026 für zwei Unterhaltspflichten',()=>{
   assert.equal(garnishment2026(2805,2),112.94);assert.equal(garnishment2026(2525,2),.94);assert.equal(garnishment2026(2400,2),0);
 });
-test('Referenzwerte VBL und SV-Hinzubetrag sind kalibriert',()=>{
-  assert.equal(Math.round(4480.43*SALARY_2026.social.vblEmployeeRate*100)/100,81.10);
-  assert.equal(Math.round(4480.43*SALARY_2026.social.zvSvAddonRate*100)/100,178.22);
+test('VBL 2026 wird nach Arbeitgeberumlage, 100-Euro-Grenze und 13,30-Euro-Freibetrag berechnet',()=>{
+  assert.equal(vblEmployeeContribution(4480.43),81.10);
+  assert.equal(vblSvAddon(4480.43),178.22);
+  assert.equal(vblSvAddon(4581.20),183.75);
+  assert.equal(vblSvAddon(4730.43),191.94);
 });
 
 test("Wechselschicht wird durch Code 5211 auch ohne Stundenwert berücksichtigt", () => {
@@ -32,8 +34,6 @@ test("Schichtzulage wird durch Code 5212 auch ohne Stundenwert berücksichtigt",
   assert.equal(c.pay.shift,100);
   assert.equal(c.shift,'schicht');
 });
-
-import {calculateSalaryForecastCore} from '../lib/salary.js';
 
 test('reiner Festbezug reproduziert die echte 2026-Kernabrechnung',()=>{
   const f=calculateSalaryForecastCore({items:[]},{wageTax:662.58,solidarity:0,churchTax:32.99,churchBase:0});
@@ -57,5 +57,22 @@ test('Einspringen wird einmalig als steuerpflichtiger Zusatzlohn ergänzt',()=>{
   assert.equal(c.pay.springIn,344.43);
   assert.equal(c.taxableExtra,344.43);
   assert.equal(c.taxFreePay,9.16);
+  assert.equal(c.needsReview,true);
+});
+
+
+test('Einspringprämie bleibt bis VBL-Nachweis außerhalb der VBL-Basis',()=>{
+  const f=calculateSalaryForecastCore({items:[],springIn:{duties:1,hours:7.7}},{wageTax:700,solidarity:0,churchTax:35,churchBase:0});
+  assert.equal(f.components.springInVblUnverified,true);
+  assert.equal(f.vblGross,4480.43);
+  assert.equal(f.vbl,81.10);
+  assert.equal(f.svAddon,178.22);
+  assert.equal(f.needsReview,true);
+});
+
+test('§21-Durchschnitt wird sichtbar als nicht automatisch berechenbar geführt',()=>{
+  const c=reportComponents({items:[{code:'5161',hours:2}]});
+  assert.equal(c.average21Days,2);
+  assert.equal(c.unpriced.length,1);
   assert.equal(c.needsReview,true);
 });
