@@ -7,7 +7,7 @@ const root=path.join(path.dirname(fileURLToPath(import.meta.url)),'..');
 const allJs=['app.js',...fs.readdirSync(path.join(root,'lib')).filter(x=>x.endsWith('.js')).map(x=>`lib/${x}`)].map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n');
 
 test('sichtbare Aktionsbuttons sind im JavaScript verdrahtet',()=>{
-  ['incomeBtn','expenseBtn','correctionBtn','withdrawBtn','savingRateBtn','pendingSalaryBtn','pendingSalaryDeleteBtn','addFixBtn','timeReportBtn','payslipBtn','exportBtn','importBtn','updateBtn','resetBtn'].forEach(id=>assert.match(allJs,new RegExp(id),id));
+  ['incomeBtn','expenseBtn','correctionBtn','withdrawBtn','savingRateBtn','pendingSalaryBtn','pendingSalaryDeleteBtn','addFixBtn','addFixMobileBtn','timeReportBtn','payslipBtn','exportBtn','importBtn','updateBtn','resetBtn'].forEach(id=>assert.match(allJs,new RegExp(id),id));
 });
 
 test('PWA Service Worker wird wieder registriert',()=>assert.match(allJs,/serviceWorker\.register/));
@@ -54,4 +54,17 @@ test('Gehaltsprognose verbindet Zeitnachweis und echte Bezügemitteilung ohne Ei
   assert.match(html,/id="payslipBtn"/);
   assert.match(html,/id="payrollControlList"/);
   assert.doesNotMatch(html,/id="springInBtn"/);
+});
+
+
+test('Fixkostenansicht nutzt die kompakte Kartenstruktur und mobile Hinzufügen-Aktion',()=>{
+  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const fixedUi=fs.readFileSync(path.join(root,'lib/fixed-costs-ui.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'design-refresh.css'),'utf8');
+  assert.match(html,/class="fix-next-summary"/);
+  assert.match(html,/id="fixNextHint"/);
+  assert.match(html,/id="addFixMobileBtn"/);
+  assert.match(fixedUi,/document\.createElement\('details'\)/);
+  assert.match(fixedUi,/Nächsten Lohn anpassen/);
+  assert.match(css,/v0\.99\.48 — compact modern fixed-costs/);
 });
