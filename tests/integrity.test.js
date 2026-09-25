@@ -42,3 +42,11 @@ test('Fixkosten-Ausnahmen sind an den nächsten Lohntag gebunden und werden nach
   assert.match(fixedUi,/Reduzieren/);
   assert.match(budgetUi,/removeFixedCostOverridesForPayout/);
 });
+
+
+test('Gehaltsimporte dürfen Speicherfehler nicht still verschlucken',()=>{
+  const source=fs.readFileSync(path.join(root,'lib/salary-ui.js'),'utf8');
+  assert.match(source,/Gehaltsprognose konnte nicht dauerhaft gespeichert werden/);
+  assert.match(source,/Bezügemitteilung konnte nicht dauerhaft gespeichert werden/);
+  assert.match(source,/Payroll-Lernhistorie konnte nicht dauerhaft gespeichert werden/);
+});
