@@ -8,6 +8,7 @@ import {createMaintenanceUi} from './lib/maintenance-ui.js';
 import {initSalaryUi} from './lib/salary-ui.js';
 import {$,initTabs,notify} from './lib/ui.js';
 import {initTheme} from './lib/theme-ui.js';
+import {initPreferences} from './lib/preferences-ui.js';
 
 let budgetUi,savingsUi,fixedCostsUi,historyUi;
 const refresh=()=>{budgetUi.render();savingsUi.render();fixedCostsUi.render();historyUi.render();};
@@ -21,6 +22,7 @@ function init(){
   if(migration.error){console.warn('[storage] Datenmigration konnte nicht vollständig ausgeführt werden.');setTimeout(()=>notify('Einige ältere Daten konnten nicht vollständig übernommen werden.',{type:'error',timeout:5000}),150);}
   if($('appVersion'))$('appVersion').textContent=`v${APP_VERSION}`;
   initTheme();
+  initPreferences();
   budgetUi=createBudgetUi({refresh});
   savingsUi=createSavingsUi({budgetUi,refresh});
   fixedCostsUi=createFixedCostsUi({refresh});
