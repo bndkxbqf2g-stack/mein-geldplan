@@ -36,5 +36,11 @@ test('September-Rückstand berechnet Nettoeffekte mit echter Kernlogik',()=>{
   assert.equal(full.totalGross,4723.33);
   assert.equal(full.vblGross,4581.20);
   assert.equal(full.vbl,82.92);
-  assert.ok(full.payout>baseline.payout);
+  assert.equal(baseline.garnishableNet,2746.88);
+  assert.equal(full.garnishableNet,2801.94);
+  assert.equal(baseline.garnishment,88.94);
+  assert.equal(full.garnishment,112.94);
+  assert.equal(Math.round((full.garnishment-baseline.garnishment)*100)/100,24);
+  assert.equal(full.payout,2831.13);
+  assert.equal(Math.round((full.payout-baseline.payout)*100)/100,173.19);
 });
