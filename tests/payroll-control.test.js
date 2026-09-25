@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildPayrollControl,buildPayrollControlHistory} from '../lib/payroll-control.js';
+import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers} from '../lib/payroll-control.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -107,4 +107,40 @@ test('5211/5212 aus gespeichertem Zeitnachweis bestimmt Zulagenart',()=>{
   });
   assert.equal(wechsel.variableRows.find(row=>row.key==='shift').label,'Wechselschichtzulage');
   assert.equal(schicht.variableRows.find(row=>row.key==='shift').label,'Schichtzulage');
+});
+
+test('offene September-Nachzahlung wird dem nächsten ausstehenden Monat Oktober zugeordnet',()=>{
+  const controls=[
+    {payoutMonth:'2026-10',label:'Oktober 2026',status:'waiting',remainingGross:null},
+    {payoutMonth:'2026-09',label:'September 2026',status:'open',remainingGross:242.90}
+  ];
+  const carry=buildPayrollCarryovers({controls,netByMonth:{'2026-09':189.88}});
+  assert.deepEqual(carry,{
+    '2026-10':[{
+      sourceMonth:'2026-09',
+      sourceLabel:'September 2026',
+      net:189.88,
+      gross:242.90
+    }]
+  });
+  assert.equal(Math.round((2773.72+carry['2026-10'][0].net)*100)/100,2963.60);
+});
+
+test('erledigte Nachzahlung wird nicht mehr in einen Folgemonat übertragen',()=>{
+  const controls=[
+    {payoutMonth:'2026-10',label:'Oktober 2026',status:'waiting',remainingGross:null},
+    {payoutMonth:'2026-09',label:'September 2026',status:'settled',remainingGross:0}
+  ];
+  assert.deepEqual(buildPayrollCarryovers({controls,netByMonth:{'2026-09':189.88}}),{});
+});
+
+test('offener Anspruch wandert zum nächsten noch nicht abgerechneten Monat',()=>{
+  const controls=[
+    {payoutMonth:'2026-11',label:'November 2026',status:'waiting',remainingGross:null},
+    {payoutMonth:'2026-10',label:'Oktober 2026',status:'ok',remainingGross:0},
+    {payoutMonth:'2026-09',label:'September 2026',status:'open',remainingGross:242.90}
+  ];
+  const carry=buildPayrollCarryovers({controls,netByMonth:{'2026-09':189.88}});
+  assert.equal(carry['2026-11'][0].sourceMonth,'2026-09');
+  assert.equal(carry['2026-10'],undefined);
 });
