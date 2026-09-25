@@ -1,3 +1,10 @@
+# v0.99.40
+
+- Cloud-Anmeldung fordert Supabase jetzt mit der produktiven GitHub-Pages-URL als Redirect an, statt den Projektstandard localhost:3000 zu verwenden.
+- Magic-Link-Rückleitungen können die Supabase-Sitzung direkt aus dem URL-Fragment übernehmen und die Cloud-Anmeldung in der App abschließen.
+- Regressionstests sichern Produktions-Redirect und Magic-Link-Callback ab.
+- Für Supabase Auth muss die produktive GitHub-Pages-URL zusätzlich in der Redirect-Allowlist des Projekts eingetragen sein.
+
 # v0.99.39
 
 - Private Cloud-Sicherung über ein eigenes Supabase-Projekt ergänzt.
