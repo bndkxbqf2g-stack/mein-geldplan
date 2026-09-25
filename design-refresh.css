@@ -141,3 +141,22 @@ nav{top:57px}
  .refresh-only{min-height:36px}
  .refresh-header .update-button{width:36px;height:36px}
 }
+
+
+/* v0.99.5 overview salary forecast */
+.expected-salary-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:15px 2px;border-bottom:1px solid var(--line)}
+.expected-salary-row:last-child{border-bottom:0}
+.expected-salary-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.expected-salary-info strong{font-size:15px;color:var(--text);text-transform:capitalize}
+.expected-salary-info span{font-size:12px;color:var(--muted)}
+.expected-salary-value{font-size:20px;font-weight:850;white-space:nowrap}
+.expected-salary-value.outstanding{font-size:14px;color:var(--muted);font-weight:750}
+@media(min-width:750px){
+ #uebersicht .quick-access{grid-column:1/-1}
+ #ovPendingSalaryCard{grid-column:1/-1}
+ #uebersicht section:last-of-type{grid-column:1/-1}
+}
+@media(max-width:430px){
+ .expected-salary-row{align-items:flex-start}
+ .expected-salary-value{font-size:18px}
+}
