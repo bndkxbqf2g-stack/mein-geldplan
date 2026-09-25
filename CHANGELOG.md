@@ -1,3 +1,10 @@
+# v0.99.9
+
+- Hotfix: Gehalts-/Kontrollmodule können den Start der Budget-App nicht mehr blockieren.
+- Budget, Übersicht, Fixkosten, Sparen und Verlauf werden vollständig initialisiert und gerendert, bevor der Gehaltsbereich separat geladen wird.
+- Fehler im Gehaltsbereich werden abgefangen; die Kern-App bleibt dabei weiter benutzbar und zeigt ihre gespeicherten Beträge.
+- Regressionstest stellt sicher, dass salary-ui nicht mehr als statische Startabhängigkeit eingebunden ist.
+
 # v0.99.8
 
 - Neues Gehaltskontrolltool: Zeitnachweis-Soll gegen tatsächliche Bezügemitteilung.
