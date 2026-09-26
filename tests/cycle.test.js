@@ -125,3 +125,16 @@ test("normale Werktage bleiben Arbeitstage", async () => {
   assert.equal(isWorkday("2026-01-07"), true);
   assert.equal(isWorkday("2026-06-05"), true);
 });
+
+test("Budget-Zyklus behandelt ISO-Datumsstrings unabhängig von der Laufzeitzeitzone als Kalendertage", async () => {
+  const { budgetForDate } = await import("../lib/cycle.js");
+  const result = budgetForDate({
+    giro: 2100,
+    today: "2026-10-04",
+    payday: "2026-09-30",
+    nextPayday: "2026-10-30"
+  });
+  assert.equal(iso(result.segmentStart), "2026-10-04");
+  assert.equal(result.remainingDays, 26);
+  assert.equal(result.segmentDays, 7);
+});
