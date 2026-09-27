@@ -1,3 +1,8 @@
+# v0.99.50
+
+- Budget: Der tatsächliche Bargeld-Abhebebetrag ist frei wählbar; das Wochenbudget dient nur noch als Orientierung.
+- Service-Worker-Cache erhöht, damit die korrigierte Budget-Oberfläche auf mobilen Geräten sicher aktualisiert wird.
+
 # v0.99.49
 
 - Die Soll-/Ist-Karte verwendet bei offenen Monaten für „Netto-Differenz“ jetzt denselben aktuell berechneten offenen Nettoanspruch wie der Bereich „Nachzahlung netto“. Ein alter reiner Forecast-minus-Ist-Wert (z. B. −189,56 €) kann damit nicht mehr parallel zu einem abweichenden offenen Nettoanspruch (z. B. 168,57 €) stehen.
