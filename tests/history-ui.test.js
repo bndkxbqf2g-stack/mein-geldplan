@@ -2,6 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {expectedSalarySlots,overviewAvailableAmount} from '../lib/history-ui.js';
 
+test('Übersicht ordnet den Hauptbetrag dem aktuellen Budgetzyklus bis Samstag zu',()=>{
+  const budget={active:true,weeklyBudget:74.97,dailyBudget:18.742,segmentStart:new Date(2026,8,30),segmentEnd:new Date(2026,9,3)};
+  assert.equal(overviewAvailableAmount({budget,giro:562.26,cash:30}),74.97);
+  assert.equal(budget.segmentEnd.getDay(),6);
+  assert.equal(Number(budget.dailyBudget.toFixed(2)),18.74);
+});
+
 test('Übersicht zeigt im aktiven Zyklus das berechnete Abschnittsbudget statt Giro plus Bargeld',()=>{
   assert.equal(overviewAvailableAmount({
     budget:{active:true,weeklyBudget:74.97},
