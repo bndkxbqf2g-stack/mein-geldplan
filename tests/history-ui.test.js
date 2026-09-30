@@ -1,6 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {expectedSalarySlots} from '../lib/history-ui.js';
+import {expectedSalarySlots,overviewAvailableAmount} from '../lib/history-ui.js';
+
+test('Übersicht zeigt im aktiven Zyklus das berechnete Abschnittsbudget statt Giro plus Bargeld',()=>{
+  assert.equal(overviewAvailableAmount({
+    budget:{active:true,weeklyBudget:74.97},
+    giro:562.26,
+    cash:30
+  }),74.97);
+});
+
+test('Ohne aktiven Zyklus zeigt die Übersicht weiterhin Giro plus Bargeld',()=>{
+  assert.equal(overviewAvailableAmount({
+    budget:{active:false},
+    giro:562.26,
+    cash:30
+  }),592.26);
+});
 
 test('Übersicht zeigt für September die aktuell gespeicherte Prognose',()=>{
   const slots=expectedSalarySlots({
