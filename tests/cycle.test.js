@@ -11,7 +11,7 @@ import {
   bavariaPublicHolidays
 } from "../lib/cycle.js";
 
-const iso = d => d.toISOString().slice(0, 10);
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
 test("30.09.2026 startet einen Zyklus bis 30.10.2026", () => {
   assert.equal(iso(lastWorkday(2026, 8)), "2026-09-30");
