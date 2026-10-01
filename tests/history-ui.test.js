@@ -90,3 +90,40 @@ test('Übersicht nutzt für zukünftige Monate eine stabile Lernkalibrierung',()
   assert.equal(slots[0].learningApplied,true);
   assert.equal(slots[0].payout,2803.94);
 });
+
+
+test('Übersicht rechnet offene September-Nachzahlung in die Oktober-Prognose ein',()=>{
+  const commonComponents={
+    fixed:{basePay:4226.92,careAllowance:90,universityAllowance:163.51},
+    night:98.01,saturday:0.77,sunday:44.12,holiday:0,shift:0,shiftType:'none',springIn:0,
+    unpriced:[]
+  };
+  const forecasts=[
+    {
+      payoutMonth:'2026-09',reportMonth:'2026-07',totalGross:4723.33,payout:2845.20,
+      components:commonComponents,
+      netEffects:{basis:'actual-payslip-outstanding',complete:true,totalNet:173.19,timeNet:173.19}
+    },
+    {
+      payoutMonth:'2026-10',reportMonth:'2026-08',totalGross:4480.43,payout:2773.72,
+      components:{...commonComponents,night:0,saturday:0,sunday:0}
+    }
+  ];
+  const payslips=[{
+    month:'2026-09',basePay:4226.92,careAllowance:90,universityAllowance:163.51,
+    totalGross:4480.43,payout:2700.70,hasPriorAdjustment:false,needsReview:false,
+    components:{night:null,saturday:null,sunday:null,holiday:null,shift:null,springIn:null,hasVariableDetail:false},
+    retroPeriods:[]
+  }];
+  const slots=expectedSalarySlots({
+    today:new Date(2026,8,25,12,0,0),
+    transactions:[],
+    forecasts,
+    payslips,
+    learning:[]
+  });
+  assert.equal(slots[0].status,'actual');
+  assert.equal(slots[1].payout,2946.91);
+  assert.equal(slots[1].regularPayout,2773.72);
+  assert.equal(slots[1].carryover,173.19);
+});
