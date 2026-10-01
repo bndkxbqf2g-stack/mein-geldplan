@@ -1,3 +1,7 @@
+# v0.99.53
+
+- Gehaltsübersicht: PWA-/Service-Worker-Version erhöht, damit die korrigierte Nachzahlungsanzeige nach dem Deployment auf mobilen Geräten aktualisiert wird.
+
 # v0.99.50
 
 - Budget: Der tatsächliche Bargeld-Abhebebetrag ist frei wählbar; das Wochenbudget dient nur noch als Orientierung.
