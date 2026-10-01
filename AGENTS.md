@@ -32,3 +32,8 @@
 - UI-Änderungen auf tatsächliche mobile/desktop Ansichten prüfen. Die bestehende CI ist Node-basiert und hat keinen Browser-, Screenshot- oder Golden-Test-Runner. Keine Screenshot-Abhängigkeiten allein für Dokumentationsänderungen hinzufügen; bei UI-Arbeit Interaktionen testen und den sichtbaren Prüfweg benennen.
 - Nach Änderungen relevante Tests und vollständige CI ausführen; Fehler beheben und keine grüne CI behaupten, wenn nur Teiltests gelaufen sind.
 - Abschlussbericht: geänderte Berechnungs-/Datenpfade, Referenzwerte, Tests/CI-Ergebnis, PR und bekannte Grenzen.
+
+
+## Fehlerbehebung und geteilte Apps
+- Für Fehler in jeder Funktion gilt der reproduzieren → Regressionstest → minimale Korrektur → vollständige Prüfung → Ergebnisprotokollieren-Ablauf aus [DEBUGGING.md](DEBUGGING.md).
+- Bei ausdrücklich gewünschter Synchronisierung mit `Steffi_Geldplan` nur gemeinsam verwendbare Import-/UI-Logik übernehmen. Steffis eigene Gehaltsgrundlagen, Fixkosten, fehlende Pfändungsberechnung und lokale Daten bleiben unverändert.
