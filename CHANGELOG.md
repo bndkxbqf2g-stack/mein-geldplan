@@ -1,3 +1,10 @@
+# v0.99.54
+
+- Zeitnachweisimport auf iOS/Safari nutzt FileReader, wenn File.arrayBuffer fehlt, fehlschlägt oder keine Bytes liefert.
+- PDF-Seitenumbrüche bleiben echte Zeilenumbrüche; Importfehler nennen jetzt die betroffene Verarbeitungsstufe.
+- Regressionstests prüfen Safari-Fallback, fehlerhaftes arrayBuffer, Seitenumbrüche sowie anonymisierte März-/April-/Mai-Zeitnachweise.
+- Gemeinsame Fehlerdiagnose für alle App-Funktionen in DEBUGGING.md dokumentiert.
+
 # v0.99.53
 
 - Gehaltsübersicht: PWA-/Service-Worker-Version erhöht, damit die korrigierte Nachzahlungsanzeige nach dem Deployment auf mobilen Geräten aktualisiert wird.

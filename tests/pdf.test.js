@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { detectReportMonth, parseTimeReportText, parseWageLine, payoutMonth, splitLines, textItemsToLines } from "../lib/pdf.js";
+import { detectReportMonth, parseTimeReportText, parseWageLine, payoutMonth, readPdfText, splitLines, textItemsToLines } from "../lib/pdf.js";
 
 test("Text wird in saubere Zeilen geteilt", () => {
   assert.deepEqual(splitLines("A\n\n B\r\nC "), ["A", "B", "C"]);
@@ -157,4 +157,110 @@ test("echter August-Zeitnachweis: Summen und Wechselschicht werden korrekt erkan
   assert.equal(sum("5024"), 7.7);
   assert.equal(r.wechsel, true);
   assert.equal(r.schicht, false);
+});
+
+test("Safari-Zeitnachweise nutzen FileReader als Fallback und behalten PDF-Seitenumbrüche", async () => {
+  const previousReader = globalThis.FileReader;
+  const previousPdfjs = globalThis.pdfjsLib;
+  const hadReader = Object.prototype.hasOwnProperty.call(globalThis, "FileReader");
+  const hadPdfjs = Object.prototype.hasOwnProperty.call(globalThis, "pdfjsLib");
+  const bytes = new Uint8Array([1, 2, 3]).buffer;
+
+  globalThis.FileReader = class {
+    readAsArrayBuffer(file) {
+      this.result = file.payload;
+      this.onload();
+    }
+  };
+  globalThis.pdfjsLib = {
+    GlobalWorkerOptions: {},
+    getDocument({ data }) {
+      assert.deepEqual([...data], [1, 2, 3]);
+      return {
+        promise: Promise.resolve({
+          numPages: 2,
+          getPage: async pageNo => ({
+            getTextContent: async () => ({
+              items: [{ str: pageNo === 1 ? "Zeitnachweis April 2026" : "5010 Nachtarbeit 1,00 Std." }]
+            })
+          })
+        })
+      };
+    }
+  };
+
+  try {
+    const withoutArrayBuffer = await readPdfText({ payload: bytes });
+    const rejectedArrayBuffer = await readPdfText({
+      payload: bytes,
+      arrayBuffer: async () => { throw new Error("Null is not an object"); }
+    });
+    for (const result of [withoutArrayBuffer, rejectedArrayBuffer]) {
+      assert.equal(result.text, "Zeitnachweis April 2026\n5010 Nachtarbeit 1,00 Std.");
+      assert.equal(result.pages, 2);
+      assert.equal(result.needsOcr, false);
+    }
+  } finally {
+    if (hadReader) globalThis.FileReader = previousReader;
+    else delete globalThis.FileReader;
+    if (hadPdfjs) globalThis.pdfjsLib = previousPdfjs;
+    else delete globalThis.pdfjsLib;
+  }
+});
+
+test("anonymisierte März-, April- und Mai-Zeitnachweise behalten die echten Lohnarten-Summen", () => {
+  const reports = [
+    {
+      month: {year:2026,month:3}, payoutMonth: "2026-05", count: 9, night: 2.7, averageCode: "5161", averageDays: 2,
+      text: [
+        "Z E I T N A C H W E I S Mitarbeiter Mrz 26",
+        "09.03.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "10.03.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "11.03.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "23.03.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "24.03.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "25.03.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "30.03.2026 3B61 5161: Durchschnitt §21 TV 1,00",
+        "31.03.2026 3B61 5161: Durchschnitt §21 TV 1,00",
+        "31.03.2026 3C12 5212: SchiZ§43 1,00"
+      ].join("\n")
+    },
+    {
+      month: {year:2026,month:4}, payoutMonth: "2026-06", count: 6, night: 1.35, averageCode: "5162", averageDays: 2,
+      text: [
+        "Z E I T N A C H W E I S Mitarbeiter Apr 26",
+        "01.04.2026 3B62 5162:Durchsch.§21TVL-Folg 1,00",
+        "02.04.2026 3B62 5162:Durchsch.§21TVL-Folg 1,00",
+        "13.04.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "14.04.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "15.04.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "30.04.2026 3C12 5212: SchiZ§43 1,00"
+      ].join("\n")
+    },
+    {
+      month: {year:2026,month:5}, payoutMonth: "2026-07", count: 8, night: 1.35, averageCode: "5161", averageDays: 4,
+      text: [
+        "Z E I T N A C H W E I S Mitarbeiter Mai 26",
+        "11.05.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "12.05.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "13.05.2026 21:00 21:27 3A10 5010: Nachtarbeit 0,45",
+        "26.05.2026 3B61 5161: Durchschnitt §21 TV 1,00",
+        "27.05.2026 3B61 5161: Durchschnitt §21 TV 1,00",
+        "28.05.2026 3B61 5161: Durchschnitt §21 TV 1,00",
+        "29.05.2026 3B61 5161: Durchschnitt §21 TV 1,00",
+        "31.05.2026 3C12 5212: SchiZ§43 1,00"
+      ].join("\n")
+    }
+  ];
+
+  for (const expected of reports) {
+    const report = parseTimeReportText(expected.text);
+    assert.deepEqual(report.month, expected.month);
+    assert.equal(report.payoutMonth, expected.payoutMonth);
+    assert.equal(report.items.length, expected.count);
+    assert.equal(report.needsReview, false);
+    assert.equal(report.items.filter(item => item.code === "5010").reduce((sum,item) => sum + item.hours, 0), expected.night);
+    assert.equal(report.items.filter(item => item.code === expected.averageCode).reduce((sum,item) => sum + item.hours, 0), expected.averageDays);
+    assert.equal(report.items.some(item => item.code === "5212"), true);
+  }
 });
