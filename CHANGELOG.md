@@ -1,4 +1,4 @@
-# Unreleased
+# v0.99.56
 
 - Nach einer Bargeldabhebung im laufenden Lohnzyklus beginnt die Budgetberechnung am kommenden Sonntag beziehungsweise am früheren Lohntag; dadurch werden Tages- und Wochenbudget vor dem Sonntag bereits korrekt auf den nächsten Abschnitt bezogen.
 - Weitere Abhebungen in späteren Wochen setzen den Budgetanker erneut für den dann kommenden Sonntag.
