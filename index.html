@@ -273,8 +273,8 @@ button{font:inherit}button:disabled{opacity:.55;cursor:not-allowed;transform:non
   <input id="cloudEmail" type="email" autocomplete="email" placeholder="name@beispiel.de">
   <button class="primary secondary" style="margin-top:8px" id="cloudSendCode">Anmeldecode senden</button>
   <div id="cloudOtpWrap" class="hidden" style="margin-top:12px">
-    <label>6-stelliger Code</label>
-    <input id="cloudOtp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="123456">
+    <label>8-stelliger Code</label>
+    <input id="cloudOtp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" minlength="8" autocomplete="one-time-code" placeholder="12345678">
     <button class="primary" style="margin-top:8px" id="cloudVerifyCode">Anmelden & sichern</button>
   </div>
 </div>
