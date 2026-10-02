@@ -21,7 +21,10 @@
 - **N — Normal:** Begrenzter Entwicklungsblock, typischerweise bis zu fünf zusammenhängende Schritte; danach relevante Tests/CI und Ergebnis berichten.
 - **Q — Qualitätssicherung:** Prüfe einen benannten Bereich oder bestehenden Diff, führe passende Prüfungen aus und behebe nur klar belegte Fehler mit Regressionstest. Keine neuen Features.
 - **U — Update:** Nur Branch-, Projekt- und CI-Status feststellen und mit Ampel berichten; keine Änderungen und keine Fehlerbehebung.
-- Ein Kürzel allein autorisiert keine Änderung echter Finanzdaten, Rechts-/Tarifparameter ohne Referenz oder Merge/Release.
+- `c` autorisiert in diesem Repository Merge und Push des aktuellen, geprüften Änderungsstands.
+- Vor Merge/Push müssen relevante Tests erfolgreich sein, der Diff geprüft sein und dürfen keine echten Finanzdaten oder Geheimnisse enthalten.
+- Unzusammenhängende oder fremde Änderungen werden nicht mitgemerged.
+- `c` autorisiert weiterhin keine Änderungen an echten Finanzdaten oder Rechts-/Tarifparametern ohne Referenz.
 
 ## Tests und Abschluss
 - Aktuelle Standardchecks: `npm test` sowie JavaScript-Syntaxprüfung mit `node --check` über alle `.js`-Dateien. Details: [docs/TESTING.md](docs/TESTING.md).
