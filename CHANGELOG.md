@@ -1,3 +1,8 @@
+# v0.99.57
+
+- Cloud-Anmeldung auf den aktuell gesendeten 8-stelligen Supabase-Code ausgerichtet.
+- Stable-Stand bleibt unverändert; diese Version basiert auf dem gemergten Main-Stand.
+
 # v0.99.56
 
 - Nach einer Bargeldabhebung im laufenden Lohnzyklus beginnt die Budgetberechnung am kommenden Sonntag beziehungsweise am früheren Lohntag; dadurch werden Tages- und Wochenbudget vor dem Sonntag bereits korrekt auf den nächsten Abschnitt bezogen.
