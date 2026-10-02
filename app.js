@@ -13,8 +13,8 @@ function nextLastBankDayAfter(d){var y=d.getFullYear(),m=d.getMonth()+1;if(m>11)
 function upcomingPayDate(){var now=new Date(),d=lastBankDay(now.getFullYear(),now.getMonth());return now<=d?d:lastBankDay(now.getFullYear(),now.getMonth()+1);}
 function txs(){try{var a=JSON.parse(localStorage.getItem("meinGeldplanGiroTx")||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
 function saveTx(a){try{localStorage.setItem("meinGeldplanGiroTx",JSON.stringify(a));}catch(e){}}
-function ensureBase(){var a=txs();if(!a.some(function(t){return t.type==="base";})){a.unshift({id:"base",type:"base",amount:153.30,date:dateKey(new Date()),text:"Ausgangskontostand"});saveTx(a);}}
-function base(){var t=txs().find(function(x){return x.type==="base";});return t?Number(t.amount)||0:153.30;}
+function ensureBase(){var a=txs();if(!a.some(function(t){return t.type==="base";})){a.unshift({id:"base",type:"base",amount:0,date:dateKey(new Date()),text:"Ausgangskontostand"});saveTx(a);}}
+function base(){var t=txs().find(function(x){return x.type==="base";});return t?Number(t.amount)||0:0;}
 function currentGiro(){return base()+txs().filter(function(t){return t.type!=="base";}).reduce(function(s,t){return s+(Number(t.amount)||0);},0);}
 function cashBalance(){try{var v=parseFloat(localStorage.getItem("meinGeldplanCash")||"0");return Number.isFinite(v)?Math.max(0,v):0;}catch(e){return 0;}}
 function saveCash(v){try{localStorage.setItem("meinGeldplanCash",String(Math.max(0,Number(v)||0)));}catch(e){}}
@@ -56,6 +56,9 @@ function daysUntilNextWithdrawal(){
  var n=nextWithdrawalDate();
  return n?daysBetweenDates(new Date(),n):7;
 }
+function currentCycleDaysLeft(){
+ return Math.max(1,daysUntilNextWithdrawal());
+}
 function daysToFollowingSundayFrom(d){
  var dow=d.getDay(),delta=(7-dow)%7;
  return delta===0?7:delta;
@@ -84,7 +87,7 @@ function sameOldDefault(a){return Array.isArray(a)&&a.length===4&&Number(a[0].am
 function fixItems(){try{var raw=localStorage.getItem("meinGeldplanFixItems");var a=raw?JSON.parse(raw):null;if(sameOldDefault(a)){var migrated=DEFAULT_FIX.map(function(x){return {id:x.id,name:x.name,amount:x.amount};});saveFixItems(migrated);return migrated;}if(Array.isArray(a)&&a.length)return a;}catch(e){}return DEFAULT_FIX.map(function(x){return {id:x.id,name:x.name,amount:x.amount};});}
 function saveFixItems(a){try{localStorage.setItem("meinGeldplanFixItems",JSON.stringify(a));}catch(e){}}
 function fixTotal(){return fixItems().reduce(function(s,x){return s+(Number(x.amount)||0);},0);}
-function renderFixItems(){var box=$("fixItems");if(!box)return;var a=fixItems();box.innerHTML="";a.forEach(function(item,idx){var wrap=document.createElement("div");wrap.className="fix-item";wrap.innerHTML='<input class="fix-name" data-idx="'+idx+'" type="text" value="'+String(item.name).replace(/&/g,"&amp;").replace(/"/g,"&quot;")+'"><input class="fix-amount" data-idx="'+idx+'" type="number" step=".01" min="0" value="'+(Number(item.amount)||0).toFixed(2)+'"><button type="button" class="removeFix" data-idx="'+idx+'">×</button>';box.appendChild(wrap);});
+function renderFixItems(){var box=$("fixItems");if(!box)return;var a=fixItems();box.innerHTML="";a.forEach(function(item,idx){var wrap=document.createElement("div");wrap.className="fix-item";wrap.innerHTML='<input class="fix-name" data-idx="'+idx+'" type="text" aria-label="Name der Fixkosten" value="'+String(item.name).replace(/&/g,"&amp;").replace(/"/g,"&quot;")+'"><input class="fix-amount" data-idx="'+idx+'" type="number" aria-label="Monatlicher Betrag in Euro" step=".01" min="0" value="'+(Number(item.amount)||0).toFixed(2)+'"><button type="button" class="removeFix" data-idx="'+idx+'" aria-label="Fixkosten entfernen" title="Fixkosten entfernen">×</button>';box.appendChild(wrap);});
  box.querySelectorAll("input").forEach(function(el){el.addEventListener("input",function(){var i=Number(el.dataset.idx),arr=fixItems();if(!arr[i])return;if(el.classList.contains("fix-name"))arr[i].name=el.value;else arr[i].amount=numValue(el.value);saveFixItems(arr);var total=arr.reduce(function(s,x){return s+(Number(x.amount)||0);},0);if($("fixTotal"))$("fixTotal").textContent=eur(total);});});
  box.querySelectorAll(".removeFix").forEach(function(btn){btn.addEventListener("click",function(){var arr=fixItems();arr.splice(Number(btn.dataset.idx),1);saveFixItems(arr);renderFixItems();refresh();});});
  var total=fixTotal();if($("fixTotal"))$("fixTotal").textContent=eur(total);if($("monthlyFix")){if(document.activeElement!==$("monthlyFix"))$("monthlyFix").value=total.toFixed(2);}
@@ -95,7 +98,7 @@ function bookTransaction(amount,text,type,meta){var a=txs(),t={id:Date.now()+Mat
 
 function updateBudget(){
  var giro=currentGiro(),cash=cashBalance(),available=giro+cash,nextPay=currentCyclePayDate();
- var daysW=daysUntilNextWithdrawal();
+ var daysW=currentCycleDaysLeft();
  var cycleBudget=weeklyGiroBudget();
  if($('mainGiro'))$('mainGiro').textContent=eur(giro);
  if($('mainCash'))$('mainCash').textContent=eur(cash);
@@ -143,11 +146,37 @@ function renderOverview(){
  if($("ovAvailable"))$("ovAvailable").textContent=eur(available);if($("ovGiro"))$("ovGiro").textContent=eur(giro);if($("ovCash"))$("ovCash").textContent=eur(cash);if($("ovNextPay"))$("ovNextPay").textContent='Nächster Lohn: '+fmt(currentCyclePayDate());if($("ovPayDays"))$("ovPayDays").textContent=payDays+' Tage';if($("ovDay"))$("ovDay").textContent=eur(cycleBudget.day);if($("ovWeek"))$("ovWeek").textContent=eur(cycleBudget.week);if($("ovNextWithdraw"))$("ovNextWithdraw").textContent=fmt(next);if($("ovFix"))$("ovFix").textContent=eur(fixTotal());if($("ovCycleExpenses"))$("ovCycleExpenses").textContent=eur(cycleExp);if($("ovCashKpi"))$("ovCashKpi").textContent=eur(cash);if($("ovSalaryCount"))$("ovSalaryCount").textContent=txs().filter(function(t){return t.type==='salary';}).length;
  var s=latestSalary(),pct=0;if(s){var sd=new Date((s.date||dateKey(new Date()))+'T12:00:00'),pd=currentCyclePayDate(),total=Math.max(1,daysBetweenDates(sd,pd)),elapsed=Math.max(0,Math.min(total,daysBetweenDates(sd,new Date())));pct=(elapsed/total)*100;}if($("ovProgress"))$("ovProgress").style.width=pct.toFixed(1)+'%';if($("ovProgressText"))$("ovProgressText").textContent=Math.round(pct)+' % vergangen';
 }
-function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){recalculateExactNet();}}
-function exportData(){
- var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:35,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
+function openTab(name){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===name);});document.querySelectorAll('.view').forEach(function(v){v.classList.add('hidden');});var t=$(name);if(t)t.classList.remove('hidden');if(name==='verlauf'){renderTx();renderMonthlyCompare();renderMonthlyChart();}if(name==='prognose'){showLatestForecast();recalculateExactNet();renderForecastTable();renderPayslipComparison();}}
+function checkForUpdate(){
+ var button=$('updateBtn'),status=$('updateStatus');
+ if(button)button.classList.add('spinning');
+ if(status){status.textContent='Suche nach Aktualisierung …';status.style.display='block';}
+ if(!('serviceWorker' in navigator)){
+   if(status)status.textContent='Diese lokale Vorschau kann nicht online aktualisiert werden.';
+   if(button)button.classList.remove('spinning');
+   return;
+ }
+ var timeout=new Promise(function(_,reject){setTimeout(function(){reject(new Error('timeout'));},5000);});
+ Promise.race([navigator.serviceWorker.getRegistration('./').then(function(reg){return reg||navigator.serviceWorker.register('./service-worker.js');}),timeout]).then(function(reg){
+   return reg.update();
+ }).then(function(){
+   if(status)status.textContent='Aktualisierung geprüft. App wird neu geladen …';
+   if(navigator.serviceWorker.controller){
+     setTimeout(function(){if(!window.__appReloadedForUpdate){window.__appReloadedForUpdate=true;location.reload();}},300);
+   }else{
+     if(button)button.classList.remove('spinning');
+     if(status)status.textContent='Die App ist aktuell.';
+   }
+ }).catch(function(){
+   if(status)status.textContent='Aktualisierung konnte nicht geprüft werden. Bitte Internetverbindung prüfen.';
+   if(button)button.classList.remove('spinning');
+   setTimeout(function(){if(status)status.style.display='none';},3500);
+ });
 }
-function importData(){var inp=$("importFile");if(!inp||!inp.files||!inp.files[0]){alert('Bitte zuerst eine Sicherungsdatei auswählen.');return;}var file=inp.files[0],reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(!data||!Array.isArray(data.giroTransactions)||!Array.isArray(data.fixItems)||!Array.isArray(data.timeReports))throw new Error('Ungültige Sicherungsdatei.');if(!confirm('Gespeicherte App-Daten wirklich durch diese Sicherung ersetzen?'))return;localStorage.setItem('meinGeldplanGiroTx',JSON.stringify(data.giroTransactions));localStorage.setItem('meinGeldplanCash',String(Math.max(0,Number(data.cash)||0)));localStorage.setItem('meinGeldplanFixItems',JSON.stringify(data.fixItems));localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(data.timeReports));if($("backupStatus"))$("backupStatus").textContent='Daten erfolgreich wiederhergestellt. Die App wird neu geladen.';setTimeout(function(){location.reload();},500);}catch(e){alert('Wiederherstellung fehlgeschlagen: '+e.message);}};reader.readAsText(file);}
+function exportData(){
+ var filename='mein-geldplan-backup-'+dateKey(new Date())+'.json',data={app:'Mein Geldplan',version:44,exportedAt:new Date().toISOString(),giroTransactions:txs(),cash:cashBalance(),fixItems:fixItems(),timeReports:loadReports(),payslips:loadPayslips(),savings:savingsEntries(),exactCalculation:loadExactCalculation()},blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);if($("backupStatus"))$("backupStatus").textContent='Sicherung erstellt: '+filename;
+}
+function importData(){var inp=$("importFile");if(!inp||!inp.files||!inp.files[0]){alert('Bitte zuerst eine Sicherungsdatei auswählen.');return;}var file=inp.files[0],reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(!data||!Array.isArray(data.giroTransactions)||!Array.isArray(data.fixItems)||!Array.isArray(data.timeReports))throw new Error('Ungültige Sicherungsdatei.');if(!confirm('Gespeicherte App-Daten wirklich durch diese Sicherung ersetzen?'))return;localStorage.setItem('meinGeldplanGiroTx',JSON.stringify(data.giroTransactions));localStorage.setItem('meinGeldplanCash',String(Math.max(0,Number(data.cash)||0)));localStorage.setItem('meinGeldplanFixItems',JSON.stringify(data.fixItems));localStorage.setItem('meinGeldplanSavings',JSON.stringify(Array.isArray(data.savings)?data.savings:[]));localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(data.timeReports));localStorage.setItem('meinGeldplanPayslips',JSON.stringify(Array.isArray(data.payslips)?data.payslips:[]));localStorage.setItem('meinGeldplanExactCalculation',JSON.stringify(data.exactCalculation&&typeof data.exactCalculation==='object'?data.exactCalculation:{}));if($("backupStatus"))$("backupStatus").textContent='Daten erfolgreich wiederhergestellt. Die App wird neu geladen.';setTimeout(function(){location.reload();},500);}catch(e){alert('Wiederherstellung fehlgeschlagen: '+e.message);}};reader.readAsText(file);}
 
 function renderCycleExpenses(){var list=$("cycleExpenseList");if(!list)return;list.innerHTML="";var c=activeCycleKey();var a=txs().filter(function(t){return t.type==="expense"&&t.cycle===c;}).slice().reverse();if(!a.length){list.innerHTML='<div class="note">Keine zusätzlichen Ausgaben im laufenden Lohnzyklus.</div>';return;}var total=0;a.forEach(function(t){total+=Math.abs(Number(t.amount)||0);var r=document.createElement("div");r.className="row";var l=document.createElement("span");l.textContent=(t.date||"")+" · "+(t.text||"Ausgabe");var v=document.createElement("span");v.className="v red";v.textContent=eur(Math.abs(Number(t.amount)||0));r.appendChild(l);r.appendChild(v);list.appendChild(r);});var rr=document.createElement("div");rr.className="row";rr.innerHTML='<span><b>Zusätzliche Ausgaben im Zyklus</b></span><span class="v">'+eur(total)+'</span>';list.appendChild(rr);}
 function addIncome(){var v=num("giroIncome");if(v<=0){alert("Bitte einen positiven Zahlungseingang eingeben.");return;}bookTransaction(v,$("giroText").value.trim()||"Zahlungseingang","income",{cycle:activeCycleKey()});$("giroIncome").value="";$("giroText").value="";refresh();}
@@ -177,28 +206,16 @@ function sunday(){
  if($('withdrawalDays'))$('withdrawalDays').textContent=daysUntilNextWithdrawal();
  if($('withdrawalHint'))$('withdrawalHint').textContent='Der 7-Tage-Betrag wird aus dem aktuellen Giroguthaben und dem nächsten Abhebungssonntag-Fenster bis zum nächsten Lohn berechnet. Bargeldabhebungen aktualisieren den Betrag sofort.';
 }
-// Historisch aus den hochgeladenen Bezügemitteilungen kalibriert.
-// Wir verwenden das tatsächlich ausgewiesene Regel-Netto als Basis und
-// schätzen nur die variablen Zeitbezüge. Das ist stabiler als ein grober
-// Brutto->Netto-Faktor.
-var PAYROLL_CALIBRATION={
-  // 2026 vor der Entgelt-/Zulagenänderung ab 01.04.2026
-  preApr2026:{gross:4360.85,legalNet:2767.80},
-  // Regelabrechnungen ab 04/2026 zeigen durchgehend diese Basis
-  fromApr2026:{gross:4480.43,legalNet:2827.98},
-  // Aus den Rückrechnungs-Perioden 2026 ergibt sich für steuer-/SV-pflichtige
-  // variable Bezüge ein sehr stabiler Auszahlungsfaktor um 48,2 %.
-  taxableExtraNetRate:0.482,
-  // Durchschnitt-VM §21 wird in den jüngsten Abrechnungen mit 1,44 €/Einheit
-  // ausgewiesen (z. B. 7 × 1,44 € = 10,08 €).
-  average21Rate:1.44,
-  nightSurchargeRate:4.58,
-  sundaySurchargeRate:5.58,
-  saturdayRate:0.64
+var PAYROLL_MASTER={
+  basePay:4226.92,careAllowance:90.00,universityAllowance:163.51,
+  fixedGross:4480.43,nightRate:4.46,saturdayRate:0.64,sundayRate:5.58,
+  shiftAllowance:250.00,schichtAllowance:100.00,
+  pensionRate:0.093,unemploymentRate:0.013,healthRate:0.0839,careRate:0.0155,
+  churchRate:0.08,dependents:2,tariff:'Bayern KR8',surchargeLevel:3
 };
+var FORECAST_DEPENDENTS=2;
 function payrollBaseForReport(rep){
-  var y=Number(rep.year)||0,m=Number(rep.month)||0;
-  return (y>2026 || (y===2026&&m>=3))?PAYROLL_CALIBRATION.fromApr2026:PAYROLL_CALIBRATION.preApr2026;
+  return {gross:PAYROLL_MASTER.fixedGross};
 }
 
 
@@ -207,6 +224,8 @@ var lastParsedReport=null;
 var MONTHS={Jan:0,Feb:1,"Mär":2,Mar:2,Apr:3,Mai:4,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Okt:9,Oct:9,Nov:10,Dez:11,Dec:11};
 function loadReports(){try{var a=JSON.parse(localStorage.getItem('meinGeldplanTimeReports')||'[]');return Array.isArray(a)?a:[];}catch(e){return[];}}
 function saveReports(a){reportStore=a;try{localStorage.setItem('meinGeldplanTimeReports',JSON.stringify(a));}catch(e){}}
+function loadPayslips(){try{var a=JSON.parse(localStorage.getItem('meinGeldplanPayslips')||'[]');return Array.isArray(a)?a:[];}catch(e){return[];}}
+function savePayslips(a){try{localStorage.setItem('meinGeldplanPayslips',JSON.stringify(a));}catch(e){}}
 function loadExactCalculation(){try{var v=JSON.parse(localStorage.getItem('meinGeldplanExactCalculation')||'{}');return v&&typeof v==='object'?v:{};}catch(e){return {};}}
 function saveExactCalculation(v){try{localStorage.setItem('meinGeldplanExactCalculation',JSON.stringify(v));}catch(e){}}
 function recalculateExactNet(){
@@ -236,6 +255,41 @@ function reportMonthFromLines(lines){
   }
   return null;
 }
+function moneyMatches(s){
+ var matches=String(s||'').match(/-?\d{1,3}(?:\.\d{3})*,\d{2}/g)||[];
+ return matches.map(parseMoney);
+}
+function amountAfterLabel(lines,patterns){
+ for(var i=0;i<lines.length;i++){
+   if(patterns.some(function(pattern){return pattern.test(lines[i]);})){
+     var values=moneyMatches(lines[i]);if(values.length)return values[values.length-1];
+     if(i+1<lines.length){values=moneyMatches(lines[i+1]);if(values.length)return values[values.length-1];}
+   }
+ }
+ return null;
+}
+function payslipMonthFromLines(lines){
+ var month=reportMonthFromLines(lines);if(month)return month;
+ for(var i=0;i<Math.min(lines.length,40);i++){
+   var full=lines[i].match(/\b(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(20\d{2})\b/i);
+   if(full){var names=['januar','februar','märz','april','mai','juni','juli','august','september','oktober','november','dezember'];return {year:Number(full[2]),month:names.indexOf(full[1].toLowerCase())};}
+   var m=lines[i].match(/\b(0?[1-9]|1[0-2])[./-](20\d{2})\b/);
+   if(m)return {year:Number(m[2]),month:Number(m[1])-1};
+ }
+ return null;
+}
+function parsePayslip(lines){
+ var month=payslipMonthFromLines(lines);if(!month)throw new Error('Abrechnungsmonat der Bezügemitteilung konnte nicht erkannt werden.');
+ var actual={
+   year:month.year,month:month.month,
+   gross:amountAfterLabel(lines,[/Gesamtbrutto/i,/Bruttoentgelt/i]),
+   net:amountAfterLabel(lines,[/gesetzliches Netto/i,/gesetzl\.?\s*Netto/i]),
+   payout:amountAfterLabel(lines,[/Auszahlungsbetrag/i,/Auszahlung/i,/Überweisungsbetrag/i]),
+   garnish:amountAfterLabel(lines,[/Pfändung/i,/Abtretung/i])
+ };
+ if(actual.gross==null&&actual.net==null&&actual.payout==null)throw new Error('Keine sicheren Abrechnungswerte erkannt.');
+ return actual;
+}
 function groupPdfText(items){
   var arr=items.filter(function(x){return x.str&&x.str.trim();}).map(function(x){return {str:x.str.trim(),x:x.transform[4],y:x.transform[5]};});
   arr.sort(function(a,b){return b.y-a.y||a.x-b.x;});
@@ -247,7 +301,7 @@ function groupPdfText(items){
 function normalizeReportLine(s){return s.replace(/\s+/g,' ').trim();}
 function codeDescription(code){
  var m={
-  '5010':'Nachtarbeit (20 %)','5011':'Nacht Beginn vor 0:00 (Nachtarbeit)','5014':'Samstag 13–20 Uhr, 0,64 €/h','5024':'Sonntagsarbeit 25 %','5161':'Durchschnitt § 21 TV-L','5211':'Wechselschichtzulage §43','5212':'Schichtzulage §43','3A10':'Nachtarbeit Zeitlohnart','3A11':'Nacht Beginn vor 0:00','3A14':'Samstag 13–20 Uhr','3B61':'Durchschnitt §21 TV-L','3C11':'Wechselschichtzulage §43','3C12':'Schichtzulage §43'};
+  '5010':'Nachtarbeit','5011':'Nachtarbeit (Beginn vor 0:00)','5014':'Samstag','5024':'Sonntag','5161':'Durchschnitt §21','5211':'Wechselschichtzulage','5212':'Schichtzulage'};
  return m[code]||null;
 }
 function parseTimeReports(lines){
@@ -261,9 +315,11 @@ function parseTimeReports(lines){
    var m=rest.match(/^(?:(\d{1,2}:\d{2})\s+(\d{1,2}:\d{2})\s+)?([A-Z0-9]{4})\s+(\d{4}):?\s*(.*?)\s+(-?\d+(?:[,.]\d+)?)$/i);
    if(!m)continue;
    var code=m[4],shortCode=m[3],label=m[5],qty=parseMoney(m[6]);
-   rows.push({date:dm[1],from:m[1]||'',to:m[2]||'',code:code,shortCode:shortCode,label:label,qty:qty,description:codeDescription(code)||codeDescription(shortCode)||'Unbekannte Zeitlohnart'});
+   rows.push({date:dm[1],from:m[1]||'',to:m[2]||'',code:code,shortCode:shortCode,label:label,qty:qty,amount:qty,description:codeDescription(code)||'Unbekannte Zeitlohnart',known:!!codeDescription(code)});
  }
  if(!rows.length)throw new Error('Keine abrechnungsrelevanten Zeitlohnarten erkannt.');
+ var hasWechsel=rows.some(function(r){return r.code==='5211';}),hasSchicht=rows.some(function(r){return r.code==='5212';});
+ if(hasWechsel&&hasSchicht)throw new Error('Der Zeitnachweis enthält gleichzeitig 5211 und 5212. Diese Lohnarten schließen sich aus.');
  return {year:month.year,month:month.month,rows:rows};
 }
 function extractShiftSummary(lines){
@@ -276,18 +332,22 @@ function protectedSurchargeCalc(rows){
  rows.forEach(function(r){
    if(r.code==='5010'||r.code==='5011')nightHours+=Number(r.qty)||0;
    else if(r.code==='5024')sunHours+=Number(r.qty)||0;
-   else if(r.code==='5014'){var q=Number(r.qty)||0;saturdayHours+=q;saturdayPay+=q*PAYROLL_CALIBRATION.saturdayRate;}
+   else if(r.code==='5014'){var q=Number(r.qty)||0;saturdayHours+=q;saturdayPay+=q*PAYROLL_MASTER.saturdayRate;}
  });
  return {
    nightHours:nightHours,
    sunHours:sunHours,
    saturdayHours:saturdayHours,
-   nightPay:nightHours*PAYROLL_CALIBRATION.nightSurchargeRate,
-   sundayPay:sunHours*PAYROLL_CALIBRATION.sundaySurchargeRate,
+   nightPay:nightHours*PAYROLL_MASTER.nightRate,
+   sundayPay:sunHours*PAYROLL_MASTER.sundayRate,
    saturdayPay:saturdayPay
  };
 }
-function allowanceFromRows(rows){var wech=rows.some(function(r){return r.code==='5211'||r.label.toLowerCase().indexOf('wech')>=0;});var schi=rows.some(function(r){return r.code==='5212'||r.label.toLowerCase().indexOf('schiz')>=0;});return {wech:wech,schi:schi};}
+function allowanceFromRows(rows){
+ var wech=rows.some(function(r){return r.code==='5211';});
+ var schi=rows.some(function(r){return r.code==='5212';});
+ return {wech:wech,schi:schi,code:wech?'5211':schi?'5212':null};
+}
 function garnishment2026(net,dependents){
  // Pfändungsfreigrenzenbekanntmachung 2026, Monatswerte ab 01.07.2026 (§ 850c ZPO).
  // Die Beträge entsprechen den sechs Tabellenspalten für 0 bis 5+ Unterhaltspflichten.
@@ -298,74 +358,150 @@ function garnishment2026(net,dependents){
  if(net>4866.30){var ceilingBand=Math.floor((4866.29-rule.start)/10);amount=rule.first+ceilingBand*rule.step+(net-4866.30);}
  return Math.round(Math.max(0,amount)*100)/100;
 }
-function estimateNetFromGross(gross){
- var refGross=4480.43+250; // 4,730.43 calibrated point
- var refNet=2991.52;
- if(gross<=0)return 0;
- return gross*(refNet/refGross);
+function incomeTax2026(annualTaxable){
+ var x=Math.max(0,annualTaxable),y;
+ if(x<=12348)return 0;
+ if(x<=17799){y=(x-12348)/10000;return (914.51*y+1400)*y;}
+ if(x<=69878){y=(x-17799)/10000;return (173.10*y+2397)*y+1014.70;}
+ if(x<=277825)return 0.42*x-11135.74;
+ return 0.45*x-19470.38;
 }
 function reportVariableExtras(rep,a,p){
- var shiftAllowance=a.wech?250:(a.schi?100:0);
- var avgUnits=rep.rows.filter(function(r){return r.code==='5161';}).reduce(function(s,r){return s+(Number(r.qty)||0);},0);
- var averagePay=avgUnits*PAYROLL_CALIBRATION.average21Rate;
- var taxableExtrasGross=shiftAllowance+p.saturdayPay+averagePay;
- return {shiftAllowance:shiftAllowance,averageUnits:avgUnits,averagePay:averagePay,taxableExtrasGross:taxableExtrasGross};
+ var averageRows=rep.rows.filter(function(r){return r.code==='5161';});
+ var rowAmount=function(r){return Number(r.amount!=null?r.amount:r.qty)||0;};
+ // Bei 5211/5212 ist die Menge nur ein Anspruchskennzeichen (meist 1),
+ // nicht der Eurobetrag. Die Vergütung kommt aus der Tarifstammdaten.
+ var shiftAllowance=a.code==='5211'?PAYROLL_MASTER.shiftAllowance:a.code==='5212'?PAYROLL_MASTER.schichtAllowance:0;
+ var averagePay=averageRows.reduce(function(s,r){return s+rowAmount(r);},0);
+ return {shiftAllowance:shiftAllowance,averageUnits:averageRows.length,averagePay:averagePay,taxableExtrasGross:shiftAllowance+averagePay};
 }
 function calculateReportForecast(rep,dependents){
  var p=protectedSurchargeCalc(rep.rows),a=allowanceFromRows(rep.rows),base=payrollBaseForReport(rep),v=reportVariableExtras(rep,a,p);
- // Die Basis ist das tatsächlich beobachtete Regel-Netto aus den Abrechnungen.
- // Nur variable, steuer-/SV-pflichtige Bestandteile werden zusätzlich geschätzt.
- var taxableExtraNet=v.taxableExtrasGross*PAYROLL_CALIBRATION.taxableExtraNetRate;
- var protected=p.nightPay+p.sundayPay;
- var estimatedLegalNet=base.legalNet+taxableExtraNet+protected;
- // Pfändung nur auf den nicht geschützten Teil anwenden.
- var estimatedPfNet=Math.max(0,base.legalNet+taxableExtraNet);
- var garnish=garnishment2026(estimatedPfNet,dependents);
- var payout=estimatedLegalNet-garnish;
+ var taxableGross=base.gross+v.taxableExtrasGross,svBase=taxableGross;
+ var pension=svBase*PAYROLL_MASTER.pensionRate,unemployment=svBase*PAYROLL_MASTER.unemploymentRate;
+ var health=svBase*PAYROLL_MASTER.healthRate,care=svBase*PAYROLL_MASTER.careRate;
+ var annualTaxable=Math.max(0,(taxableGross-pension-unemployment-health-care)*12-1266);
+ var tax=incomeTax2026(annualTaxable)/12,church=tax*PAYROLL_MASTER.churchRate,soli=0;
+ var taxableNet=taxableGross-pension-unemployment-health-care-tax-church-soli;
+ var protected=p.nightPay+p.saturdayPay+p.sundayPay,estimatedLegalNet=taxableNet+protected;
+ var estimatedPfNet=Math.max(0,estimatedLegalNet-protected),garnish=garnishment2026(estimatedPfNet,dependents),payout=estimatedLegalNet-garnish;
  var pm=payoutMonthFor(rep.year,rep.month);
  return {
   report:rep,payoutYear:pm.year,payoutMonth:pm.month,
-  baseGross:base.gross,baseLegalNet:base.legalNet,
-  taxableGross:base.gross+v.taxableExtrasGross,
-  taxableExtrasGross:v.taxableExtrasGross,taxableExtraNet:taxableExtraNet,
+  baseGross:base.gross,baseLegalNet:taxableNet-v.taxableExtrasGross,
+  taxableGross:taxableGross,taxableExtrasGross:v.taxableExtrasGross,taxableExtraNet:taxableNet-(taxableGross-v.taxableExtrasGross),
   netBase:estimatedLegalNet,protected:protected,estimatedPfNet:estimatedPfNet,
   garnish:garnish,payout:payout,shiftAllowance:v.shiftAllowance,
   averageUnits:v.averageUnits,averagePay:v.averagePay,
-  allowanceType:a.wech?'Wechselschichtzulage §43':a.schi?'Schichtzulage §43':'keine aus Zeitlohnarten',p:p
+  allowanceType:a.wech?'Wechselschichtzulage §43 (5211)':a.schi?'Schichtzulage §43 (5212)':'keine aus Zeitlohnarten',p:p,
+  deductions:{tax:tax,church:church,soli:soli,pension:pension,unemployment:unemployment,health:health,care:care}
  };
 }
 function renderReportDetails(rep){
  var box=$('reportDetails');if(!box)return;
- var rows=rep.rows.map(function(r){var q=(Number(r.qty)||0).toFixed(2).replace('.',',');return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(r.description)+'</span></span><span class="v">'+q+' h</span></div>';}).join('');
+ var rows=rep.rows.map(function(r){var isAllowance=r.code==='5211'||r.code==='5212',q=isAllowance?'vorhanden':(Number(r.qty)||0).toFixed(2).replace('.',','),unit=isAllowance||r.code==='5161'?'':' h',description=r.known?r.description:'UNBEKANNT – nicht interpretiert';return '<div class="row"><span>'+esc(r.date)+' · '+esc(r.label)+'<br><span class="note">'+esc(r.code+' / '+r.shortCode)+' · '+esc(description)+'</span></span><span class="v">'+q+unit+'</span></div>';}).join('');
  box.innerHTML=rows||'<div class="note">Keine Details.</div>';
 }
+function renderSelectedForecast(rep){
+ var fields=['rMonth','rPayoutMonth','pNettoBasis','pPayout','pBaseNet','pBasePay','pCareAllowance','pUniversityAllowance','pVariableNet','pBrutto','pLegalNet','pProtected','pPfNetto','pGarnish','pShiftAllowance','pSurcharges','pPayoutDetail','pShiftSummary'];
+ if(!rep){
+   fields.forEach(function(id){var el=$(id);if(el)el.textContent='–';});
+   return;
+ }
+ var f=calculateReportForecast(rep,FORECAST_DEPENDENTS);
+ var values={
+   rMonth:formatMonth(rep.year,rep.month),
+   rPayoutMonth:formatMonth(f.payoutYear,f.payoutMonth),
+   pNettoBasis:eur(f.netBase),
+   pPayout:eur(f.payout),
+   pBaseNet:eur(f.baseLegalNet),
+   pBasePay:eur(PAYROLL_MASTER.basePay),
+   pCareAllowance:eur(PAYROLL_MASTER.careAllowance),
+   pUniversityAllowance:eur(PAYROLL_MASTER.universityAllowance),
+   pVariableNet:eur(f.taxableExtraNet),
+   pBrutto:eur(f.taxableGross),
+   pLegalNet:eur(f.netBase),
+   pProtected:eur(f.protected),
+   pPfNetto:eur(f.estimatedPfNet),
+   pGarnish:eur(f.garnish),
+   pShiftAllowance:eur(f.shiftAllowance),
+   pSurcharges:eur(f.taxableExtrasGross+f.protected),
+   pPayoutDetail:eur(f.payout),
+   pShiftSummary:'Zeitnachweis '+(rep.sourceName||formatMonth(rep.year,rep.month))+': '+f.allowanceType+
+     ' · Nacht '+(f.p.nightHours||0).toFixed(2).replace('.',',')+' h'+
+     ' · Sonntag '+(f.p.sunHours||0).toFixed(2).replace('.',',')+' h'+
+     ' · Samstag '+(f.p.saturdayHours||0).toFixed(2).replace('.',',')+' h'+
+     ' · Zuschläge gesamt '+eur(f.taxableExtrasGross+f.protected)
+ };
+ Object.keys(values).forEach(function(id){var el=$(id);if(el)el.textContent=values[id];});
+ renderReportDetails(rep);
+}
+function signedMoney(value){return value==null?'–':(value>=0?'+':'')+eur(value);}
+function renderPayslipComparison(){
+ var box=$('payslipComparison');if(!box)return;
+ var payslips=loadPayslips(),html=[];
+ payslips.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);}).forEach(function(actual){
+   var match=reportStore.map(function(rep){return {forecast:calculateReportForecast(rep,FORECAST_DEPENDENTS)};}).find(function(item){return item.forecast.payoutYear===actual.year&&item.forecast.payoutMonth===actual.month;});
+   var body='<div class="forecast-card"><div class="forecast-head"><b>Echte Abrechnung: '+esc(formatMonth(actual.year,actual.month))+'</b><span class="badge '+(match?'green':'neutral')+'">'+(match?'Prognose zugeordnet':'Keine passende Prognose')+'</span></div>';
+   if(match){
+     var f=match.forecast;
+     body+='<div class="row"><span>Gesamtbrutto</span><span class="v">'+eur(f.taxableGross)+' → '+(actual.gross==null?'–':eur(actual.gross))+' <span class="note">('+signedMoney(actual.gross==null?null:actual.gross-f.taxableGross)+')</span></span></div>';
+     body+='<div class="row"><span>Gesetzliches Netto</span><span class="v">'+eur(f.netBase)+' → '+(actual.net==null?'–':eur(actual.net))+' <span class="note">('+signedMoney(actual.net==null?null:actual.net-f.netBase)+')</span></span></div>';
+     body+='<div class="row"><span>Pfändung</span><span class="v">'+eur(f.garnish)+' → '+(actual.garnish==null?'–':eur(actual.garnish))+' <span class="note">('+signedMoney(actual.garnish==null?null:actual.garnish-f.garnish)+')</span></span></div>';
+     body+='<div class="row"><span>Auszahlung</span><span class="v">'+eur(f.payout)+' → '+(actual.payout==null?'–':eur(actual.payout))+' <span class="note">('+signedMoney(actual.payout==null?null:actual.payout-f.payout)+')</span></span></div>';
+   }else body+='<div class="note">Es wurde noch kein Zeitnachweis gefunden, dessen Auszahlung diesem Monat zugeordnet ist.</div>';
+   html.push(body+'</div>');
+ });
+ box.innerHTML=html.join('')||'<div class="note">Noch keine echte Lohnabrechnung verglichen.</div>';
+}
 function renderForecastTable(){
- var box=$('forecastTableWrap');if(!box)return;var arr=reportStore.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);});if(!arr.length){box.innerHTML='<div class="empty">Noch kein Zeitnachweis eingelesen.</div>';return;}
- var dep=num('pDependents');box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="forecast-card"><div class="forecast-head"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'</span></span><span class="badge '+(f.shiftAllowance?'green':'neutral')+'">'+esc(f.allowanceType)+'</span></div><div class="mini-grid"><div class="mini"><div class="t">Netto</div><div class="n">'+eur(f.estimatedPfNet)+'</div></div><div class="mini"><div class="t">Pfändung</div><div class="n red">'+eur(f.garnish)+'</div></div><div class="mini"><div class="t">Auszahlung</div><div class="n good">'+eur(f.payout)+'</div></div></div></div>';}).join('');renderForecastChart(arr,dep);
+ var box=$('forecastTableWrap');if(!box)return;var arr=reportStore.slice().sort(function(a,b){return (a.year*12+a.month)-(b.year*12+b.month);});if(!arr.length){box.innerHTML='<div class="empty">Noch kein Zeitnachweis eingelesen.</div>';renderSelectedForecast(null);renderForecastChart([],0);return;}
+ var dep=FORECAST_DEPENDENTS;box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep);return '<div class="forecast-card"><div class="forecast-head"><span><b>'+esc(formatMonth(rep.year,rep.month))+'</b><br><span class="note">Auszahlung: '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'</span></span><span class="badge '+(f.shiftAllowance?'green':'neutral')+'">'+esc(f.allowanceType)+'</span></div><div class="mini-grid"><div class="mini"><div class="t">Netto</div><div class="n">'+eur(f.estimatedPfNet)+'</div></div><div class="mini"><div class="t">Pfändung</div><div class="n red">'+eur(f.garnish)+'</div></div><div class="mini"><div class="t">Auszahlung</div><div class="n good">'+eur(f.payout)+'</div></div></div></div>';}).join('');
+ var selected=lastParsedReport&&arr.some(function(rep){return rep.id===lastParsedReport.id;})?lastParsedReport:arr[arr.length-1];
+ lastParsedReport=selected;renderSelectedForecast(selected);renderForecastChart(arr,dep);
 }
 function renderForecastChart(arr,dep){var box=$("forecastChart");if(!box)return;if(!arr.length){box.innerHTML='<div class="empty">Noch keine Prognosen.</div>';return;}var vals=arr.map(function(r){return calculateReportForecast(r,dep).payout;}),max=Math.max.apply(null,vals.concat([1]));box.innerHTML=arr.map(function(rep){var f=calculateReportForecast(rep,dep),h=Math.max(5,Math.round((f.payout/max)*125));return '<div class="bar-wrap"><div class="bar-value">'+eur(f.payout)+'</div><div class="bar" style="height:'+h+'px" title="'+esc(formatMonth(rep.year,rep.month))+' → '+esc(formatMonth(f.payoutYear,f.payoutMonth))+'"></div><div class="bar-label">'+monthName(rep.month).slice(0,3)+'</div></div>';}).join('');}
 function ensurePdfJs(){if(!window.pdfjsLib)throw new Error('PDF-Bibliothek konnte nicht geladen werden. Bitte Internetverbindung prüfen.');window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';return window.pdfjsLib;}
 async function readPdfLines(file){var pdfjs=await ensurePdfJs(),buf=await file.arrayBuffer(),pdf=await pdfjs.getDocument({data:buf}).promise,lines=[];for(var p=1;p<=pdf.numPages;p++){var page=await pdf.getPage(p),tc=await page.getTextContent();lines=lines.concat(groupPdfText(tc.items));}return lines;}
 async function importTimeReports(){var files=$('timeReportFiles')&&$('timeReportFiles').files,status=$('timeReportStatus');if(!files||!files.length){alert('Bitte mindestens einen Zeitnachweis als PDF auswählen.');return;}status.textContent='Zeitnachweis wird ausgelesen …';$('timeReportBtn').disabled=true;var ok=0,errors=[];
  try{for(var i=0;i<files.length;i++){try{var lines=await readPdfLines(files[i]),rep=parseTimeReports(lines);rep.id=rep.year+'-'+String(rep.month+1).padStart(2,'0');rep.sourceName=files[i].name;rep.importedAt=new Date().toISOString();var existing=reportStore.findIndex(function(x){return x.id===rep.id;});if(existing>=0)reportStore[existing]=rep;else reportStore.push(rep);ok++;lastParsedReport=rep;}catch(e){errors.push(files[i].name+': '+e.message);}}
- saveReports(reportStore);if(lastParsedReport)renderReportDetails(lastParsedReport);var preview=$('timeReportPreview');if(preview){preview.classList.remove('hidden');preview.innerHTML='<div class="note"><b>'+ok+' Zeitnachweis(e) übernommen.</b>'+(errors.length?'<br>'+errors.map(esc).join('<br>'):'')+'</div>';}
+ saveReports(reportStore);renderForecastTable();var preview=$('timeReportPreview');if(preview){preview.classList.remove('hidden');preview.innerHTML='<div class="note"><b>'+ok+' Zeitnachweis(e) übernommen.</b>'+(errors.length?'<br>'+errors.map(esc).join('<br>'):'')+'</div>';}
  status.textContent=errors.length?'Import abgeschlossen; einige Dateien konnten nicht vollständig verarbeitet werden.':'Import abgeschlossen. Zeitlohnarten und Zuschläge wurden berechnet.';
  }catch(e){status.textContent='Import fehlgeschlagen: '+e.message;} $('timeReportBtn').disabled=false;}
+async function importPayslips(){
+ var files=$('payslipFiles')&&$('payslipFiles').files,status=$('payslipStatus');
+ if(!files||!files.length){alert('Bitte mindestens eine Bezügemitteilung als PDF auswählen.');return;}
+ status.textContent='Bezügemitteilung wird ausgelesen …';$('payslipBtn').disabled=true;
+ var payslips=loadPayslips(),ok=0,errors=[];
+ try{
+   for(var i=0;i<files.length;i++)try{
+     var actual=parsePayslip(await readPdfLines(files[i]));actual.id=actual.year+'-'+String(actual.month+1).padStart(2,'0');actual.sourceName=files[i].name;actual.importedAt=new Date().toISOString();
+     var existing=payslips.findIndex(function(x){return x.id===actual.id;});if(existing>=0)payslips[existing]=actual;else payslips.push(actual);ok++;
+   }catch(e){errors.push(files[i].name+': '+e.message);}
+   savePayslips(payslips);renderPayslipComparison();
+   status.textContent=errors.length?'Vergleich abgeschlossen; einige Dateien konnten nicht verarbeitet werden.':'Abrechnung erfolgreich verglichen.';
+ }catch(e){status.textContent='Import fehlgeschlagen: '+e.message;}
+ $('payslipBtn').disabled=false;
+}
 function showLatestForecast(){reportStore=loadReports();if(!lastParsedReport&&reportStore.length)lastParsedReport=reportStore[reportStore.length-1];}
 function correctGiro(){var target=num("giroCorrection");if(target<0){alert("Bitte einen gültigen Kontostand eingeben.");return;}var current=currentGiro(),delta=target-current;if(Math.abs(delta)<0.005){$("giroCorrection").value="";alert("Der Kontostand entspricht bereits dem eingegebenen Wert.");return;}bookTransaction(delta,"Kontostand korrigiert","correction",{target:target,cycle:activeCycleKey()});$("giroCorrection").value="";refresh();}
-function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchungen löschen?"))return;["meinGeldplanGiroTx","meinGeldplanCash","meinGeldplanFixItems","meinGeldplanMonthlyFix","meinGeldplanTimeReports"].forEach(function(k){localStorage.removeItem(k);});location.reload();}
+function resetApp(){if(!confirm("Wirklich alle gespeicherten Eingaben und Buchungen löschen?"))return;["meinGeldplanGiroTx","meinGeldplanCash","meinGeldplanFixItems","meinGeldplanMonthlyFix","meinGeldplanTimeReports","meinGeldplanPayslips"].forEach(function(k){localStorage.removeItem(k);});location.reload();}
 function refresh(){renderTx();renderCycleExpenses();updateBudget();sunday();renderOverview();if($('giroCurrent'))$('giroCurrent').textContent=eur(currentGiro());showLatestForecast();if(!$('verlauf').classList.contains('hidden')){renderMonthlyCompare();renderMonthlyChart();}}
 function setDefaultMonth(){if($("pMonth")&&!$("pMonth").value){var d=new Date();$("pMonth").value=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}}
 function init(){
  ensureBase();reportStore=loadReports();setDefaultMonth();renderFixItems();initExactCalculator();
  if($('bCarryCash'))$('bCarryCash').value=cashBalance().toFixed(2);
- if($('incomeBtn'))$('incomeBtn').onclick=addIncome;if($('expenseBtn'))$('expenseBtn').onclick=addExpense;if($('withdrawBtn'))$('withdrawBtn').onclick=withdraw;if($('salaryBtn'))$('salaryBtn').onclick=addSalary;if($('resetBtn'))$('resetBtn').onclick=resetApp;if($('timeReportBtn'))$('timeReportBtn').onclick=importTimeReports;if($('correctionBtn'))$('correctionBtn').onclick=correctGiro;if($('addFixBtn'))$('addFixBtn').onclick=addFixItem;if($('exportBtn'))$('exportBtn').onclick=exportData;if($('importBtn'))$('importBtn').onclick=importData;
+ if($('incomeBtn'))$('incomeBtn').onclick=addIncome;if($('expenseBtn'))$('expenseBtn').onclick=addExpense;if($('withdrawBtn'))$('withdrawBtn').onclick=withdraw;if($('salaryBtn'))$('salaryBtn').onclick=addSalary;if($('resetBtn'))$('resetBtn').onclick=resetApp;if($('timeReportBtn'))$('timeReportBtn').onclick=importTimeReports;if($('payslipBtn'))$('payslipBtn').onclick=importPayslips;if($('correctionBtn'))$('correctionBtn').onclick=correctGiro;if($('addFixBtn'))$('addFixBtn').onclick=addFixItem;if($('exportBtn'))$('exportBtn').onclick=exportData;if($('importBtn'))$('importBtn').onclick=importData;
  if($('openHistoryBtn'))$('openHistoryBtn').onclick=function(){openTab('verlauf');};
- if($('pDependents'))$('pDependents').addEventListener('input',function(){renderForecastTable();if(lastParsedReport)renderReportDetails(lastParsedReport,calculateReportForecast(lastParsedReport,num('pDependents')));});
+ if($('updateBtn'))$('updateBtn').onclick=checkForUpdate;
  document.querySelectorAll('input,select').forEach(function(el){if(el.classList.contains('fix-name')||el.classList.contains('fix-amount')||el.id==='importFile'||el.id==='timeReportFiles')return;el.addEventListener('input',function(){if(el.id==='bCarryCash')saveCash(num('bCarryCash'));refresh();});el.addEventListener('change',function(){if(el.id==='bCarryCash')saveCash(num('bCarryCash'));refresh();});});
  document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){openTab(b.dataset.tab);});});
  openTab('uebersicht');refresh();setInterval(refresh,60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh();});
 }
 
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+if('serviceWorker' in navigator)window.addEventListener('load',function(){
+ navigator.serviceWorker.register('./service-worker.js').then(function(reg){return reg.update();}).catch(function(){/* Offline-Modus bleibt optional. */});
+ navigator.serviceWorker.addEventListener('controllerchange',function(){if(!window.__appReloadedForUpdate){window.__appReloadedForUpdate=true;location.reload();}});
+});
 })();
