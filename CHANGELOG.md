@@ -1,3 +1,9 @@
+# Unreleased
+
+- Nach einer Bargeldabhebung im laufenden Lohnzyklus beginnt die Budgetberechnung am kommenden Sonntag beziehungsweise am früheren Lohntag; dadurch werden Tages- und Wochenbudget vor dem Sonntag bereits korrekt auf den nächsten Abschnitt bezogen.
+- Weitere Abhebungen in späteren Wochen setzen den Budgetanker erneut für den dann kommenden Sonntag.
+- Regressionstests decken Screenshot-Werte, Abhebungen am Lohntag und Folgewochen ab.
+
 # v0.99.55
 
 - Bargeld kann an jedem Wochentag abgehoben werden; die Abhebung wird als Transfer Giro → Bargeld gebucht.

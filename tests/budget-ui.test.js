@@ -13,6 +13,51 @@ test('Budget-UI berechnet Tages- und Wochensatz nach Abhebung neu',()=>{
   assert.equal(result.weeklyBudget,(1520/26)*7);
 });
 
+test('Abhebung vor Sonntag setzt den Budgetanker auf den kommenden Sonntag',()=>{
+  const transactions=[
+    {type:'salary',amount:2100,date:'2026-09-30'},
+    {type:'withdrawal',amount:-70,date:'2026-10-02'}
+  ];
+  const afterFirstWithdrawal=calculateCurrentCycleBudget({
+    giro:522.26,
+    transactions,
+    savings:{positions:[],allocations:[]},
+    today:new Date('2026-10-02T12:00:00')
+  });
+  assert.equal(`${afterFirstWithdrawal.segmentStart.getFullYear()}-${String(afterFirstWithdrawal.segmentStart.getMonth()+1).padStart(2,'0')}-${String(afterFirstWithdrawal.segmentStart.getDate()).padStart(2,'0')}`,'2026-10-04');
+  assert.equal(afterFirstWithdrawal.remainingDays,26);
+  assert.equal(afterFirstWithdrawal.segmentDays,7);
+  assert.equal(Number(afterFirstWithdrawal.dailyBudget.toFixed(2)),20.09);
+  assert.equal(Number(afterFirstWithdrawal.weeklyBudget.toFixed(2)),140.61);
+
+  const afterSecondWithdrawal=calculateCurrentCycleBudget({
+    giro:422.26,
+    transactions:[...transactions,{type:'withdrawal',amount:-100,date:'2026-10-07'}],
+    savings:{positions:[],allocations:[]},
+    today:new Date('2026-10-07T12:00:00')
+  });
+  assert.equal(`${afterSecondWithdrawal.segmentStart.getFullYear()}-${String(afterSecondWithdrawal.segmentStart.getMonth()+1).padStart(2,'0')}-${String(afterSecondWithdrawal.segmentStart.getDate()).padStart(2,'0')}`,'2026-10-11');
+  assert.equal(afterSecondWithdrawal.remainingDays,19);
+  assert.equal(afterSecondWithdrawal.segmentDays,7);
+  assert.equal(Number(afterSecondWithdrawal.dailyBudget.toFixed(2)),22.22);
+  assert.equal(Number(afterSecondWithdrawal.weeklyBudget.toFixed(2)),155.57);
+});
+
+test('Abhebung am Lohntag setzt den Budgetanker ebenfalls auf Sonntag',()=>{
+  const result=calculateCurrentCycleBudget({
+    giro:2030,
+    transactions:[
+      {type:'salary',amount:2100,date:'2026-09-30'},
+      {type:'withdrawal',amount:-70,date:'2026-09-30'}
+    ],
+    savings:{positions:[],allocations:[]},
+    today:new Date('2026-09-30T12:00:00')
+  });
+  assert.equal(`${result.segmentStart.getFullYear()}-${String(result.segmentStart.getMonth()+1).padStart(2,'0')}-${String(result.segmentStart.getDate()).padStart(2,'0')}`,'2026-10-04');
+  assert.equal(result.remainingDays,26);
+  assert.equal(result.segmentDays,7);
+});
+
 test('Reservierte Sparrate wirkt erst ab effectiveFrom auf das Girobudget',()=>{
   const result=calculateCurrentCycleBudget({
     giro:1520,

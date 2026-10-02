@@ -9,7 +9,7 @@ Mein Geldplan ist eine lokale Browser-/PWA-App für Budgetverwaltung, Lohnzyklen
 ### Budget
 - Budgetzyklus beginnt nur mit tatsächlich gebuchter Lohnzahlung.
 - Fixkosten werden innerhalb desselben Zyklus nur einmal abgezogen.
-- Bargeldabhebungen sind Transfers, keine Ausgaben; Sparreservierungen und Rückbuchungen werden gemäß Budget-/Statistikregeln getrennt ausgewiesen. Sie sind jederzeit möglich und werden vom Giro zum Bargeld umgebucht; da die Budgetberechnung das Giro verwendet, sinken Tages- und Wochenbudget unmittelbar mit dem verbleibenden Girostand.
+- Bargeldabhebungen sind Transfers, keine Ausgaben; Sparreservierungen und Rückbuchungen werden gemäß Budget-/Statistikregeln getrennt ausgewiesen. Sie sind jederzeit möglich und werden vom Giro zum Bargeld umgebucht. Nach einer Abhebung im laufenden Lohnzyklus beginnt der nächste Budgetabschnitt am kommenden Sonntag (oder am früheren Lohntag); weitere Abhebungen in späteren Wochen setzen diesen Anker erneut. Tages- und Wochenbudget sinken unmittelbar mit dem verbleibenden Girostand.
 - Prognose, Soll-Abrechnung oder erwartetes Lohndatum dürfen Budgettransaktionen nicht still erzeugen oder verändern.
 
 ### Gehaltsprognose und Abrechnung
