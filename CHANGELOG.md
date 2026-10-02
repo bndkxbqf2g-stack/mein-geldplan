@@ -1,3 +1,9 @@
+# v0.99.58
+
+- Mobiles Navy-/Kobaltblau-Design mit klaren Karten, Symbolen und kompakter Navigation.
+- Wochenbudget, erwartete Löhne und sämtliche Funktionen aus v0.99.57 erhalten.
+- Ergänzende Finanzübersicht und Aktivitäten lesen vorhandene Daten; keine Änderungen an Berechnungen, Speicherformaten oder Cloud-Authentifizierung.
+
 # v0.99.57
 
 - Cloud-Anmeldung auf den aktuell gesendeten 8-stelligen Supabase-Code ausgerichtet.
