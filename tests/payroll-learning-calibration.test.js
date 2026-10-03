@@ -2,12 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildPayrollLearningCalibration,learnedPayoutForForecast} from '../lib/payroll-learning-calibration.js';
 
-function snapshot(month,payoutDifference,{grossConfirmed=true,prior=false,componentMismatch=false}={}){
+function snapshot(month,payoutDifference,{grossConfirmed=true,prior=false,componentMismatch=false,saturdayEveningMismatch=false}={}){
   return {
     payoutMonth:month,
     hasPriorAdjustment:prior,
     rows:[
       {key:'night',comparable:true,confirmed:!componentMismatch},
+      {key:'saturdayEvening',comparable:true,confirmed:!saturdayEveningMismatch},
       {key:'shift',comparable:true,confirmed:true}
     ],
     totals:[
@@ -50,6 +51,17 @@ test('Monate mit Bruttoabweichung oder variabler Lohnartabweichung verunreinigen
     snapshot('2026-10',-100,{componentMismatch:true}),
     snapshot('2026-11',-4),
     snapshot('2026-12',-6)
+  ];
+  const result=buildPayrollLearningCalibration(history);
+  assert.equal(result.payout.observations,2);
+  assert.equal(result.payout.adjustment,-5);
+});
+
+test('Abweichung bei 5034 verunreinigt die Auszahlungskalibrierung',()=>{
+  const history=[
+    snapshot('2026-09',-100,{saturdayEveningMismatch:true}),
+    snapshot('2026-10',-4),
+    snapshot('2026-11',-6)
   ];
   const result=buildPayrollLearningCalibration(history);
   assert.equal(result.payout.observations,2);
