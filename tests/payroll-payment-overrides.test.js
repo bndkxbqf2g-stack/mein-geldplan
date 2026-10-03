@@ -34,7 +34,7 @@ test('Zahlungsmonatskorrekturen bleiben lokal speicherbar und defensiv normalisi
   const storage=memoryStorage();
   const defaults=getPayrollPaymentOverrides(storage);
   assert.deepEqual(defaults,DEFAULT_PAYROLL_PAYMENT_OVERRIDES);
-  const custom=[{id:'x',originMonth:'2026-07',plannedPaymentMonth:'2026-09',actualPaymentMonth:'2026-11',reason:'Test'}];
+  const custom=[{id:'x',originMonth:'2026-07',plannedPaymentMonth:'2026-09',actualPaymentMonth:'2026-11',oneTime:true,reason:'Test'}];
   assert.equal(savePayrollPaymentOverrides(custom,storage),true);
   assert.deepEqual(getPayrollPaymentOverrides(storage),custom);
   assert.notEqual(storage.getItem(storageKeys.payrollPaymentOverrides),null);
