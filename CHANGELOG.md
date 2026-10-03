@@ -1,3 +1,9 @@
+# v0.99.61
+
+- Kontrollkarten fassen erwartete, bereits berücksichtigte und offene Zuschläge nach steuerfrei/steuerpflichtig zusammen.
+- Leistungsmonat, tatsächlicher Auszahlungsmonat, einmalige Verzögerung und Nettoeffekt werden je Karte nachvollziehbar ausgewiesen.
+- Juli 2026 (einmalig September → Oktober) und August 2026 (regulär M+2) bleiben getrennt sichtbar.
+
 # v0.99.60
 
 - Hinterlegt eine einmalige, nachvollziehbare Zahlungsmonatskorrektur für den Juli-2026-Zeitnachweis: geplant September, tatsächliche Auszahlung Oktober.
