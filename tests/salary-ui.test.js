@@ -58,7 +58,7 @@ test('alte gespeicherte September-Prognose wird einmalig mit aktuellen Regeln ne
   });
   assert.equal(result.changed,true);
   assert.equal(saved.length,1);
-  assert.equal(saved[0].forecastModel,3);
+  assert.equal(saved[0].forecastModel,4);
   assert.equal(saved[0].payout,2831.13);
   assert.equal(saved[0].baselinePayout,2657.94);
   assert.equal(saved[0].netEffects.totalNet,173.19);
@@ -66,7 +66,7 @@ test('alte gespeicherte September-Prognose wird einmalig mit aktuellen Regeln ne
 
 test('aktuelle Prognose wird nicht bei jedem App-Start erneut gespeichert',async()=>{
   let persisted=false;
-  const current={forecastModel:3,payoutMonth:'2026-09',reportMonth:'2026-07',payout:2831.13};
+  const current={forecastModel:4,payoutMonth:'2026-10',standardPayoutMonth:'2026-09',reportMonth:'2026-07',payout:2831.13};
   const result=await refreshStoredSalaryForecasts({
     forecasts:[current],
     calculator:async()=>{throw new Error('darf nicht neu rechnen');},

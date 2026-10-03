@@ -1,3 +1,9 @@
+# v0.99.60
+
+- Hinterlegt eine einmalige, nachvollziehbare Zahlungsmonatskorrektur für den Juli-2026-Zeitnachweis: geplant September, tatsächliche Auszahlung Oktober.
+- Leistungsmonat und Auszahlungsmonat bleiben getrennt; mehrere Prognosen im selben Auszahlungsmonat werden nicht mehr überschrieben.
+- Die reguläre M+2-Regel, Netto-/Steuer-/SV-/VBL-Logik und Rückrechnungszuordnung bleiben unverändert.
+
 # v0.99.59
 
 - Zeitnachweis- und Bezügemitteilungs-Importe sind für iOS/Safari gehärtet: `FileReader` greift bei fehlendem, fehlerhaftem oder leerem `File.arrayBuffer()` ein; PDF-Seitenumbrüche bleiben echte Zeilenumbrüche.
