@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { salaryMonthLabel, comparisonLabel, restoreReportFromForecast, refreshStoredSalaryForecasts, salaryDisplayPayout } from '../lib/salary-ui.js';
+import { salaryMonthLabel, comparisonLabel, restoreReportFromForecast, refreshStoredSalaryForecasts, salaryDisplayPayout, processTimeReportFiles } from '../lib/salary-ui.js';
 
 test('salary month label formatiert YYYY-MM als MM/YYYY',()=>assert.equal(salaryMonthLabel('2026-09'),'09/2026'));
 test('comparison label unterscheidet Treffer, Abweichung und Prüfung',()=>{
@@ -95,4 +95,48 @@ test('Gehaltsprognose kann stabile Lernhistorie auf zukünftige Auszahlung anwen
   },learning);
   assert.equal(result.applied,true);
   assert.equal(result.payout,2803.94);
+});
+
+test('Zeitnachweis-Import verarbeitet mehrere Dateien getrennt und markiert unbekannte Lohnarten',async()=>{
+  const stored=[];
+  const results=await processTimeReportFiles([
+    {name:'gut.pdf',text:'gut'},
+    {name:'leer.pdf',empty:true},
+    {name:'unbekannt.pdf',text:'unbekannt'},
+    {name:'defekt.pdf',broken:true}
+  ],{
+    read:async file=>{
+      if(file.broken)throw new Error('FileReader konnte Datei nicht lesen');
+      return file.empty?{text:'',needsOcr:true}:{text:file.text,needsOcr:false};
+    },
+    parse:text=>text==='unbekannt'
+      ?{month:{year:2026,month:4},payoutMonth:'2026-06',items:[{code:'5010',hours:1,status:'ok'}],unknownCodes:[{code:'5999',status:'review'}],needsReview:true}
+      :{month:{year:2026,month:4},payoutMonth:'2026-06',items:[{code:'5010',hours:1,status:'ok'}],unknownCodes:[],needsReview:false},
+    calculate:async report=>({payout:1,taxFreePay:4.58,needsReview:Boolean(report.needsReview),components:{shift:'none',pay:{shift:0},unpriced:[]}}),
+    effects:async()=>null,
+    store:async report=>{stored.push(report);}
+  });
+  assert.equal(results.length,4);
+  assert.equal(results[0].error,null);
+  assert.equal(results[0].report.payoutMonth,'2026-06');
+  assert.equal(results[1].stage,'textExtract');
+  assert.equal(results[2].error,null);
+  assert.equal(results[2].warnings[0].stage,'review');
+  assert.equal(results[3].stage,'fileRead');
+  assert.equal(stored.length,2);
+});
+
+test('Zeitnachweis ohne Monat oder ohne verwertbare Lohnart wird nicht als Nullprognose gespeichert',async()=>{
+  const stored=[];
+  const results=await processTimeReportFiles([{name:'monat.pdf',text:'monat'},{name:'unbekannt.pdf',text:'unbekannt'}],{
+    read:async file=>({text:file.text}),
+    parse:text=>text==='monat'
+      ?{month:null,items:[{code:'5010',hours:1}],unknownCodes:[]}
+      :{month:{year:2026,month:4},items:[],unknownCodes:[{code:'5999'}]},
+    calculate:async()=>({components:{pay:{shift:0},unpriced:[]}}),
+    store:async report=>stored.push(report)
+  });
+  assert.equal(results[0].stage,'month');
+  assert.equal(results[1].stage,'wageType');
+  assert.equal(stored.length,0);
 });

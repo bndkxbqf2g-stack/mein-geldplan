@@ -264,3 +264,128 @@ test("anonymisierte März-, April- und Mai-Zeitnachweise behalten die echten Loh
     assert.equal(report.items.some(item => item.code === "5212"), true);
   }
 });
+
+test("arrayBuffer mit leerem Ergebnis fällt auf FileReader zurück", async () => {
+  const previousReader = globalThis.FileReader;
+  const previousPdfjs = globalThis.pdfjsLib;
+  const hadReader = Object.prototype.hasOwnProperty.call(globalThis, "FileReader");
+  const hadPdfjs = Object.prototype.hasOwnProperty.call(globalThis, "pdfjsLib");
+  const bytes = new Uint8Array([4, 5, 6]).buffer;
+  globalThis.FileReader = class {
+    readAsArrayBuffer() { this.result = bytes; this.onload(); }
+  };
+  globalThis.pdfjsLib = {
+    GlobalWorkerOptions: {},
+    getDocument({data}) {
+      assert.deepEqual([...data], [4, 5, 6]);
+      return {promise: Promise.resolve({numPages:1,getPage:async()=>({getTextContent:async()=>({items:[{str:"5010 Nachtarbeit 1,00"}]})})})};
+    }
+  };
+  try {
+    const result = await readPdfText({arrayBuffer: async () => new ArrayBuffer(0)});
+    assert.equal(result.text, "5010 Nachtarbeit 1,00");
+  } finally {
+    if (hadReader) globalThis.FileReader = previousReader; else delete globalThis.FileReader;
+    if (hadPdfjs) globalThis.pdfjsLib = previousPdfjs; else delete globalThis.pdfjsLib;
+  }
+});
+
+test("leere oder fehlerhafte Dateidaten werden als Dateilesefehler gemeldet", async () => {
+  const previousReader = globalThis.FileReader;
+  const previousPdfjs = globalThis.pdfjsLib;
+  const hadReader = Object.prototype.hasOwnProperty.call(globalThis, "FileReader");
+  const hadPdfjs = Object.prototype.hasOwnProperty.call(globalThis, "pdfjsLib");
+  globalThis.FileReader = class {
+    readAsArrayBuffer() { this.error = new Error("leer"); this.onerror(); }
+  };
+  globalThis.pdfjsLib = {GlobalWorkerOptions:{},getDocument:()=>({promise:Promise.resolve({numPages:1})})};
+  try {
+    await assert.rejects(
+      () => readPdfText({arrayBuffer: async () => { throw new Error("arrayBuffer defekt"); }}),
+      error => error.importStage === "fileRead" && /Datei konnte nicht gelesen werden/.test(error.message)
+    );
+  } finally {
+    if (hadReader) globalThis.FileReader = previousReader; else delete globalThis.FileReader;
+    if (hadPdfjs) globalThis.pdfjsLib = previousPdfjs; else delete globalThis.pdfjsLib;
+  }
+});
+
+test("leere PDF-Textseiten bleiben erkennbar und werden nicht als Lohnart geschätzt", async () => {
+  const previousPdfjs = globalThis.pdfjsLib;
+  const hadPdfjs = Object.prototype.hasOwnProperty.call(globalThis, "pdfjsLib");
+  globalThis.pdfjsLib = {
+    GlobalWorkerOptions: {},
+    getDocument: () => ({promise: Promise.resolve({numPages:1,getPage:async()=>({getTextContent:async()=>({items:[]})})})})
+  };
+  try {
+    const result = await readPdfText({arrayBuffer: async () => new Uint8Array([1]).buffer});
+    assert.equal(result.needsOcr, true);
+    assert.equal(result.text, "");
+  } finally {
+    if (hadPdfjs) globalThis.pdfjsLib = previousPdfjs; else delete globalThis.pdfjsLib;
+  }
+});
+
+test("UKW-Lohnarten 5026, 5030 und 5034 werden ohne Lohnartenverlust erkannt", () => {
+  const text = [
+    "Z E I T N A C H W E I S Mitarbeiter Jul 26",
+    "11.07.2026 20:00 21:00 5Q34 5034: Sa 20-21 Uhr 1,00",
+    "12.07.2026 21:00 21:42 3A26 5026: Sonntag und Nacht 0,70",
+    "15.07.2026 06:00 10:00 3A30 5030: Feiertagszuschlag 4,00"
+  ].join("\n");
+  const report = parseTimeReportText(text);
+  assert.deepEqual(report.items.map(item => [item.code,item.type,item.status]), [
+    ["5034","saturdayEvening","ok"],
+    ["5026","sundayNight","ok"],
+    ["5030","holiday","review"]
+  ]);
+  assert.equal(report.unknownCodes.length, 0);
+  assert.equal(report.needsReview, true);
+});
+
+test("PDF.js nutzt bei iPhone-Ladefehlern eine zweite Quelle und lädt nur einmal parallel", async () => {
+  const previousDocument = globalThis.document;
+  const previousPdfjs = globalThis.pdfjsLib;
+  const hadDocument = Object.prototype.hasOwnProperty.call(globalThis, "document");
+  const hadPdfjs = Object.prototype.hasOwnProperty.call(globalThis, "pdfjsLib");
+  let appended = 0;
+  const makeScript = () => {
+    const listeners = new Map();
+    return {
+      src: "",
+      async: false,
+      dataset: {},
+      addEventListener(type, handler) { listeners.set(type, handler); },
+      removeEventListener(type) { listeners.delete(type); },
+      remove() {},
+      dispatch(type) { listeners.get(type)?.(); }
+    };
+  };
+  globalThis.document = {
+    querySelector: () => null,
+    createElement: () => makeScript(),
+    head: {
+      appendChild(script) {
+        appended++;
+        queueMicrotask(() => {
+          if (appended === 1) script.dispatch("error");
+          else {
+            globalThis.pdfjsLib = {GlobalWorkerOptions:{},getDocument(){}};
+            script.dispatch("load");
+          }
+        });
+      }
+    }
+  };
+  delete globalThis.pdfjsLib;
+  try {
+    const [first,second] = await Promise.all([import("../lib/pdf.js"),import("../lib/pdf.js")]);
+    const [a,b] = await Promise.all([first.ensurePdfJs(),second.ensurePdfJs()]);
+    assert.equal(a,b);
+    assert.equal(appended,2);
+    assert.match(a.GlobalWorkerOptions.workerSrc,/unpkg\.com\/pdfjs-dist/);
+  } finally {
+    if (hadDocument) globalThis.document = previousDocument; else delete globalThis.document;
+    if (hadPdfjs) globalThis.pdfjsLib = previousPdfjs; else delete globalThis.pdfjsLib;
+  }
+});

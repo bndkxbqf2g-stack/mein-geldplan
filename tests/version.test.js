@@ -13,6 +13,8 @@ test('sichtbare App-Version und Service-Worker-Version stimmen überein',()=>{
   assert.match(APP_VERSION,/^\d+\.\d+\.\d+$/);
   assert.ok(html.includes(`id="appVersion">v${APP_VERSION}`));
   assert.ok(html.includes(`app.js?v=${APP_VERSION}`));
+  assert.ok(html.includes('import(`./lib/salary-ui.js?v=${APP_VERSION}`)') || fs.readFileSync(path.join(root,'app.js'),'utf8').includes('import(`./lib/salary-ui.js?v=${APP_VERSION}`)'));
   assert.ok(sw.includes(`mein-geldplan-v${APP_VERSION}`));
   assert.ok(sw.includes(`app.js?v=${APP_VERSION}`));
+  for(const module of ['salary-ui.js','salary-payslip-ui.js','salary-net-effects.js','salary.js'])assert.ok(sw.includes(`./lib/${module}?v=${APP_VERSION}`),module);
 });
