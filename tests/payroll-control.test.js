@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,payrollDisplayedNetDifference,retroForForecast,visiblePayrollControls,payrollControlSummary} from '../lib/payroll-control.js';
+import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,groupPayrollControlsByPayoutMonth,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,payrollDisplayedNetDifference,retroForForecast,visiblePayrollControls,payrollControlSummary} from '../lib/payroll-control.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -308,4 +308,15 @@ test('Kontrollkarte fasst Zuschläge nach Steuerstatus und Status nachvollziehba
   assert.equal(summary.expectedTaxableGross,100.77);
   assert.equal(summary.openTotalGross,242.90);
   assert.equal(summary.netImpact,168.57);
+});
+
+
+test('mehrere Leistungsmonate werden in genau einer Monatskachel zusammengefasst',()=>{
+  const controls=[
+    {payoutMonth:'2026-10',label:'Oktober 2026',reportMonth:'2026-07',expectedGross:4723.33,expectedPayout:2847.50,expectedVariableGross:242.90,status:'waiting'},
+    {payoutMonth:'2026-10',label:'Oktober 2026',reportMonth:'2026-08',expectedGross:4788.14,expectedPayout:2808.94,expectedVariableGross:307.71,status:'waiting'},
+    {payoutMonth:'2026-09',label:'September 2026',reportMonth:'2026-07',status:'waiting'}
+  ];
+  const groups=groupPayrollControlsByPayoutMonth(controls);
+  assert.deepEqual(groups.map(group=>[group.payoutMonth,group.controls.length]),[['2026-10',2],['2026-09',1]]);
 });
