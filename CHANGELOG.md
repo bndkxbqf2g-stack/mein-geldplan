@@ -1,3 +1,9 @@
+# v0.99.62
+
+- Gesamtnetto der Gehaltsprognose zeigt jetzt ausdrücklich die erwartete Auszahlung inklusive Zuschlags-Nachzahlung.
+- Steuerfreie Zuschläge werden netto, steuerpflichtige Zuschläge brutto und als daraus berechneter Nettoeffekt ausgewiesen.
+- Leistungsmonat, regulärer Septemberbezug und die tatsächliche Oktober-Auszahlung bleiben getrennt nachvollziehbar.
+
 # v0.99.61
 
 - Kontrollkarten fassen erwartete, bereits berücksichtigte und offene Zuschläge nach steuerfrei/steuerpflichtig zusammen.

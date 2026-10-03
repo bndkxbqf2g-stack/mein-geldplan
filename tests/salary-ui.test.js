@@ -1,8 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { salaryMonthLabel, comparisonLabel, restoreReportFromForecast, refreshStoredSalaryForecasts, salaryDisplayPayout, processTimeReportFiles } from '../lib/salary-ui.js';
+import { salaryMonthLabel, comparisonLabel, restoreReportFromForecast, refreshStoredSalaryForecasts, salaryDisplayPayout, summarizeForecastNet, processTimeReportFiles } from '../lib/salary-ui.js';
 
 test('salary month label formatiert YYYY-MM als MM/YYYY',()=>assert.equal(salaryMonthLabel('2026-09'),'09/2026'));
+
+test('Gesamtnetto enthält Zuschlags-Nachzahlung mit steuerfreier und steuerpflichtiger Aufteilung',()=>{
+  const summary=summarizeForecastNet({baselinePayout:2657.94,payout:2831.13,components:{night:98.01,saturday:0.77,sunday:44.12,holiday:0,shift:100},netEffects:{totalNet:173.19,taxFreeNet:142.13}},2831.13,[]);
+  assert.equal(summary.totalNet,2831.13);
+  assert.equal(summary.surchargeNet,173.19);
+  assert.equal(summary.taxFreeNet,142.13);
+  assert.equal(summary.taxableGross,100.77);
+  assert.equal(summary.taxableNet,31.06);
+});
 test('comparison label unterscheidet Treffer, Abweichung und Prüfung',()=>{
   assert.equal(comparisonLabel('ok'),'Prognose trifft Abrechnung');
   assert.equal(comparisonLabel('different'),'Abweichung erkannt');
