@@ -48,6 +48,12 @@ test('Einspring-Stundenentgelt wird aus persönlicher KR-Stufe abgeleitet',()=>{
   assert.equal(springInHourlyRate(),25.25);
 });
 
+test('null oder fehlende Einspringdaten führen nicht zum Absturz',()=>{
+  assert.deepEqual(springInPay(null),{duties:0,hours:0,hourlyRate:25.25,premium:0,hourly:0,total:0});
+  const c=reportComponents({items:null,springIn:null});
+  assert.equal(c.pay.springIn,0);
+});
+
 test('Einspringprämie besteht aus 150 Euro je Dienst plus Stundenentgelt',()=>{
   assert.deepEqual(springInPay({duties:1,hours:7.7}),{duties:1,hours:7.7,hourlyRate:25.25,premium:150,hourly:194.43,total:344.43});
 });
@@ -75,6 +81,22 @@ test('§21-Durchschnitt wird sichtbar als nicht automatisch berechenbar geführt
   assert.equal(c.average21Days,2);
   assert.equal(c.unpriced.length,1);
   assert.equal(c.needsReview,true);
+});
+
+test('UKW-Codes werden nach der mein-geldplan-Tariflogik berechnet und Unklares bleibt offen',()=>{
+  const c=reportComponents({items:[
+    {code:'5034',type:'saturdayEvening',hours:1},
+    {code:'5026',type:'sundayNight',hours:.7},
+    {code:'5030',type:'holiday',hours:4}
+  ]});
+  assert.equal(c.pay.saturdayEvening,.64);
+  assert.equal(c.hours.sundayNight,.7);
+  assert.equal(c.pay.sunday,4.01);
+  assert.equal(c.taxableExtra,.64);
+  assert.equal(c.taxFreePay,4.01);
+  assert.equal(c.unpriced[0].code,'5030');
+  assert.equal(c.needsReview,true);
+  assert.equal(salaryForecastBreakdown({items:[{code:'5034',type:'saturdayEvening',hours:1}]}).timeSurcharges.find(row=>row.key==='saturdayEvening').taxFree,false);
 });
 
 test('Schichtzulage wird pro Monat nur einmal angesetzt, auch wenn der Code doppelt vorkommt',()=>{

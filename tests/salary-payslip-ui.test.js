@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildUpdatedPayrollLearning} from '../lib/salary-payslip-ui.js';
+import {buildUpdatedPayrollLearning,processPayslipFiles} from '../lib/salary-payslip-ui.js';
 
 function forecast(){
   return {
@@ -60,4 +60,28 @@ test('Workflow übernimmt spätere Rückrechnung in den passenden Lernsnapshot',
   assert.equal(history[0].componentSource,'retro');
   assert.equal(history[0].rows.find(row=>row.key==='night').confirmed,true);
   assert.equal(history[0].rows.find(row=>row.key==='shift').confirmed,true);
+});
+
+test('Bezügemitteilungs-Import zeigt den Fehler je Datei und verarbeitet weitere Dateien',async()=>{
+  const stored=[];
+  const results=await processPayslipFiles([
+    {name:'ok.pdf',text:'ok'},
+    {name:'ohne-monat.pdf',text:'monat'},
+    {name:'defekt.pdf',broken:true}
+  ],{
+    read:async file=>{
+      if(file.broken)throw new Error('Datei konnte nicht gelesen werden');
+      return {text:file.text};
+    },
+    parse:text=>text==='ok'
+      ?{month:'2026-06',totalGross:4480.43,legalNet:null,payout:null,needsReview:true}
+      :{month:null,needsReview:true},
+    store:async actual=>stored.push(actual)
+  });
+  assert.equal(results.length,3);
+  assert.equal(results[0].error,null);
+  assert.equal(results[0].warnings[0].stage,'review');
+  assert.equal(results[1].stage,'month');
+  assert.equal(results[2].stage,'fileRead');
+  assert.equal(stored.length,1);
 });

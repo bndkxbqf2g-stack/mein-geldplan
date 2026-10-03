@@ -1,3 +1,11 @@
+# v0.99.59
+
+- Zeitnachweis- und Bezügemitteilungs-Importe sind für iOS/Safari gehärtet: `FileReader` greift bei fehlendem, fehlerhaftem oder leerem `File.arrayBuffer()` ein; PDF-Seitenumbrüche bleiben echte Zeilenumbrüche.
+- Mehrere Dateien werden unabhängig ausgewertet. Fehlermeldungen nennen Datei und Importstufe (Datei lesen, PDF verarbeiten, Text extrahieren, Monat, Lohnart, Berechnung, Speichern oder Anzeige); unklare Werte bleiben UNSICHER / PRÜFEN.
+- UKW-Lohnarten 5026, 5030 und 5034 sind in die vorhandene KR8-/Stufe-3-Tariflogik eingeordnet. 5030 bleibt ohne eindeutige Feiertags-/Freizeitausgleichsangabe fachlich offen.
+- Regressionstests schützen Monatszuordnung, Auszahlung M+2, Null-/Leerfälle, Seitenumbrüche, mehrere PDFs und die bestehende KR8/5-, VBL- und Pfändungslogik.
+- App-, Service-Worker- und Cache-Version gemeinsam auf `0.99.59` angehoben.
+
 # v0.99.58
 
 - Mobiles Navy-/Kobaltblau-Design mit klaren Karten, Symbolen und kompakter Navigation.

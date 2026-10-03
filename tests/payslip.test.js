@@ -53,6 +53,14 @@ test('meldet relevante Abweichungen', () => {
   assert.ok(c.maxAbsDiff > 1);
 });
 
+test('Bezügemitteilung ordnet 5026 und 5034 eigenen Komponenten zu',()=>{
+  const c=parsePayslipComponents('5026 Sonntag und Nacht 4,01\n5034 Samstag 20-21 Uhr 0,64');
+  assert.equal(c.sunday,4.01);
+  assert.equal(c.saturdayEvening,.64);
+  assert.equal(c.saturday,null);
+  assert.equal(c.hasVariableDetail,true);
+});
+
 
 test('liest Rückrechnungsperioden mit variablen Bezügen getrennt aus',()=>{
   const doc=parsePayslipDocument(`Aktuelle Abrechnungsperiode
