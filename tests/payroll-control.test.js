@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,payrollDisplayedNetDifference,retroForForecast,visiblePayrollControls} from '../lib/payroll-control.js';
+import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,payrollDisplayedNetDifference,retroForForecast,visiblePayrollControls,payrollControlSummary} from '../lib/payroll-control.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -290,4 +290,22 @@ test('Netto-Differenz fällt ohne sichere Nachberechnung auf die reine Auszahlun
     payrollDisplayedNetDifference({status:'open',payoutDifference:-189.56},null),
     -189.56
   );
+});
+
+
+test('Kontrollkarte fasst Zuschläge nach Steuerstatus und Status nachvollziehbar zusammen',()=>{
+  const summary=payrollControlSummary({
+    variableRows:[
+      {key:'night',tax:'steuerfrei',expected:98.01,actual:0,open:98.01,retro:0},
+      {key:'sunday',tax:'steuerfrei',expected:44.12,actual:0,open:44.12,retro:0},
+      {key:'saturday',tax:'steuerpflichtig',expected:.77,actual:0,open:.77,retro:0},
+      {key:'shift',tax:'steuerpflichtig',expected:100,actual:0,open:100,retro:0}
+    ],
+    estimatedNetImpact:168.57
+  });
+  assert.equal(summary.expectedVariableGross,242.90);
+  assert.equal(summary.expectedTaxFreeGross,142.13);
+  assert.equal(summary.expectedTaxableGross,100.77);
+  assert.equal(summary.openTotalGross,242.90);
+  assert.equal(summary.netImpact,168.57);
 });
