@@ -452,6 +452,13 @@
 
 # Changelog
 
+## v0.99.63
+
+- Die Gehaltskontrolle zeigt pro Auszahlungsmonat genau eine kompakte Kachel.
+- Mehrere Leistungsmonate desselben Zahlungsmonats werden zusammengefasst; Zuschläge, steuerfreie/steuerpflichtige Anteile, Nachzahlungen und Nettoeffekt bleiben je Ursprungsmonat nachvollziehbar.
+- Die Prognoseauszahlung zählt das feste Monatsentgelt nur einmal und addiert die Zuschläge des Zahlungsmonats ohne Doppelzählung.
+
+
 ## v0.99.1 – Release Candidate
 - Keine neuen Fachfunktionen.
 - Gesamtcheck für Repo-Root, PWA-Versionierung, Service Worker und Test-Suite.
