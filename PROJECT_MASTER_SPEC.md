@@ -16,6 +16,7 @@ Mein Geldplan ist eine lokale Browser-/PWA-App für Budgetverwaltung, Lohnzyklen
 - Prognose entsteht aus importiertem Zeitnachweis und versionierter Konfiguration.
 - Feste Bezüge, Schicht-/Wechselschichtzulagen und Zeit-/Zeitzuschläge bleiben getrennt nachvollziehbar.
 - Prognosemonat, Leistungsmonat und Auszahlungsmonat müssen unterscheidbar sein. Das implementierte README beschreibt derzeit den Auszahlungstermin als Leistungsmonat + 2 Monate; Änderungen müssen vorhandene gespeicherte Prognosen und Migrationen berücksichtigen.
+- Die Kachel „Erwartete Löhne“ zeigt je Auszahlungsmonat die gesamte erwartete Nettozahlung: feste Nettobasis nur einmal, Nettoeffekte aller diesem Auszahlungsmonat zugeordneten Zeitnachweis-Zuschläge und offene, rechnerisch belegte Netto-Nachzahlungen aus früheren Monaten. Solche offenen Beträge werden dem nächsten noch nicht abgerechneten Auszahlungsmonat einmalig zugerechnet und nach tatsächlicher Rückrechnung ausgeglichen; derselbe Zuschlag darf weder doppelt erscheinen noch verloren gehen.
 - Echte Bezügemitteilungen sind Ist-Belege. Soll-/Ist-Differenzen, offene Netto-Nachzahlungen und spätere Rückrechnungen werden nachvollziehbar geführt und dem Ursprungszeitraum zugeordnet.
 - Fehlende oder nicht extrahierbare Bezügebestandteile bleiben unbekannt (`null`), statt als null Euro in die Summe eingerechnet zu werden.
 - Payroll-Lernhistorie darf zukünftige Auszahlungsprognosen konservativ kalibrieren, aber keine Tarif-, Steuer-, Sozialversicherungs- oder Pfändungsregeln automatisch umschreiben.
