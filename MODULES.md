@@ -20,7 +20,7 @@ Kleine gemeinsame DOM-/Format-/Navigation-Helfer.
 Kleine, getrennte Fixkostenlogik und Verwaltung. Die Lohnbuchung liest ausschließlich die gespeicherte Summe. Die UI verwendet kompakte Karten, eine dreiteilige Zusammenfassung und einklappbare einmalige Anpassungen für den nächsten Lohnzyklus.
 
 ### `lib/history-ui.js`
-Übersicht, Kontoverlauf, Monatsvergleich und Abhebungsanzeige. Keine eigene Fachberechnung.
+Übersicht, Kontoverlauf, Monatsvergleich und Abhebungsanzeige. Die Kachel „Erwartete Löhne“ fasst mehrere Leistungsmonate desselben Auszahlungsmonats als eine Nettozahlung zusammen: feste Nettobasis einmalig, variable Nettoeffekte addiert und belegte offene Nachzahlungen einmalig in den nächsten noch nicht abgerechneten Monat übernommen. Keine eigene Steuer-/Tarifberechnung.
 
 ### `lib/maintenance-ui.js`
 Backup/Restore, Service-Worker-Registrierung und Updateprüfung.

@@ -127,3 +127,44 @@ test('Übersicht rechnet offene September-Nachzahlung in die Oktober-Prognose ei
   assert.equal(slots[1].regularPayout,2773.72);
   assert.equal(slots[1].carryover,173.19);
 });
+
+test('Übersicht fasst Grundnetto nur einmal zusammen und addiert alle Zuschläge aus demselben Auszahlungsmonat netto',()=>{
+  const fixed={basePay:2500,careAllowance:50,universityAllowance:50};
+  const makeForecast=({reportMonth,standardPayoutMonth,payout,shift,override=false})=>({
+    payoutMonth:'2026-10',
+    reportMonth,
+    standardPayoutMonth,
+    paymentMonthOverride:override?{reason:'einmalige Verzögerung'}:null,
+    totalGross:2600+shift,
+    baselineGross:2600,
+    baselinePayout:2500,
+    payout,
+    netEffects:{complete:true,totalNet:payout-2500},
+    reportItems:[{code:shift===100?'5212':'5211'}],
+    components:{fixed,night:0,saturday:0,saturdayEvening:0,sunday:0,holiday:0,shift,shiftType:shift===100?'schicht':'wechsel',springIn:0,unpriced:[],springInVblUnverified:false},
+    needsReview:false
+  });
+  const slots=expectedSalarySlots({
+    today:new Date(2026,9,4,12,0,0),
+    transactions:[],
+    forecasts:[
+      makeForecast({reportMonth:'2026-07',standardPayoutMonth:'2026-09',payout:2600,shift:100,override:true}),
+      makeForecast({reportMonth:'2026-08',standardPayoutMonth:'2026-10',payout:2800,shift:300})
+    ],
+    payslips:[],
+    learning:[]
+  });
+  assert.equal(slots[0].payoutMonth,'2026-10');
+  assert.equal(slots[0].payout,2900);
+  assert.equal(slots[0].regularPayout,2900);
+  assert.deepEqual(slots[0].reportMonths,['2026-07','2026-08']);
+  assert.equal(slots[0].status,'forecast');
+});
+
+test('Übersicht markiert den Monatsbetrag zur Prüfung, wenn eine Zusatzprognose keinen belastbaren Nettoeffekt hat',()=>{
+  const base={payoutMonth:'2026-10',reportMonth:'2026-08',standardPayoutMonth:'2026-10',baselinePayout:2500,payout:2700,baselineGross:2600,totalGross:2700,components:{fixed:{basePay:2500},night:0,shift:100,unpriced:[]},reportItems:[{code:'5212'}],needsReview:false};
+  const extra={...base,reportMonth:'2026-07',standardPayoutMonth:'2026-09',paymentMonthOverride:{reason:'einmalige Verzögerung'},baselinePayout:null,netEffects:null};
+  const slot=expectedSalarySlots({today:new Date(2026,9,4,12,0,0),forecasts:[base,extra]})[0];
+  assert.equal(slot.payout,null);
+  assert.equal(slot.status,'review');
+});

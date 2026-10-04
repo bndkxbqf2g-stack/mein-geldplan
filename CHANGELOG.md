@@ -452,7 +452,13 @@
 
 # Changelog
 
-## v0.99.63
+## v0.99.64
+
+- „Erwartete Löhne“ fasst mehrere Zeitnachweise desselben Auszahlungsmonats zu einer Nettozahlung zusammen: festes Grundnetto einmalig plus sämtliche Netto-Zuschlagseffekte.
+- Rechnerisch offene Zuschläge aus tatsächlichen Abrechnungen werden bis zur verbuchten Rückrechnung einmalig in den nächsten noch nicht abgerechneten Monat übernommen.
+- Fehlt bei mehreren Prognosen ein belastbarer Nettoeffekt, wird die Summe als prüfbedürftig angezeigt statt unvollständig zu wirken.
+
+# v0.99.63
 
 - Die Gehaltskontrolle zeigt pro Auszahlungsmonat genau eine kompakte Kachel.
 - Mehrere Leistungsmonate desselben Zahlungsmonats werden zusammengefasst; Zuschläge, steuerfreie/steuerpflichtige Anteile, Nachzahlungen und Nettoeffekt bleiben je Ursprungsmonat nachvollziehbar.
