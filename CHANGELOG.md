@@ -1,3 +1,9 @@
+# v0.99.65
+
+- Eine Bargeldabhebung am Sonntag setzt jetzt ebenfalls den nächsten Budgetabschnitt als Anzeigeanker.
+- Bei einer Abhebung am 04.10.2026 wird dadurch sofort der Folgeabschnitt 11.10.–17.10.2026 mit neu berechnetem Tages- und Wochenbudget angezeigt.
+- Die Regel gilt auch für spätere Sonntagsabhebungen; Abhebungen bleiben Transfers vom Giro ins Bargeld.
+
 # v0.99.62
 
 - Gesamtnetto der Gehaltsprognose zeigt jetzt ausdrücklich die erwartete Auszahlung inklusive Zuschlags-Nachzahlung.
