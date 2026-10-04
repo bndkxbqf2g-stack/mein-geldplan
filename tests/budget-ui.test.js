@@ -2,15 +2,20 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {calculateCurrentCycleBudget} from '../lib/budget-ui.js';
 
-test('Budget-UI berechnet Tages- und Wochensatz nach Abhebung neu',()=>{
+test('Sonntagsabhebung zeigt sofort den nächsten Budgetabschnitt',()=>{
   const result=calculateCurrentCycleBudget({
     giro:1520,
     transactions:[{type:'salary',amount:2100,date:'2026-09-30'},{type:'withdrawal',amount:-300,date:'2026-10-04'}],
     savings:{positions:[],allocations:[]},
     today:new Date('2026-10-04T12:00:00')
   });
-  assert.equal(result.dailyBudget,1520/26);
-  assert.equal(result.weeklyBudget,(1520/26)*7);
+  assert.equal(result.segmentStart.getFullYear(),2026);
+  assert.equal(result.segmentStart.getMonth()+1,10);
+  assert.equal(result.segmentStart.getDate(),11);
+  assert.equal(result.remainingDays,19);
+  assert.equal(result.segmentDays,7);
+  assert.equal(result.dailyBudget,1520/19);
+  assert.equal(result.weeklyBudget,(1520/19)*7);
 });
 
 test('Abhebung vor Sonntag setzt den Budgetanker auf den kommenden Sonntag',()=>{
