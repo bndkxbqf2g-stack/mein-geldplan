@@ -15,7 +15,7 @@ test('Kontrollkarten initialisieren ohne Fehler, wenn noch keine Prognosen gespe
   try{
     assert.doesNotThrow(()=>renderPayrollControl());
     assert.equal(wrap.children.length,1);
-    assert.match(wrap.children[0].textContent,/Noch keine gemeinsame Soll-/Ist-Grundlage/);
+    assert.ok(wrap.children[0].textContent.includes('Noch keine gemeinsame Soll-/Ist-Grundlage'));
   }finally{
     if(originalDocument===undefined)delete globalThis.document;else globalThis.document=originalDocument;
     if(originalStorage===undefined)delete globalThis.localStorage;else globalThis.localStorage=originalStorage;
