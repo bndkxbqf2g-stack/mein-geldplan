@@ -20,6 +20,13 @@ export const SALARY_2026 = Object.freeze({
     schicht: 100
   }),
   payroll: Object.freeze({ dependents: 2, payoutDelayMonths: 2 }),
+  annualSpecialPayment: Object.freeze({
+    paymentMonth: 11,
+    referenceMonths: Object.freeze([7, 8, 9]),
+    rate: 0.8814,
+    vblEligible: true,
+    source: 'TV-L §20 Abs. 2 und 5, TdL Stand 14.02.2026'
+  }),
   work: Object.freeze({ weeklyHours: 38.5, monthFactor: 4.348 }),
   springIn: Object.freeze({ basePremium: 150, taxMode: 'taxable', socialMode: 'taxable', vblMode: 'unverified' }),
   profile: Object.freeze({ taxClass: 1, childAllowance: 1.0, churchTaxRate: 0.08, kvAdditionalRate: 2.18, childless: false, careChildDeductions: 1, saxony: false }),

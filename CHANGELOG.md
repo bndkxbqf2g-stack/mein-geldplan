@@ -1,3 +1,9 @@
+# v0.99.66
+
+- Jahressonderzahlung 2026 als separate November-Zahlung ergänzt.
+- TV-L-Referenz Juli–September, steuer-/SV-/VBL-/Pfändungsabzüge und Ist-Erkennung verhindern eine Doppelzählung mit dem November-Zeitnachweis.
+- Die reguläre November-Prognose bleibt M+2 und wird als Januar-2027-Auszahlung geführt.
+
 # v0.99.65
 
 - Eine Bargeldabhebung am Sonntag setzt jetzt ebenfalls den nächsten Budgetabschnitt als Anzeigeanker.
