@@ -1,3 +1,8 @@
+# v0.99.68
+
+- Die Detailprognose zeigt gespeicherte Zeitnachweise beim App-Start sofort an, auch während die aktuelle Netto-Berechnung noch geladen wird.
+- Der zuletzt gespeicherte Zeitnachweis wird nach einem PWA-Neustart wieder als aktive Detailprognose hergestellt.
+
 # v0.99.67
 
 - Kontrollkacheln zeigen erwartete variable Bezüge bei ausstehender Abrechnung nicht mehr fälschlich als bereits berücksichtigt 0,00 €.
