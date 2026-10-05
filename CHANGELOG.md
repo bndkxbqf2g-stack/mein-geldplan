@@ -1,3 +1,8 @@
+# v0.99.69
+
+- Der Gehaltsbereich startet wieder zuverlässig: Die Prognose der Jahressonderzahlung wird jetzt definiert gespeichert und kann die Kontrollkarten ohne ReferenceError initialisieren.
+- Regressionstest deckt das Rendern der Kontrollkarten beim Start ab.
+
 # v0.99.68
 
 - Die Detailprognose zeigt gespeicherte Zeitnachweise beim App-Start sofort an, auch während die aktuelle Netto-Berechnung noch geladen wird.
