@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,groupPayrollControlsByPayoutMonth,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,payrollDisplayedNetDifference,retroForForecast,visiblePayrollControls,payrollControlSummary} from '../lib/payroll-control.js';
+import {buildPayrollNetBreakdown} from '../lib/payroll-net-breakdown.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -319,4 +320,30 @@ test('mehrere Leistungsmonate werden in genau einer Monatskachel zusammengefasst
   ];
   const groups=groupPayrollControlsByPayoutMonth(controls);
   assert.deepEqual(groups.map(group=>[group.payoutMonth,group.controls.length]),[['2026-10',2],['2026-09',1]]);
+});
+test('ausstehende Bezügemitteilung zeigt erwartete Zuschläge als offen statt als 0',()=>{
+  const control=buildPayrollControl({forecast,actual:null,payslips:[]});
+  assert.equal(control.status,'waiting');
+  assert.equal(control.actualGross,null);
+  assert.equal(control.actualPayout,null);
+  assert.equal(control.variableRows.find(row=>row.key==='night').actual,0);
+  assert.equal(control.variableRows.find(row=>row.key==='night').open,98.01);
+  assert.equal(control.variableRows.find(row=>row.key==='shift').open,100);
+  const summary=payrollControlSummary(control);
+  assert.equal(summary.accountedTaxFreeGross,0);
+  assert.equal(summary.openTaxFreeGross,142.13);
+  assert.equal(summary.openTaxableGross,100.77);
+});
+
+test('ausstehende Zuschläge verwenden den gespeicherten prognostizierten Nettoeffekt',()=>{
+  const control=buildPayrollControl({forecast,actual:null,payslips:[]});
+  const net=buildPayrollNetBreakdown({
+    forecast:{...forecast,netEffects:{complete:true,totalNet:168.57,timeNet:100,shiftStandaloneNet:68.57}},
+    actual:{payout:null},
+    variableRows:control.variableRows,
+    estimatedNetImpact:168.57
+  });
+  assert.equal(net.totalNet,168.57);
+  assert.equal(net.taxFreeGross,142.13);
+  assert.equal(net.taxableGross,100.77);
 });

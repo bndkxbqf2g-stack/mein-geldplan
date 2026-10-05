@@ -1,3 +1,9 @@
+# v0.99.67
+
+- Kontrollkacheln zeigen erwartete variable Bezüge bei ausstehender Abrechnung nicht mehr fälschlich als bereits berücksichtigt 0,00 €.
+- Der erwartete Nettoeffekt aus dem Zeitnachweis wird auch ohne Ist-Bezügemitteilung ausgewiesen.
+- Die Jahressonderzahlung wird zusätzlich in der November-Kontrollkachel als eigener Brutto-/Netto-Bestandteil angezeigt.
+
 # v0.99.66
 
 - Jahressonderzahlung 2026 als separate November-Zahlung ergänzt.
