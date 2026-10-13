@@ -1,3 +1,8 @@
+# v0.99.73
+
+- Auch im Formular „Lohn vormerken“ bleibt der voraussichtlich verfügbare Betrag auf Mobilgeräten in einer Zeile.
+- Übersicht und Formular verwenden dieselben Layout-Klassen; Regressionstest deckt beide Anzeigen ab.
+
 # v0.99.72
 
 - Die Anzeige „Ab Auszahlungstag voraussichtlich verfügbar“ hält den Geldbetrag auf mobilen Geräten in einer Zeile.
