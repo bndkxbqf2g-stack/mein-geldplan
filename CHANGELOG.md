@@ -1,3 +1,10 @@
+# v0.99.71
+
+- In der Detailprognose für November werden das reguläre Netto des gewählten September-Zeitnachweises, Jahressonderzahlung brutto und geschätzte Jahressonderzahlung netto getrennt dargestellt. Die eigene Monatsnetto-Kachel verwendet die bereits in „Erwartete Löhne“ implementierte Gesamtauszahlungsberechnung (alle Leistungsmonate und belegte Überträge, ohne doppelte Nettobasis).
+- Während die Sonderzahlung berechnet wird, erscheint ausdrücklich „–“ statt eines unvollständigen Gesamtbetrags; fehlende Berechnungen bleiben zur Prüfung offen.
+- Bei tatsächlicher November-Bezügemitteilung wird ausschließlich die belegte Ist-Auszahlung gezeigt: ein Bonus wird niemals zusätzlich auf eine echte Überweisung aufgeschlagen, auch wenn die Sonderzahlungszeile nicht einzeln erkannt wurde.
+- Anzeige für Nicht-November bleibt unverändert. Keine Änderung an TV-L-Tarif, Steuer-, SV-, VBL-, Pfändungsparametern, Budgetbuchungen oder lokalen Daten. Neue synthetische Regressionstests für Monatsabgleich, asynchrone Anzeige, fehlende Sonderzahlung und Ist-Doppelzählung.
+
 # v0.99.70
 
 - Kontrollkarte trennt das tatsächlich abgerechnete Netto aus Rückrechnungen vom **noch offenen Nettoanspruch**. Beglichene Zuschläge werden nicht mehr als „Nettoeffekt 0,00 €“ fehlbeschriftet.
