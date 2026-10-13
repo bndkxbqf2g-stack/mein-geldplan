@@ -21,6 +21,10 @@ find . -type f -name '*.js' -not -path './.git/*' -print0 | xargs -0 -n1 node --
 
 Die vorhandenen Tests enthalten Budget-, Payroll-Control-, Lernkalibrierungs-, echte Belegparser-, Simulation- und E2E-Referenzfälle. Fehlerbehebungen ergänzen einen engen Test für den gemeldeten Fehler und mindestens einen relevanten Gegen-/Randfall.
 
+## Automatische Lohnvormerkung beim Belegimport
+
+Regressionstests prüfen positiven und fehlenden Überweisungsbetrag, Abrechnungsmonat/Zahltag, zurückliegende Belege, vorhandene Vormerkungen, erneuten Import und bereits gebuchte Löhne. Der Betrag bleibt vor dem Zahltag außerhalb des Giro- und Budgetzyklus.
+
 ## Referenzdaten
 
 - Fixture-Werte synthetisch oder eindeutig aus bereits dokumentierten, überprüfbaren Referenzfällen abgeleitet.
