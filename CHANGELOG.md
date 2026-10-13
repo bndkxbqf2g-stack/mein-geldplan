@@ -1,3 +1,10 @@
+# v0.99.74
+
+- Beim Import einer Bezügemitteilung wird ein sicher erkannter positiver Überweisungsbetrag automatisch als Lohn vorgemerkt.
+- Die Vormerkung nutzt den geplanten letzten Arbeitstag des Abrechnungsmonats, bleibt bis dahin ohne Budgetwirkung und wird über den bestehenden idempotenten Ablauf gebucht.
+- Bereits gebuchte oder zurückliegende Auszahlungsmonate erzeugen keine zweite bzw. rückwirkende Buchung; eine Vormerkung für einen anderen Zahltag bleibt unverändert.
+- Synthetische Regressionstests decken Betrag, Zahltag, erneuten Import, fehlenden Betrag, Altbelege und Doppelbuchung ab.
+
 # v0.99.73
 
 - Auch im Formular „Lohn vormerken“ bleibt der voraussichtlich verfügbare Betrag auf Mobilgeräten in einer Zeile.
