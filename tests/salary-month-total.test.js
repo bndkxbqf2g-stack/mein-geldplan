@@ -34,7 +34,7 @@ test('November: Detail zeigt reguläres Netto + gesondertes Bonusnetto = monatli
   await withDisplay({},async({view,elements,storedForecasts})=>{
     renderPaymentMonthTotal('2026-11',{calculateSpecialNet:async()=>({payout:525})});
     assert.equal(view('pTotalNet'),'–','keine vorzeitige Falschausgabe nur des Monatsnettos');
-    await Promise.resolve();await Promise.resolve();await Promise.resolve();
+    await new Promise(resolve=>setImmediate(resolve));
     assert.equal(view('pPayoutLabel'),'Reguläres Gehalt netto (Zeitnachweis)');
     assert.equal(view('pAnnualSpecialNet'),'525,00 €');
     assert.equal(view('pTotalNet'),'2.225,00 €');
@@ -89,7 +89,7 @@ test('Nicht-November: Sonderzahlung ausgeblendet und async Rückmeldung einer al
     assert.equal(view('pTotalNetLabel'),'Gesamtnetto inkl. Zuschlags-Nachzahlung');
     assert.equal(elements.get('pAnnualSpecialCards').classList.contains('hidden'),true);
     resolveNet({payout:525});
-    await Promise.resolve();await Promise.resolve();await Promise.resolve();
+    await new Promise(resolve=>setImmediate(resolve));
     assert.equal(view('pTotalNetLabel'),'Gesamtnetto inkl. Zuschlags-Nachzahlung');
     assert.notEqual(view('pTotalNet'),'2.225,00 €');
   });
