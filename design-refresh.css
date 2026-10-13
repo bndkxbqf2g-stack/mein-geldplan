@@ -398,8 +398,8 @@ html[data-theme="dark"] .quick-grid button:nth-child(n) span{background:#213959;
 #ovPendingSalaryCard .row:last-of-type > .v{flex:0 0 auto;max-width:none!important;white-space:nowrap!important;overflow-wrap:normal!important;word-break:keep-all!important;}
 @media(max-width:1000px){#ovPendingSalaryCard .row:last-of-type > .v{font-size:clamp(24px,7vw,32px);}}
 
-/* v0.99.60 — keep projected availability amount intact on narrow screens. */
-.pending-available-row{display:grid!important;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:12px;}
-.pending-available-label{min-width:0;line-height:1.25;}
-.pending-available-value{display:inline-block!important;min-width:max-content;max-width:none!important;white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;line-height:1.05;}
-@media(max-width:500px){.pending-available-row{grid-template-columns:minmax(0,1fr) max-content;gap:8px}.pending-available-value{font-size:clamp(22px,7vw,30px)!important;letter-spacing:-.5px}.pending-available-label{font-size:14px}}
+/* v0.99.72 — keep projected availability amount on one line on mobile. */
+.pending-available-row{display:flex!important;justify-content:space-between;align-items:center;gap:8px;}
+.pending-available-label{flex:1 1 auto;min-width:0;line-height:1.25;}
+.pending-available-value{display:block!important;flex:0 0 auto;width:max-content;min-width:max-content;max-width:none!important;white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;line-height:1.05;}
+@media(max-width:500px){.pending-available-value{font-size:clamp(22px,6.8vw,29px)!important;letter-spacing:-.5px}.pending-available-label{font-size:14px}}
