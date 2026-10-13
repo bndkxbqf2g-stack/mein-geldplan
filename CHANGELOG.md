@@ -1,3 +1,8 @@
+# v0.99.72
+
+- Die Anzeige „Ab Auszahlungstag voraussichtlich verfügbar“ hält den Geldbetrag auf mobilen Geräten in einer Zeile.
+- App-, Service-Worker- und Stylesheet-Version gemeinsam aktualisiert; der PWA-Cache enthält dieselbe CSS-Version wie die Seite.
+
 # v0.99.71
 
 - In der Detailprognose für November werden das reguläre Netto des gewählten September-Zeitnachweises, Jahressonderzahlung brutto und geschätzte Jahressonderzahlung netto getrennt dargestellt. Die eigene Monatsnetto-Kachel verwendet die bereits in „Erwartete Löhne“ implementierte Gesamtauszahlungsberechnung (alle Leistungsmonate und belegte Überträge, ohne doppelte Nettobasis).
