@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildPayrollControl,buildPayrollControlHistory,buildPayrollCarryovers,groupPayrollControlsByPayoutMonth,payrollCarryoverRegularSollLabel,payrollCardDisplay,payrollProjectedPayout,payrollDisplayedNetDifference,retroForForecast,visiblePayrollControls,payrollControlSummary} from '../lib/payroll-control.js';
 import {buildPayrollNetBreakdown} from '../lib/payroll-net-breakdown.js';
+import {parsePayslipDocument} from '../lib/payslip.js';
+import {expectedSalarySlots} from '../lib/history-ui.js';
 
 const forecast={
   payoutMonth:'2026-09',
@@ -346,4 +348,86 @@ test('ausstehende Zuschläge verwenden den gespeicherten prognostizierten Nettoe
   assert.equal(net.totalNet,168.57);
   assert.equal(net.taxFreeGross,142.13);
   assert.equal(net.taxableGross,100.77);
+});
+
+
+test('Oktober-Soll-Ist mit zwei rückgerechneten Leistungsmonaten bleibt ohne Doppelzählung',()=>{
+  // Ausschließlich synthetische Beträge: keine echten Belege oder personenbezogenen Testdaten.
+  const octoberText=[
+    'Aktuelle Abrechnungsperiode',
+    'Abrechnungsmonat : 10/2026',
+    'Bezüge: KR8 / 5',
+    'Tabellenentgelt LSGZ 1.900,00',
+    'Pflegezulage (AT Uni WÜ) LSGZ 70,00',
+    'Universitätszulage Pflege LSGZ 30,00',
+    'Gesamtbrutto 2.000,00',
+    'Gesetzliches Netto 1.400,00',
+    'ZV-Uml. Regelentg. AN 36,00-',
+    'Nachverrechnung aus Vorm. 141,50',
+    'Summe Pfändung/Abtretung 20,00-',
+    'Überweisung 1.485,50',
+    'Rückrechnungs-Periode',
+    'für Abrechnungsmonat : 07/2026',
+    'Nachtarbeit LSG 3,00 5,00 15,00',
+    'Nachtarb.Beginn vor 0 Uhr LSG 1,00 5,00 5,00',
+    'Samstag 13-20 Uhr 0,64Eur LSGZ 1,00 0,64 0,64',
+    'Sonntagsarbeit 25% LSG 2,00 6,00 12,00',
+    'Schichtzul.mtl. §43TV-L LSGZ 1,00 45,00 45,00',
+    'Gesamtbrutto 77,64',
+    'Gesetzliches Netto 60,00',
+    'ZV-Uml. Regelentg. AN 1,50-',
+    'Rückrechnungs-Periode',
+    'für Abrechnungsmonat : 08/2026',
+    'Nachtarbeit LSG 2,00 5,00 10,00',
+    'Samstag 13-20 Uhr 0,64Eur LSGZ 1,00 0,64 0,64',
+    'Sonntagsarbeit 25% LSG 2,00 6,00 12,00',
+    'Wechselsch.mtl. §43TV-L LSGZ 1,00 90,00 90,00',
+    'Gesamtbrutto 112,64',
+    'Gesetzliches Netto 85,00',
+    'ZV-Uml. Regelentg. AN 2,00-'
+  ].join('\n');
+  const actual=parsePayslipDocument(octoberText);
+  assert.equal(actual.month,'2026-10');
+  assert.equal(actual.payout,1485.50);
+  assert.equal(actual.priorAdjustment,141.50);
+  assert.deepEqual(actual.retroPeriods.map(retro=>retro.month),['2026-07','2026-08']);
+  assert.deepEqual(actual.retroPeriods.map(retro=>retro.totalGross),[77.64,112.64]);
+  assert.equal(actual.retroPeriods[0].components.night,20);
+  assert.equal(actual.retroPeriods[1].components.shift,90);
+
+  const fixed={basePay:1900,careAllowance:70,universityAllowance:30};
+  const forecasts=[
+    {
+      payoutMonth:'2026-10',standardPayoutMonth:'2026-09',reportMonth:'2026-07',
+      paymentMonthOverride:{reason:'Synthetische einmalige Verzögerung'},
+      totalGross:2077.64,baselinePayout:1300,payout:1358.50,
+      reportItems:[{code:'5212'}],
+      components:{fixed,night:20,saturday:.64,saturdayEvening:0,sunday:12,holiday:0,shift:45,shiftType:'schicht',springIn:0}
+    },
+    {
+      payoutMonth:'2026-10',standardPayoutMonth:'2026-10',reportMonth:'2026-08',
+      totalGross:2112.64,baselinePayout:1300,payout:1383,
+      reportItems:[{code:'5211'}],
+      components:{fixed,night:10,saturday:.64,saturdayEvening:0,sunday:12,holiday:0,shift:90,shiftType:'wechsel',springIn:0}
+    }
+  ];
+  const controls=buildPayrollControlHistory({forecasts,payslips:[actual]});
+  const groups=groupPayrollControlsByPayoutMonth(controls);
+  assert.equal(groups.length,1);
+  assert.equal(groups[0].payoutMonth,'2026-10');
+  assert.equal(groups[0].controls.length,2);
+  assert.deepEqual(controls.map(item=>item.reportMonth).sort(),['2026-07','2026-08']);
+  assert.equal(controls.every(item=>item.status==='settled'&&item.remainingGross===0),true);
+  assert.equal(controls.every(item=>item.variableRows.every(row=>row.open===0)),true);
+  assert.equal(controls.reduce((total,item)=>total+item.retroGross,0),190.28);
+  assert.deepEqual(buildPayrollCarryovers({controls,netByMonth:{'2026-10':141.50}}),{});
+
+  const october=expectedSalarySlots({
+    today:new Date(2026,9,14,12),
+    forecasts,payslips:[actual],transactions:[],learning:[]
+  }).find(slot=>slot.payoutMonth==='2026-10');
+  assert.equal(october.status,'actual');
+  assert.equal(october.payout,1485.50);
+  assert.equal(october.carryover,0);
+  assert.deepEqual(october.reportMonths,['2026-07','2026-08']);
 });
