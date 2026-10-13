@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildUpdatedPayrollLearning,processPayslipFiles} from '../lib/salary-payslip-ui.js';
+import {buildUpdatedPayrollLearning,processPayslipFiles,autoScheduleImportedPayslips,pendingSalaryFromPayslip} from '../lib/salary-payslip-ui.js';
 
 function forecast(){
   return {
@@ -84,4 +84,65 @@ test('Bezügemitteilungs-Import zeigt den Fehler je Datei und verarbeitet weiter
   assert.equal(results[1].stage,'month');
   assert.equal(results[2].stage,'fileRead');
   assert.equal(stored.length,1);
+});
+
+
+test('Bezügemitteilung merkt den echten Überweisungsbetrag am geplanten Zahltag vor',()=>{
+  let saved=null;
+  const result=autoScheduleImportedPayslips([{month:'2026-10',payout:2831.13}],{
+    pending:null,transactions:[],today:new Date(2026,9,14),save:value=>{saved=value;return true;}
+  });
+  assert.equal(result.status,'scheduled');
+  assert.equal(saved.amount,2831.13);
+  assert.equal(saved.payoutDate,'2026-10-30');
+  assert.equal(saved.id,'payslip-2026-10');
+  assert.equal(result.changed,true);
+});
+
+test('erneuter Import aktualisiert dieselbe Vormerkung statt eine zweite zu erzeugen',()=>{
+  let saved=null;
+  const pending={id:'manual-existing',amount:2700,text:'Lohn',payoutDate:'2026-10-30',status:'pending'};
+  const result=autoScheduleImportedPayslips([{month:'2026-10',payout:2831.13}],{
+    pending,transactions:[],today:new Date(2026,9,14),save:value=>{saved=value;return true;}
+  });
+  assert.equal(result.status,'scheduled');
+  assert.equal(saved.id,'manual-existing');
+  assert.equal(saved.amount,2831.13);
+});
+
+test('ältere Bezügemitteilungen erzeugen keine rückwirkende Lohnvormerkung',()=>{
+  let saved=false;
+  const result=autoScheduleImportedPayslips([{month:'2026-09',payout:2831.13}],{
+    pending:null,transactions:[],today:new Date(2026,9,14),save:()=>{saved=true;return true;}
+  });
+  assert.equal(result.status,'past');
+  assert.equal(saved,false);
+});
+
+test('fehlender Überweisungsbetrag erzeugt keine Vormerkung',()=>{
+  const result=pendingSalaryFromPayslip({month:'2026-10',payout:null},{today:new Date(2026,9,14)});
+  assert.equal(result.status,'unavailable');
+});
+
+test('bestehende Vormerkung eines anderen Zahltags wird nicht überschrieben',()=>{
+  let saved=false;
+  const result=autoScheduleImportedPayslips([{month:'2026-10',payout:2831.13}],{
+    pending:{id:'other',amount:1000,payoutDate:'2026-11-30'},
+    transactions:[],today:new Date(2026,9,14),save:()=>{saved=true;return true;}
+  });
+  assert.equal(result.status,'conflict');
+  assert.equal(saved,false);
+});
+
+test('bereits gebuchter Lohn verhindert eine zweite Vormerkung',()=>{
+  let saved=false,cleared=false;
+  const result=autoScheduleImportedPayslips([{month:'2026-10',payout:2831.13}],{
+    pending:{id:'payslip-2026-10',amount:2831.13,payoutDate:'2026-10-30'},
+    transactions:[{type:'salary',date:'2026-10-30',amount:2831.13}],
+    today:new Date(2026,9,14),save:()=>{saved=true;return true;},clear:()=>{cleared=true;return true;}
+  });
+  assert.equal(result.status,'already-booked');
+  assert.equal(result.changed,true);
+  assert.equal(saved,false);
+  assert.equal(cleared,true);
 });
