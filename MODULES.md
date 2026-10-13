@@ -5,6 +5,7 @@ Budget, Cycle, Salary, UI, Insolvenz.
 - `lib/payroll-settlement.js`: Reiner, belegbasierter Netto-Nachzahlungsabgleich je Leistungsmonat (Gesetzliches Netto minus VBL) gegen die gesamte Nachverrechnung; keine Schätzung bei fehlenden Angaben. Die Kontrollkarte trennt gezahlt und noch offen.
 
 ### `lib/salary-ui.js`
+Der Import einer echten Bezügemitteilung übernimmt den sicher erkannten Überweisungsbetrag automatisch in die Lohnvormerkung für den geplanten Zahltag; die Budget-UI startet den vorhandenen idempotenten Buchungsablauf.
 Verantwortlich für den Gehaltsprognose-Fluss Zeitnachweis → erkannte Zeitlohnarten → Brutto/Netto → Auszahlungsmonat. Bei November-Zeitnachweisen zeigt die Detailansicht die zusätzliche Jahressonderzahlung brutto und netto sowie den vollständigen Monatswert aus `expectedSalaryForPayoutMonth` (`history-ui.js`) an. Eine bereits belegte Gesamtüberweisung wird nicht doppelt um Bonusnetto erhöht. Ältere gespeicherte Forecast-Modelle werden aus ihren gespeicherten Zeitnachweispositionen einmalig mit den aktuellen Regeln neu aufgebaut, bevor Übersicht und Payroll-Check rendern. `salary-payslip-ui.js` ergänzt den Upload echter Bezügemitteilungen und stößt Soll-/Ist-, Rückrechnungs-, offenen Nettoabgleich sowie die kontrollierte Payroll-Lernhistorie an. Berechnungen bleiben in `salary.js` / `salary-net-effects.js`, PDF-Parsing in `pdf.js` / `payslip.js`.
 
 ### `lib/budget-ui.js`
