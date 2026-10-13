@@ -392,3 +392,8 @@ html[data-theme="dark"] .fix-next-summary>div.fix-summary-card,html[data-theme="
 .summary-surface .subcard.wide{grid-column:auto}.summary-surface .hero-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.quick-grid button:nth-child(n) span{background:#eaf3ff;color:var(--blue)}
 @media(max-width:1000px){#uebersicht>section.dashboard-activities{order:7}#uebersicht>section.summary-surface{order:5}html[data-theme] nav button.active{background:#edf5ff!important;color:#1966c7!important;border-color:transparent!important}html[data-theme="dark"] nav button.active{background:#213959!important;color:#83b5ff!important}}
 html[data-theme="dark"] .quick-grid button:nth-child(n) span{background:#213959;color:var(--blue)}
+
+/* v0.99.59 — keep projected availability amount on one line. */
+#ovPendingSalaryCard .row:last-of-type > span:first-child{flex:1 1 auto;min-width:0;}
+#ovPendingSalaryCard .row:last-of-type > .v{flex:0 0 auto;max-width:none!important;white-space:nowrap!important;overflow-wrap:normal!important;word-break:keep-all!important;}
+@media(max-width:1000px){#ovPendingSalaryCard .row:last-of-type > .v{font-size:clamp(24px,7vw,32px);}}
