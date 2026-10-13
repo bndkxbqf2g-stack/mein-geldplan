@@ -170,3 +170,23 @@ test('reale LfF-Schreibweise Wechselschichtzul. wird erkannt',()=>{
   assert.equal(c.wechsel,250);
   assert.equal(c.shift,250);
 });
+
+
+test('LfF-Nachtarb.Beginn vor 0 Uhr zählt zur Nachtarbeit statt verloren zu gehen',()=>{
+  const components=parsePayslipComponents([
+    'Nachtarbeit LSG 3,00 5,00 15,00',
+    'Nachtarb.Beginn vor 0 Uhr LSG 1,40 5,00 7,00'
+  ].join('\n'));
+  assert.equal(components.night,22);
+  assert.equal(components.hasVariableDetail,true);
+});
+
+test('LfF-Wechselsch.mtl. wird neben ausgeschriebener Wechselschichtzulage erkannt',()=>{
+  const abbreviated=parsePayslipComponents('Wechselsch.mtl. §43TV-L LSGZ 1,00 90,00 90,00');
+  assert.equal(abbreviated.wechsel,90);
+  assert.equal(abbreviated.schicht,null);
+  assert.equal(abbreviated.shift,90);
+  const longForm=parsePayslipComponents('Wechselschichtzul.mtl. §43TV-L LSGZ 1,00 75,00 75,00');
+  assert.equal(longForm.wechsel,75);
+  assert.equal(longForm.shift,75);
+});
