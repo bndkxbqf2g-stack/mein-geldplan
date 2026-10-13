@@ -1,3 +1,11 @@
+# v0.99.70
+
+- Kontrollkarte trennt das tatsächlich abgerechnete Netto aus Rückrechnungen vom **noch offenen Nettoanspruch**. Beglichene Zuschläge werden nicht mehr als „Nettoeffekt 0,00 €“ fehlbeschriftet.
+- Nachweisbare Nettoanteile je Rückrechnungsmonat stammen ausschließlich aus gesetzlichen Netto-Differenzen abzüglich belegter VBL-Beiträge und werden mit der tatsächlichen Nachverrechnung abgeglichen; bei Unklarheiten bleibt die Einzelaufteilung unbekannt.
+- Soll-Brutto aus Zeitnachweisen und Ist-Brutto einschließlich Rückrechnungen stehen getrennt nebeneinander. Zusätzlicher §21-Durchschnitt wird als Ist-Position erkannt, aber nicht rückwirkend als Prognosebetrag erfunden.
+- Ein Beleg kann mehrere Leistungsmonate enthalten, ohne Mehrfachbuchung; abgeschlossene Zuschläge erhalten den Status „Zuschläge bezahlt“, andere Prüfhinweise bleiben sichtbar.
+- Neue synthetische Regressionstests für Abrechnungsparser, Rundung, fehlende Einzelwerte und die tatsächlich gerenderte Karte. Keine Änderung an Budget, Pfändung, Steuer-/SV-/Tarifparametern oder produktiven Nutzerdaten.
+
 # v0.99.69
 
 - Der Gehaltsbereich startet wieder zuverlässig: Die Prognose der Jahressonderzahlung wird jetzt definiert gespeichert und kann die Kontrollkarten ohne ReferenceError initialisieren.
