@@ -35,10 +35,10 @@ test('Mobile-Lohnvorschau hält den verfügbaren Betrag einzeilig und precacht d
   const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
   const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
   const css=fs.readFileSync(path.join(root,'design-refresh.css'),'utf8');
-  const stylesheet=html.match(/href="(design-refresh\\.css\\?v=[^"]+)"/)?.[1];
+  const stylesheet=html.match(/href="(design-refresh\.css\?v=[^"]+)"/)?.[1];
   assert.ok(stylesheet,'aktuelle Design-CSS fehlt im HTML');
   assert.ok(sw.includes("'./"+stylesheet+"'"),'Service Worker muss exakt die aktuelle Design-CSS-Version precachen');
   assert.match(html,/class="row pending-available-row"/);
-  assert.match(css,/pending-available-value\\{[^}]*white-space:nowrap!important/);
-  assert.match(css,/pending-available-row\\{display:flex!important/);
+  assert.match(css,/pending-available-value\{[^}]*white-space:nowrap!important/);
+  assert.match(css,/pending-available-row\{display:flex!important/);
 });
