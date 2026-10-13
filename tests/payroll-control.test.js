@@ -430,4 +430,28 @@ test('Oktober-Soll-Ist mit zwei rückgerechneten Leistungsmonaten bleibt ohne Do
   assert.equal(october.payout,1485.50);
   assert.equal(october.carryover,0);
   assert.deepEqual(october.reportMonths,['2026-07','2026-08']);
+
+  // Ein nur auf der Abrechnung bezifferter §21-Durchschnitt bleibt prüfpflichtig:
+  // bekannte Zuschläge gelten als bezahlt, ein unbekannter Prognosewert wird nicht erfunden.
+  const augustWithUnpriced={
+    ...forecasts[1],needsReview:true,
+    components:{
+      ...forecasts[1].components,
+      unpriced:[{code:'5161',label:'Durchschnitt §21 TV-L',quantity:5,reason:'Individueller Satz unbekannt'}]
+    }
+  };
+  const extraAverage={
+    ...actual,
+    retroPeriods:actual.retroPeriods.map(period=>period.month==='2026-08'
+      ?{...period,totalGross:124.14}
+      :period)
+  };
+  const unknownAverageControl=buildPayrollControl({
+    forecast:augustWithUnpriced,actual:extraAverage,payslips:[extraAverage]
+  });
+  assert.equal(unknownAverageControl.status,'review');
+  assert.equal(unknownAverageControl.remainingGross,0);
+  assert.equal(unknownAverageControl.unexplainedOverCorrection,11.5);
+  assert.equal(unknownAverageControl.variableRows.every(row=>row.open===0),true);
+  assert.equal(unknownAverageControl.reviewRows[0].code,'5161');
 });
