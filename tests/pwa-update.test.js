@@ -38,7 +38,8 @@ test('Mobile-Lohnvorschau hält den verfügbaren Betrag einzeilig und precacht d
   const stylesheet=html.match(/href="(design-refresh\.css\?v=[^"]+)"/)?.[1];
   assert.ok(stylesheet,'aktuelle Design-CSS fehlt im HTML');
   assert.ok(sw.includes("'./"+stylesheet+"'"),'Service Worker muss exakt die aktuelle Design-CSS-Version precachen');
-  assert.match(html,/class="row pending-available-row"/);
+  assert.equal((html.match(/class="row pending-available-row"/g)||[]).length,2,'beide Lohnvorschau-Zeilen verwenden das einzeilige Layout');
+  assert.match(html,/class="row pending-available-row"><span class="pending-available-label">Voraussichtlich verfügbar ab Auszahlungstag<\/span><span class="v good pending-available-value" id="pendingSalaryProjection">/);
   assert.match(css,/pending-available-value\{[^}]*white-space:nowrap!important/);
   assert.match(css,/pending-available-row\{display:flex!important/);
 });
